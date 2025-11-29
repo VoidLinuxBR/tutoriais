@@ -12,7 +12,14 @@ sudo xbps-install -y xorg xinit xterm
 
 ## 3. Instalar XFCE4 completo
 ```
-sudo xbps-install -y xfce4 network-manager-applet xfce4-plugins xfce4-screenshooter
+sudo xbps-install -y xfce4 \
+   network-manager-applet \
+   xfce4-plugins \
+   xfce4-screenshooter \
+   xarchiver \
+   thunar-archive-plugin \
+   p7zip \
+   unzip
 ```
 
 ## 4. Instalar LXDM (display manager leve)
