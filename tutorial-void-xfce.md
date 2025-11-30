@@ -25,7 +25,7 @@ sudo xbps-install -y xfce4 \
    gnome-disk-utility \
    gparted \
    gvfs \
-   p7zip \  
+   p7zip \
    unzip \
    htop
 ```
