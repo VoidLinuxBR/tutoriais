@@ -100,18 +100,18 @@ exec startxfce4
 EOF
 ```
 
-## 13. Ativar serviços obrigatórios (runit)
+## 13. Reconfigure
+```
+sudo xbps-reconfigure -fa
+```
+
+## 14. Ativar serviços obrigatórios (runit)
 ```
 sudo ln -s /etc/sv/dbus /var/service/
 sudo ln -s /etc/sv/elogind /var/service/
 sudo ln -s /etc/sv/polkitd /var/service/
 sudo ln -s /etc/sv/NetworkManager /var/service/
 sudo ln -s /etc/sv/lxdm /var/service/
-```
-
-## 14. Reconfigure
-```
-sudo xbps-reconfigure -fa
 ```
 
 ## Finalização
