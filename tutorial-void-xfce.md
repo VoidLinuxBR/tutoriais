@@ -94,17 +94,14 @@ ln -sf /usr/share/applications/wireplumber.desktop ~/.config/autostart/
 ```
 sudo xbps-install -y xfce4-pulseaudio-plugin xfce4-notifyd
 
-PANEL_XML="$HOME/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml"
-if ! grep -q 'value="pulseaudio"' "$PANEL_XML"; then
-   LAST_ID=$(grep -o 'plugin-[0-9]\+' "$PANEL_XML" | awk -F- '{print $2}' | sort -n | tail -1)
-   [ -z "$LAST_ID" ] && LAST_ID=10
-   NEW_ID=$((LAST_ID + 1))
-   sed -i "/<property name=\"plugin-ids\"/a\        <value type=\"int\" value=\"$NEW_ID\"\/>" "$PANEL_XML"
-   sed -i "/<\/property>[[:space:]]*<\/property>/ {
-     i\      <property name=\"plugin-$NEW_ID\" type=\"string\" value=\"pulseaudio\">
-     i\        <property name=\"enable-keyboard-shortcuts\" type=\"bool\" value=\"true\"/>
-     i\      </property>
-   }" "$PANEL_XML"
+XML="$HOME/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml"
+if ! grep -q 'pulseaudio' "$XML"; then
+   NEW_ID=$(( $(grep -o 'plugin-[0-9]\+' "$XML" | awk -F- '{print $2}' | sort -n | tail -1) + 1 ))
+   grep -q "<value type=\"int\" value=\"$NEW_ID\"/>" "$XML" || \
+   sed -i "/<property name=\"plugin-ids\" type=\"array\">/a\  <value type=\"int\" value=\"$NEW_ID\"/>" "$XML"
+   sed -i "
+   \$s#</property>#    <property name=\"plugin-$NEW_ID\" type=\"string\" value=\"pulseaudio\">\n      <property name=\"enable-keyboard-shortcuts\" type=\"bool\" value=\"true\"/>\n    </property>\n</property>#
+   " "$XML"
 fi
 
 ```
