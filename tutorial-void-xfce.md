@@ -97,10 +97,11 @@ sudo xbps-install -y xfce4-pulseaudio-plugin xfce4-notifyd
 
 ## 12. Criar .xinitrc (opcional para startx)
 ```
-sudo tee -a /etc/rc.conf >/dev/null << EOF
-TIMEZONE="America/Sao_Paulo"
-KEYMAP="br-abnt2"
-FONT=Lat2-Terminus16
+cat <<EOF > ~/.xinitrc
+#!/bin/sh
+setxkbmap -layout br -variant abnt2 &
+xsetroot -cursor_name left_ptr &
+exec startxfce4
 EOF
 ```
 
@@ -116,7 +117,7 @@ sudo sed -i -e 's/^#\(en_US.UTF-8 UTF-8\)/\1/' -e 's/^#\(pt_BR.UTF-8 UTF-8\)/\1/
 
 ## 15. Personalizar o /etc/rc.conf. Define o fuso horário, layout do teclado e fonte padrão do console. Altere conforme necessidade.
 ```
-sudo cat << EOF >> /etc/rc.conf
+sudo tee -a /etc/rc.conf >/dev/null << EOF
 TIMEZONE="America/Sao_Paulo"
 KEYMAP="br-abnt2"
 FONT=Lat2-Terminus16
