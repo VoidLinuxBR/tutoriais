@@ -97,11 +97,10 @@ sudo xbps-install -y xfce4-pulseaudio-plugin xfce4-notifyd
 
 ## 12. Criar .xinitrc (opcional para startx)
 ```
-cat <<EOF > ~/.xinitrc
-#!/usr/bin/env bash
-setxkbmap -layout br -variant abnt2 &
-xsetroot -cursor_name left_ptr &
-exec startxfce4
+sudo tee -a /etc/rc.conf >/dev/null << EOF
+TIMEZONE="America/Sao_Paulo"
+KEYMAP="br-abnt2"
+FONT=Lat2-Terminus16
 EOF
 ```
 
