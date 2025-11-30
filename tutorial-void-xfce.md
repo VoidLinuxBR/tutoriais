@@ -15,11 +15,14 @@ sudo xbps-install -y xorg xinit xterm
 sudo xbps-install -y xfce4 \
    network-manager-applet \
    xfce4-plugins \
+   arc-theme \
    xfce4-screenshooter \
+   firefox \
    xarchiver \
    thunar-archive-plugin \
-   p7zip \
-   unzip
+   p7zip \  
+   unzip \
+   htop
 ```
 
 ## 4. Instalar LXDM (display manager leve)
