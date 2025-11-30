@@ -108,7 +108,7 @@ if ! grep -q 'pulseaudio' "$XML"; then
        </property>
      </property>
    </channel>
-   EOF
+EOF
 
    sed -i '/<property name="panel-1" type="empty">/,/<\/property>/ {
        /<property name="plugin-ids" type="array">/,/<\/property>/ {
