@@ -113,10 +113,10 @@ if [[ -f "$XML" ]] && ! grep -q 'pulseaudio' "$XML"; then
    sed -i '$d' "$XML"   # remove o último </property>
 
    cat << EOF >> "$XML"
-   <property name="plugin-$next" type="string" value="pulseaudio">
-     <property name="enable-keyboard-shortcuts" type="bool" value="true"/>
-   </property>
- </property>
+    <property name="plugin-$next" type="string" value="pulseaudio">
+      <property name="enable-keyboard-shortcuts" type="bool" value="true"/>
+    </property>
+  </property>
 </channel>
 EOF
 
