@@ -1,84 +1,56 @@
-# PipeWire e WirePlumber no Void Linux
-Guia objetivo, baseado diretamente no padrão adotado pelo Void Linux.
+# PipeWire + WirePlumber no Void Linux (2025)
+Guia funcional, direto, baseado somente em pacotes reais do Void Linux.
 
 Documentação oficial:  
 https://docs.voidlinux.org/config/media/pipewire.html
 
 ---
 
-## 1. Instalação dos pacotes necessários
-
-O Void Linux separa alguns componentes de áudio em pacotes distintos. Para uma configuração completa do PipeWire com substituição do PulseAudio, suporte a ALSA e JACK, instale:
+# 1. Instalação dos pacotes corretos
 
 ```
 sudo xbps-install -S \
   pipewire \
   wireplumber \
-  pipewire-pulse \
-  pipewire-alsa \
-  pipewire-jack \
+  alsa-pipewire \
+  alsa-lib \
+  alsa-utils \
+  alsa-plugins \
+  alsa-firmware \
   pavucontrol \
   pulsemixer
 ```
 
-Notas:
-- `wireplumber` é o session manager recomendado.
-- `pipewire-pulse` substitui totalmente o PulseAudio.
-- Não execute `pipewire-media-session` junto do WirePlumber.
+Esses são os **únicos pacotes necessários** para PipeWire no Void.
 
 ---
 
-## 2. Estrutura de configuração
+# 2. Configuração opcional (drop-ins)
 
-As configurações podem ser feitas por usuário ou por sistema.
-
-Configuração por usuário:
-```
-~/.config/pipewire/
-```
-
-Exemplos fornecidos pelo Void ficam em:
-```
-/usr/share/examples/pipewire/
-```
-
-Crie os diretórios de drop-in:
 ```
 mkdir -p ~/.config/pipewire/pipewire.conf.d
 mkdir -p ~/.config/pipewire/pipewire-pulse.conf.d
 ```
 
----
-
-## 3. Ativação da camada PulseAudio (pipewire-pulse)
-
-O PipeWire utiliza arquivos `.example`. Para habilitar:
-
-Arquivo principal:
+PulseAudio compat:
 ```
 ln -s /usr/share/examples/pipewire/pipewire-pulse.conf.example \
       ~/.config/pipewire/pipewire-pulse.conf
 ```
 
-Drop-ins:
+Drop-ins Pulse:
 ```
 cp -a /usr/share/examples/pipewire/pipewire-pulse.conf.d/* \
       ~/.config/pipewire/pipewire-pulse.conf.d/ 2>/dev/null || true
 ```
 
----
-
-## 4. Ativação do ALSA
-
+ALSA:
 ```
 ln -s /usr/share/examples/pipewire/pipewire.conf.d/10-alsa.conf.example \
       ~/.config/pipewire/pipewire.conf.d/10-alsa.conf
 ```
 
----
-
-## 5. Ativação do JACK (opcional)
-
+JACK (opcional):
 ```
 ln -s /usr/share/examples/pipewire/pipewire.conf.d/20-jack.conf.example \
       ~/.config/pipewire/pipewire.conf.d/20-jack.conf
@@ -86,18 +58,28 @@ ln -s /usr/share/examples/pipewire/pipewire.conf.d/20-jack.conf.example \
 
 ---
 
-## 6. Inicialização
+# 3. Inicialização automática por DE/WM
 
-### 6.1 Ambientes gráficos (XFCE, LXQt, GNOME, KDE, Cinnamon, MATE)
+## 3.1 Desktop Environments (funciona sozinho)
+Esses DEs iniciam PipeWire automaticamente.  
+**Nada a fazer.**
 
-Nada precisa ser configurado.  
-O PipeWire inicia automaticamente via DBus ao iniciar a sessão gráfica.
+- XFCE  
+- LXQt  
+- LXDE  
+- KDE Plasma (X11 e Wayland)  
+- GNOME (X11 e Wayland)  
+- Cinnamon  
+- MATE  
+- Enlightenment  
+
+PipeWire sobe via DBus sem intervenção.
 
 ---
 
-### 6.2 Window Managers (i3, bspwm, dwm, openbox, etc.)
+## 3.2 Window Managers (precisa iniciar manualmente)
 
-O PipeWire depende de DBus. Em sessões via `.xinitrc`, utilize:
+### i3 — `~/.xinitrc`
 
 ```
 export XDG_RUNTIME_DIR="/run/user/$(id -u)"
@@ -110,7 +92,63 @@ dbus-run-session -- sh -c '
 '
 ```
 
-Para Sway:
+### bspwm — `~/.xinitrc`
+
+```
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+
+dbus-run-session -- sh -c '
+  pipewire &
+  wireplumber &
+  pipewire-pulse &
+  exec bspwm
+'
+```
+
+### dwm — `~/.xinitrc`
+
+```
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+
+dbus-run-session -- sh -c '
+  pipewire &
+  wireplumber &
+  pipewire-pulse &
+  exec dwm
+'
+```
+
+### Openbox — `~/.xinitrc`
+
+```
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+
+dbus-run-session -- sh -c '
+  pipewire &
+  wireplumber &
+  pipewire-pulse &
+  exec openbox-session
+'
+```
+
+### Fluxbox / IceWM / JWM — `~/.xinitrc`
+
+```
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+
+dbus-run-session -- sh -c '
+  pipewire &
+  wireplumber &
+  pipewire-pulse &
+  exec fluxbox
+'
+```
+
+---
+
+## 3.3 Wayland WMs
+
+### Sway — `~/.config/sway/config`
 
 ```
 exec pipewire
@@ -118,23 +156,35 @@ exec wireplumber
 exec pipewire-pulse
 ```
 
+### Wayfire
+
+```
+exec pipewire
+exec wireplumber
+exec pipewire-pulse
+```
+
+### Hyprland
+
+```
+exec-once = pipewire
+exec-once = wireplumber
+exec-once = pipewire-pulse
+```
+
 ---
 
-## 7. Grupos necessários (somente sem elogind)
-
-Em sistemas somente com runit:
+# 4. Grupos necessários (Void sem elogind)
 
 ```
 sudo usermod -aG audio,video $USER
 ```
 
-Depois, faça logout e login.
-
-> `loginctl` não funciona sem elogind.
+Logout/login.
 
 ---
 
-## 8. Verificação
+# 5. Testes gerais
 
 PipeWire:
 ```
@@ -146,21 +196,26 @@ WirePlumber:
 ps aux | grep wireplumber
 ```
 
-PulseAudio compatível:
+PulseAudio compat:
 ```
 pactl info | grep "Server Name"
 ```
 
-Saída esperada:
+Esperado:
 ```
 Server Name: PulseAudio (on PipeWire 0.3.x)
 ```
 
+Som:
+```
+speaker-test -t wav -c 2
+```
+
 ---
 
-## 9. Solução de problemas
+# 6. Troubleshooting
 
-Remover configurações antigas do PulseAudio:
+Remover configs antigas do PulseAudio:
 ```
 rm -rf ~/.config/pulse ~/.pulse
 ```
@@ -170,45 +225,34 @@ Verificar DBus:
 ps aux | grep dbus
 ```
 
-Iniciar manualmente para depuração:
+Iniciar PipeWire manualmente:
 ```
 dbus-run-session -- pipewire
 ```
 
-Caso aplicações reclamem de PulseAudio:
+Aplicações reclamando de PulseAudio:
 ```
 pipewire-pulse &
 ```
 
 ---
 
-## 10. Ferramentas de diagnóstico
+# 7. Resumo rápido
 
+Instalar:
 ```
-pw-cli ls Node
-pw-dump
-pw-top
+sudo xbps-install pipewire wireplumber alsa-pipewire alsa-utils alsa-plugins alsa-lib alsa-firmware
 ```
+
+DEs suportados automaticamente:
+- XFCE, LXQt, LXDE, GNOME, KDE, Cinnamon, MATE, Enlightenment
+
+WMs que precisam de configuração:
+- i3, bspwm, dwm, Openbox, Fluxbox, sway, wayfire, hyprland
+
+PipeWire opera por sessão (não usa runit).
 
 ---
 
-## 11. Resumo
+# FIM
 
-Instalação:
-```
-sudo xbps-install pipewire wireplumber pipewire-pulse pipewire-alsa pipewire-jack
-```
-
-Configuração:
-```
-~/.config/pipewire/pipewire.conf.d/
-~/.config/pipewire/pipewire-pulse.conf.d/
-```
-
-Inicialização:
-- DE: automático  
-- WM: necessário configurar `.xinitrc` ou equivalente
-
-PipeWire opera em nível de sessão, não utiliza serviços runit.
-
----
