@@ -77,15 +77,43 @@ cp env.example .env
 
 ---
 
-## 4. Configurar o .env para uso via Tailscale
+## 4. Ajustar `.env` para uso com Tailscale  
+(antes precisamos confirmar o IP e o DNS interno da Tailnet)
 
-Editar:
+Antes de editar o `.env`, confirme:
+
+**1 — IP interno Tailscale**
 
 ```bash
-nano .env
+tailscale ip -4
 ```
 
-Ajustar:
+Exemplo real usado:
+```
+100.75.137.60
+```
+
+**2 — Nome DNS interno da máquina na Tailnet**
+
+```bash
+tailscale status --json | grep DNSName
+```
+
+Resultado real:
+
+```
+"DNSName": "jitsi.tailf0138e.ts.net.",
+```
+
+Esse é o domínio **interno verdadeiro** gerado pelo Tailscale, com base no hostname configurado e no ID da Tailnet.
+
+Somente depois disso edite o `.env`:
+
+```bash
+nano /opt/jitsi/docker-jitsi-meet/.env
+```
+
+Configure assim:
 
 ```ini
 PUBLIC_URL=https://jitsi.tailf0138e.ts.net
@@ -93,10 +121,15 @@ ENABLE_LETSENCRYPT=0
 DISABLE_HTTPS=1
 ```
 
-Justificativas:
-- PUBLIC_URL aponta para o nome interno do Tailscale  
-- HTTPS dentro do container é desativado porque o TLS vem do Tailscale  
-- Não usamos Let’s Encrypt porque não há domínio público nem Funnel liberado  
+### Justificativas:
+- **PUBLIC_URL aponta para o nome interno do Tailscale**  
+  pois é a URL real usada para acessar o servidor dentro da Tailnet.  
+
+- **HTTPS dentro do container é desativado porque o TLS vem do Tailscale**  
+  (o Tailscale Serve fornece o HTTPS interno e não precisamos do TLS do nginx do Jitsi).  
+
+- **Não usamos Let’s Encrypt porque não há domínio público nem Funnel liberado**  
+  e o Admin da TailNet ainda não habilitou o recurso, portanto TLS público não existe — somente interno.  
 
 ---
 
