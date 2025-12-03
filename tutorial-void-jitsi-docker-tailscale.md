@@ -252,23 +252,74 @@ tailscale serve reset
 
 ---
 
-## 10. Quando o admin da TailNet liberar FUNNEL
+## 10. Quando o Admin da TailNet liberar o FUNNEL (opcional, acesso público)
 
-Com Funnel ativado na Tailnet, você poderá tornar o servidor **público**, com HTTPS global:
+Se o **Admin da TailNet** habilitar o Funnel, você poderá expor
+o Jitsi para a INTERNET inteira, com HTTPS válido, sem depender de firewall, modem ou IP fixo.
+
+Com Funnel ativado, você executa:
 
 ```bash
 tailscale funnel --https=443 http://127.0.0.1:8000
 ```
 
-E aí:
+E o acesso passa a ser:
 
 ```
-https://jitsi.tailf0138e.ts.net
+https://jitsi.tailf0138e.ts.net/
 ```
 
-funciona até para quem **não está no Tailscale**.
+---
 
-Mas isso depende do admin da Tailnet.
+### 🔶 NOTA IMPORTANTE: COMO LIBERAR O FUNNEL
+
+Somente o **administrador da TailNet** pode habilitar o Funnel.
+
+O Admin precisa fazer:
+
+1. Entrar em:
+   https://login.tailscale.com/admin/acls
+
+2. No menu lateral, clicar em:
+   **Settings → Funnel**
+
+3. Ativar a opção:
+   ✔ **Allow Funnel for this tailnet**
+
+4. E ativar também:
+   ✔ selecionar o dispositivo **jitsi**  
+     (ou o nome que você configurou com `tailscale set --hostname`)
+
+5. Salvar.
+
+Depois disso, você testa:
+
+```bash
+tailscale funnel status
+```
+
+Se estiver liberado, o comando deixa de dar erro e você pode ativar Funnel normalmente.
+
+---
+
+### ✔ O que muda quando o Funnel está ativo
+
+- O Jitsi fica acessível PUBLICAMENTE (sem TailNet)
+- HTTPS válido automaticamente (via Let's Encrypt do Tailscale)
+- A URL permanece:
+  ```
+  https://jitsi.tailf0138e.ts.net/
+  ```
+- Pode ser compartilhada com QUALQUER pessoa
+
+---
+
+### ✔ O que NÃO muda
+
+- Nada do tutorial anterior quebra  
+- Serve interno continua funcionando  
+- Docker não precisa ser modificado  
+- Jitsi não precisa reiniciar  
 
 ---
 
