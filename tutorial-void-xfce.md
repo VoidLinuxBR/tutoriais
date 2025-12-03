@@ -158,12 +158,21 @@ FONT=Lat2-Terminus16
 EOF
 ```
 
-## 16. Reconfigure
+## 16. Personalizar o /etc/locale.conf. Define o idioma. Altere conforme necessidade.
+```
+sudo tee /etc/locale.conf >/dev/null << EOF
+LANG=pt_BR.UTF-8
+LANGUAGE=pt_BR.UTF-8
+LC_COLLATE=pt_BR.UTF-8
+EOF
+```
+
+## 17. Reconfigure
 ```
 sudo xbps-reconfigure -fa
 ```
 
-## 17. Ativar serviços obrigatórios (runit)
+## 18. Ativar serviços obrigatórios (runit)
 ```
 sudo ln -s /etc/sv/dbus /var/service/
 sudo ln -s /etc/sv/elogind /var/service/
