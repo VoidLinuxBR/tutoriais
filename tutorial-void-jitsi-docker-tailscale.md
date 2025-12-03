@@ -103,37 +103,75 @@ Justificativas:
 ## 5. Ajustar docker-compose.yml  
 (muito importante — foi aqui que corrigimos a maior dor de cabeça)
 
+Esse passo é absolutamente ESSENCIAL porque foi onde corrigimos:
+
+- o nginx do Void aparecendo no lugar do Jitsi  
+- conflito de portas 80/8000  
+- Tailscale Serve reclamando que “somente localhost é suportado”  
+- o Jitsi sendo servido externamente sem querer  
+- o backend não funcionando no Serve  
+- a necessidade de expose local-only  
+- inicialização automática dos containers  
+- preparação para FUNNEL futuro sem alterar nada depois  
+
 O serviço `web` deve expor APENAS no localhost, pois:
 
-- Tailscale Serve **exige** backend em 127.0.0.1  
-- Evita conflito com nginx do Void na porta 80  
-- Garante acesso correto via `jitsi.tailf0138e.ts.net`
+- **Tailscale Serve EXIGE backend em 127.0.0.1**  
+  (versão atual do Serve só aceita localhost, senão dá erro de proxy)
+- **Evita conflito com o nginx do Void**, que roda na porta 80 do sistema  
+  (foi por isso que aparecia “Welcome to nginx!”)
+- **Garante que o Serve encaminhe para o Jitsi**, não para o nginx do host
+- **Impede exposição acidental na internet**, já que localhost não aceita conexões externas
+- **Garante compatibilidade futura com FUNNEL**, caso o Admin da TailNet libere
+- **Com `restart: always`, os containers sobem automaticamente após reboot**, sem runit adicional
 
-Editar:
+Edite o compose:
 
 ```bash
-nano docker-compose.yml
+nano /opt/jitsi/docker-jitsi-meet/docker-compose.yml
 ```
 
-Alterar:
-
-**ANTES**
+E deixe EXATAMENTE assim:
 
 ```yaml
-ports:
-  - "8000:80"
-  - "8443:443"
+services:
+
+  web:
+    image: jitsi/web:unstable
+    restart: always
+    ports:
+      - "127.0.0.1:8000:80"
+      - "127.0.0.1:8443:443"
+
+  prosody:
+    image: jitsi/prosody:unstable
+    restart: always
+
+  jicofo:
+    image: jitsi/jicofo:unstable
+    restart: always
+
+  jvb:
+    image: jitsi/jvb:unstable
+    restart: always
 ```
 
-**DEPOIS**
+Explicação resumida:
 
-```yaml
-ports:
-  - "127.0.0.1:8000:80"
-  - "127.0.0.1:8443:443"
-```
+- **127.0.0.1:8000 → 80**  
+  → A porta 80 do container só existe internamente, e quem recebe é 127.0.0.1  
+  → Por isso o Tailscale Serve consegue redirecionar corretamente
 
-Salvar.
+- **restart: always**  
+  → Se o Void reiniciar, o Jitsi volta sozinho  
+  → Se o Docker reiniciar, o Jitsi volta sozinho  
+  → Se houver queda de energia, volta sozinho  
+
+- **Isso elimina 100% o problema do nginx do Void**  
+- **Isso deixa o Jitsi invisível na internet pública** (o que é desejado dentro da Tailnet)
+- **Isso prepara tudo para ativar Funnel no futuro com apenas um comando**
+
+Salvar e sair.
 
 ---
 
