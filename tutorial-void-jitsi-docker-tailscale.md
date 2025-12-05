@@ -343,6 +343,14 @@ tailscale serve reset
 docker compose exec prosody prosodyctl --config /config/prosody.cfg.lua register admin meet.jitsi Jitsi1234
 ```
 
+Saída esperada:
+
+```
+usermanager         info	User account created: admin@meet.jitsi
+```
+
+---
+
 ## 11. Quando o Admin da TailNet liberar o FUNNEL (opcional, acesso público)
 
 Se o **Admin da TailNet** habilitar o Funnel, você poderá expor
