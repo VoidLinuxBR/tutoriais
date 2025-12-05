@@ -119,6 +119,20 @@ Configure assim:
 PUBLIC_URL=https://jitsi.tailf0138e.ts.net
 ENABLE_LETSENCRYPT=0
 DISABLE_HTTPS=1
+ENABLE_AUTH=1
+ENABLE_GUESTS=1
+AUTH_TYPE=internal
+
+XMPP_DOMAIN=meet.jitsi
+#XMPP_AUTH_DOMAIN=auth.meet.jitsi
+#XMPP_AUTH_DOMAIN_PREFIX=auth
+XMPP_MUC_DOMAIN=muc.meet.jitsi
+XMPP_INTERNAL_MUC_DOMAIN=internal-muc.meet.jitsi
+XMPP_GUEST_DOMAIN=guest.meet.jitsi
+
+
+
+
 ```
 
 ### Justificativas:
