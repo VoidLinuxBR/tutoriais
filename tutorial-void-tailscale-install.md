@@ -1,6 +1,6 @@
-# Servidor Jitsi sob Void Linux ;D
+# Tailscale VPN sob Void Linux ;D
 
-## 🎯 Objetivo - Subir um servidor Jitsi para uso da comunidade Void Linux BR
+## 🎯 Objetivo - Subir uma interface de rede conectada á VPN do serviço do Tailscale.
 
 ## ✅ Baixar e descompactar o client do Tailscale
 
@@ -89,6 +89,14 @@ sudo tailscale status
 ```bash
 sudo sv status tailscaled
 ```
+
+## ✅ CASO tenha em algum momento rodado o serviço e ele tenha cacheado o DNS do Tailscale, pode voltar a usar o seu próprio DNS da rede, rodando o comando:
+
+```bash
+sudo tailscale up --accept-dns=false
+```
+
+## Depois disso, essa nova configuração será salva no state, e nos próximos boots o DNS não será mais modificado.
 
 ---
 
