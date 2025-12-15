@@ -108,17 +108,17 @@ ip -br link
 ## 📥 Download and extract Samba4 source code
 
 ```bash
-wget https://download.samba.org/pub/samba/samba-4.23.3.tar.gz
+wget https://download.samba.org/pub/samba/samba-4.23.4.tar.gz
 ```
 
 ```bash
-tar -xvzf samba-4.23.3.tar.gz
+tar -xvzf samba-4.23.4.tar.gz
 ```
 
 ## Compile and install from source
 
 ```bash
-cd samba-4.23.3
+cd samba-4.23.4
 ```
 
 ```bash
@@ -158,7 +158,7 @@ samba-tool -V
 ## Output:
 
 ```bash
-4.23.3
+4.23.4
 ```
 
 ## 🏰 Provision the SAMBA4 domain (Creating the actual PDC)
@@ -220,7 +220,7 @@ Lowest function level of a DC: (Windows) 2016
 ## If everything is OK, you will see:
 
 ```bash
-samba version 4.23.3 started.
+samba version 4.23.4 started.
 Copyright Andrew Tridgell and the Samba Team 1992-2025
 Attempting to autogenerate TLS self-signed keys for https for hostname 'voiddc.educatux.edu'
 TLS self-signed keys generated OK
@@ -424,20 +424,6 @@ nameserver 127.0.0.1
 chattr +i /etc/resolv.conf
 ```
 
-## 👑 Give Administrator root privileges
-
-```bash
-vim /opt/samba/etc/user.map
-```
-
-```bash
-vim /opt/samba/etc/user.map
-```
-
-```bash
-!root=educatux.edu\Administrator
-```
-
 ## 🔗 Link Winbind libraries to the system
 
 ## Validate libdir path:
@@ -495,7 +481,7 @@ vim /opt/samba/etc/smb.conf
         server role = active directory domain controller
         workgroup = EDUCATUX
         idmap_ldb:use rfc2307 = yes
-	interfaces = lo eth0
+    	interfaces = lo eth0
         bind interfaces only = yes
 
 [sysvol]
@@ -619,7 +605,7 @@ wbinfo -g
 EDUCATUX\administrator
 EDUCATUX\guest
 EDUCATUX\krbtgt
-[root@voiddc samba-4.23.3]# wbinfo -g
+[root@voiddc samba-4.23.4]# wbinfo -g
 EDUCATUX\cert publishers
 EDUCATUX\ras and ias servers
 EDUCATUX\allowed rodc password replication group
@@ -662,7 +648,7 @@ Password for [EDUCATUX\Administrator]:
         ---------       ----      -------
         sysvol          Disk
         netlogon        Disk
-        IPC$            IPC       IPC Service (Samba 4.23.3)
+        IPC$            IPC       IPC Service (Samba 4.23.4)
 SMB1 disabled -- no workgroup available
 ```
 
@@ -677,18 +663,18 @@ Password for [EDUCATUX\administrator]:
   2 zone(s) found
 
   pszZoneName                 : educatux.edu
-  Flags                                : DNS_RPC_ZONE_DSINTEGRATED DNS_RPC_ZONE_UPDATE_SECURE
-  ZoneType                         : DNS_ZONE_TYPE_PRIMARY
-  Version                            : 50
-  dwDpFlags                      : DNS_DP_AUTOCREATED DNS_DP_DOMAIN_DEFAULT DNS_DP_ENLISTED
-  pszDpFqdn                      : DomainDnsZones.educatux.edu
+  Flags                       : DNS_RPC_ZONE_DSINTEGRATED DNS_RPC_ZONE_UPDATE_SECURE
+  ZoneType                    : DNS_ZONE_TYPE_PRIMARY
+  Version                     : 50
+  dwDpFlags                   : DNS_DP_AUTOCREATED DNS_DP_DOMAIN_DEFAULT DNS_DP_ENLISTED
+  pszDpFqdn                   : DomainDnsZones.educatux.edu
  
   pszZoneName                 : _msdcs.educatux.edu
-  Flags                               : DNS_RPC_ZONE_DSINTEGRATED DNS_RPC_ZONE_UPDATE_SECURE
-  ZoneType                        : DNS_ZONE_TYPE_PRIMARY
-  Version                           : 50
-  dwDpFlags                     : DNS_DP_AUTOCREATED DNS_DP_FOREST_DEFAULT DNS_DP_ENLISTED
-  pszDpFqdn                     : ForestDnsZones.educatux.edu
+  Flags                       : DNS_RPC_ZONE_DSINTEGRATED DNS_RPC_ZONE_UPDATE_SECURE
+  ZoneType                    : DNS_ZONE_TYPE_PRIMARY
+  Version                     : 50
+  dwDpFlags                   : DNS_DP_AUTOCREATED DNS_DP_FOREST_DEFAULT DNS_DP_ENLISTED
+  pszDpFqdn                   : ForestDnsZones.educatux.edu
 ```
 
 ```bash

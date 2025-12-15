@@ -119,17 +119,17 @@ ip -br link
 ## 📥 Download and extract Samba4 source code
 
 ```bash
-wget https://download.samba.org/pub/samba/samba-4.23.3.tar.gz
+wget https://download.samba.org/pub/samba/samba-4.23.4.tar.gz
 ```
 
 ```bash
-tar -xvzf samba-4.23.3.tar.gz
+tar -xvzf samba-4.23.4.tar.gz
 ```
 
 ## Compile and install from source
 
 ```bash
-cd samba-4.23.3
+cd samba-4.23.4
 ```
 
 ```bash
@@ -169,7 +169,7 @@ samba-tool -V
 ## Output:
 
 ```bash
-4.23.3
+4.23.4
 ```
 
 ## ⚠️ Warning: DO NOT use the provisioning command on the File Server!
@@ -328,16 +328,6 @@ Valid starting       Expires              Service principal
 	renew until 12/12/2025 09:43:36
 ```
 
-## 👑 Give Administrator root privileges
-
-```bash
-vim /opt/samba/etc/user.map
-```
-
-```bash
-!root=educatux.edu\Administrator
-```
-
 ## 🔗 Link Winbind libraries to the system
 
 ## Validate libdir path:
@@ -456,7 +446,7 @@ chmod +x /etc/sv/smbd/log/run
 ## Result obtained
 
 ```bash
-smbd version 4.23.3 started.
+smbd version 4.23.4 started.
 Copyright Andrew Tridgell and the Samba Team 1992-2025
 daemon 'smbd' : Starting process ...
 ```
@@ -519,7 +509,7 @@ chmod +x /etc/sv/winbindd/log/run
 ## Result obtained
 
 ```bash
-winbindd version 4.23.3 started.
+winbindd version 4.23.4 started.
 Copyright Andrew Tridgell and the Samba Team 1992-2025
 daemon 'winbindd' : Starting process ...
 ```
