@@ -1,6 +1,6 @@
 # 🐧 Void Linux + XFCE4 — Tutorial Definitivo
 
-## 0. Configurar sudo - grupo wheel - para evitar de ficar pedindo senha de root
+## 0. Configurar sudo - grupo wheel - para evitar ficar pedindo senha de root
 ```
 sudo tee -a /etc/sudoers.d/g_wheel >/dev/null << EOF
 %wheel ALL=(ALL:ALL) NOPASSWD: ALL
@@ -109,7 +109,7 @@ if [[ -f "$XML" ]] && ! grep -q 'pulseaudio' "$XML"; then
    next=$(grep -o 'plugin-[0-9]*' "$XML" 2>/dev/null | sed 's/.*-//' | sort -n | tail -1)
    next=$((next + 1))
 
-   sed -i '$d' "$XML"   # remove o </channel>
+   sed -i '$d' "$XML"   # remove o ũltimo </channel>
    sed -i '$d' "$XML"   # remove o último </property>
 
    cat << EOF >> "$XML"
@@ -129,27 +129,17 @@ EOF
 fi
 ```
 
-## 12. Criar .xinitrc (opcional para startx)
-```
-cat <<EOF > ~/.xinitrc
-#!/bin/sh
-setxkbmap -layout br -variant abnt2 &
-xsetroot -cursor_name left_ptr &
-exec startxfce4
-EOF
-```
-
-## 13. configurar timezone - define o fuso horário
+## 12. configurar timezone - define o fuso horário
 ```
 sudo ln -sfv /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
 ```
 
-## 14. configure locales
+## 13. configure locales
 ```
 sudo sed -i -e 's/^#\(en_US.UTF-8 UTF-8\)/\1/' -e 's/^#\(pt_BR.UTF-8 UTF-8\)/\1/' /etc/default/libc-locales
 ```
 
-## 15. Personalizar o /etc/rc.conf. Define o fuso horário, layout do teclado e fonte padrão do console. Altere conforme necessidade.
+## 14. Personalizar o /etc/rc.conf. Define o fuso horário, layout do teclado e fonte padrão do console. Altere conforme necessidade.
 ```
 sudo tee -a /etc/rc.conf >/dev/null << EOF
 TIMEZONE="America/Sao_Paulo"
@@ -158,7 +148,8 @@ FONT=Lat2-Terminus16
 EOF
 ```
 
-## 16. Personalizar o /etc/locale.conf. Define o idioma. Altere conforme necessidade.
+## 15. Personalizar o /etc/locale.conf. Define o idioma. Altere conforme necessidade.
+⚠️    **IMPORTANTE:**
 ```
 sudo tee /etc/locale.conf >/dev/null << EOF
 LANG=pt_BR.UTF-8
@@ -167,9 +158,19 @@ LC_COLLATE=pt_BR.UTF-8
 EOF
 ```
 
-## 17. Reconfigure
+## 16. Reconfigure
 ```
 sudo xbps-reconfigure -fa
+```
+
+## 17. Criar .xinitrc (para startx)
+```
+cat <<EOF > ~/.xinitrc
+#!/bin/sh
+setxkbmap -layout br -variant abnt2 &
+xsetroot -cursor_name left_ptr &
+exec startxfce4
+EOF
 ```
 
 ## 18. Ativar serviços obrigatórios (runit)
