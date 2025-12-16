@@ -3,6 +3,7 @@
 ## 0. Configurar sudo - (grupo wheel) - evita ficar pedindo senha de root
 ```
 sudo usermod -aG wheel "$USER"
+
 sudo tee -a /etc/sudoers.d/g_wheel >/dev/null << EOF
 %wheel ALL=(ALL:ALL) NOPASSWD: ALL
 EOF
