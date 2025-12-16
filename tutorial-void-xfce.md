@@ -137,6 +137,8 @@ EOF
    }' "$XML"
 fi
 ```
+> Se caso no primeiro login ainda não aparecer o ícone do som
+abra o terminal e rode esse script, depois logout e login novamente
 
 ## 12. configurar timezone - define o fuso horário
 ```
