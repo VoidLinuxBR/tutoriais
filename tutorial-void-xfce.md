@@ -139,7 +139,9 @@ sudo ln -sfv /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
 sudo sed -i -e 's/^#\(en_US.UTF-8 UTF-8\)/\1/' -e 's/^#\(pt_BR.UTF-8 UTF-8\)/\1/' /etc/default/libc-locales
 ```
 
-## 14. Personalizar o /etc/rc.conf. Define o fuso horário, layout do teclado e fonte padrão do console. Altere conforme necessidade.
+## 14. Personalizar o /etc/rc.conf. Define o fuso horário, layout do teclado e fonte padrão do console.
+⚠️    **Altere conforme necessidade**
+
 ```
 sudo tee -a /etc/rc.conf >/dev/null << EOF
 TIMEZONE="America/Sao_Paulo"
