@@ -43,7 +43,7 @@ xbps-install -S \
  python3-dnspython python3-cryptography \
  python3-matplotlib python3-pexpect python3-pyasn1 \
  tree libuuid-devel wget xfsprogs-devel zlib-devel \
- bind ldns pkg-config wget
+ bind ldns pkg-config vim
 ```
 
 ## 🖥️ Set hostname

@@ -39,7 +39,7 @@ xbps-install -S \
  python3-dnspython python3-cryptography \
  python3-matplotlib python3-pexpect python3-pyasn1 \
  tree libuuid-devel wget xfsprogs-devel zlib-devel \
- bind ldns pkg-config
+ bind ldns pkg-config vim
 ```
 
 ## ⚠️ ATENÇÃO:  O Samba4 compilado inclui o código do kerberos Heimdal, embutido (KDC interno) por default, mas não inclui clientes Kerberos. Nesse caso o repositório disponibiliza pacotes binários do MIT, que podem ser instalados sem qualquer problema ou interferência no kerberos heimdal default, compilado no Controlador de Domínio. Os pacotes são: mit-krb5 mit-krb5-client mit-krb5-devel. PORÉM você NÃO DEVE em hipótese alguma, instalar por repositório o pacote binário do krb5-server, o que causaria serviço concorrente ao kerberos Heimdal, interno do Samba4!
