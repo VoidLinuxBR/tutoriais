@@ -291,7 +291,7 @@ chmod +x /etc/sv/samba-ad-dc/log/run
 ## Habilitar o serviço do samba-ad-dc para subir no boot:
 
 ```bash
-ln -s /etc/sv/samba-ad-dc /var/service/
+ln -sf /etc/sv/samba-ad-dc/ /var/service/
 ```
 
 ## Validar se está rodando
@@ -362,7 +362,7 @@ allow 192.168.70.0/24
 ## Adicionar o serviço do chronyd ao start do RUNIT
 
 ```bash
-ln -s /etc/sv/chronyd/ /var/service
+ln -sf /etc/sv/chronyd/ /var/service/
 ```
 
 ## Reiniciar o TimeServer:
@@ -428,10 +428,6 @@ nameserver 127.0.0.1
 chattr +i /etc/resolv.conf
 ```
 
-```bash
-!root=educatux.edu\Administrator
-```
-
 ## 🔗 Linkar bibliotecas do Winbind no Sistema
 
 ## Validar os paths de libdir:
@@ -449,11 +445,11 @@ LIBDIR: /opt/samba/lib
 ## Criar links entre as bibliotecas. Prefira digitar manualmente ao invés de copiar e colar aqui.
 
 ```bash
-ln -s /opt/samba/lib/libnss_winbind.so.2 /usr/lib/
+ln -sf /opt/samba/lib/libnss_winbind.so.2 /usr/lib/
 ```
 
 ```bash
-ln -s /usr/lib/libnss_winbind.so.2 /usr/lib/libnss_winbind.so
+ln -sf /usr/lib/libnss_winbind.so.2 /usr/lib/libnss_winbind.so
 ```
 
 ## Releia a configuração com as novas bibliotecas linkadas
@@ -491,7 +487,7 @@ cat /opt/samba/etc/smb.conf
         server role = active directory domain controller
         workgroup = EDUCATUX
         idmap_ldb:use rfc2307 = yes
-         interfaces = lo eth0
+        interfaces = lo eth0
         bind interfaces only = yes
 
 [sysvol]
@@ -650,17 +646,17 @@ Password for [EDUCATUX\administrator]:
 
   pszZoneName               : educatux.edu
   Flags                            : DNS_RPC_ZONE_DSINTEGRATED DNS_RPC_ZONE_UPDATE_SECURE
-  ZoneType                     : DNS_ZONE_TYPE_PRIMARY
-  Version                        : 50
-  dwDpFlags                   : DNS_DP_AUTOCREATED DNS_DP_DOMAIN_DEFAULT DNS_DP_ENLISTED
-  pszDpFqdn                   : DomainDnsZones.educatux.edu
+  ZoneType                      : DNS_ZONE_TYPE_PRIMARY
+  Version                         : 50
+  dwDpFlags                    : DNS_DP_AUTOCREATED DNS_DP_DOMAIN_DEFAULT DNS_DP_ENLISTED
+  pszDpFqdn                    : DomainDnsZones.educatux.edu
 
-  pszZoneName              : _msdcs.educatux.edu
-  Flags                           : DNS_RPC_ZONE_DSINTEGRATED DNS_RPC_ZONE_UPDATE_SECURE
-  ZoneType                    : DNS_ZONE_TYPE_PRIMARY
-  Version                       : 50
-  dwDpFlags                  : DNS_DP_AUTOCREATED DNS_DP_FOREST_DEFAULT DNS_DP_ENLISTED
-  pszDpFqdn                  : ForestDnsZones.educatux.edu
+  pszZoneName               : _msdcs.educatux.edu
+  Flags                            : DNS_RPC_ZONE_DSINTEGRATED DNS_RPC_ZONE_UPDATE_SECURE
+  ZoneType                      : DNS_ZONE_TYPE_PRIMARY
+  Version                         : 50
+  dwDpFlags                    : DNS_DP_AUTOCREATED DNS_DP_FOREST_DEFAULT DNS_DP_ENLISTED
+  pszDpFqdn                    : ForestDnsZones.educatux.edu
 ```
 
 ```bash

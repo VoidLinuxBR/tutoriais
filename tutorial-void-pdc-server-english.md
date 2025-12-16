@@ -287,7 +287,7 @@ chmod +x /etc/sv/samba-ad-dc/log/run
 ## Enable the samba-ad-dc service to start on boot:
 
 ```bash
-ln -s /etc/sv/samba-ad-dc /var/service/
+ln -sf /etc/sv/samba-ad-dc/ /var/service/
 ```
 
 ## Validate if it’s running
@@ -358,7 +358,7 @@ allow 192.168.70.0/24
 ## Enable chronyd in runit
 
 ```bash
-ln -s /etc/sv/chronyd/ /var/service
+ln -sf /etc/sv/chronyd/ /var/service/
 ```
 
 ## Restart service:
@@ -443,9 +443,9 @@ LIBDIR: /opt/samba/lib
 ## Create library links (prefer typing manually):
 
 ```bash
-ln -s /opt/samba/lib/libnss_winbind.so.2 /usr/lib/
+ln -sf /opt/samba/lib/libnss_winbind.so.2 /usr/lib/
 
-ln -s /usr/lib/libnss_winbind.so.2 /usr/lib/libnss_winbind.so
+ln -sf /usr/lib/libnss_winbind.so.2 /usr/lib/libnss_winbind.so
 ```
 
 ## Reload library cache:
@@ -665,18 +665,18 @@ Password for [EDUCATUX\administrator]:
   2 zone(s) found
 
   pszZoneName                 : educatux.edu
-  Flags                       : DNS_RPC_ZONE_DSINTEGRATED DNS_RPC_ZONE_UPDATE_SECURE
-  ZoneType                    : DNS_ZONE_TYPE_PRIMARY
-  Version                     : 50
-  dwDpFlags                   : DNS_DP_AUTOCREATED DNS_DP_DOMAIN_DEFAULT DNS_DP_ENLISTED
-  pszDpFqdn                   : DomainDnsZones.educatux.edu
+  Flags                              : DNS_RPC_ZONE_DSINTEGRATED DNS_RPC_ZONE_UPDATE_SECURE
+  ZoneType                        : DNS_ZONE_TYPE_PRIMARY
+  Version                           : 50
+  dwDpFlags                      : DNS_DP_AUTOCREATED DNS_DP_DOMAIN_DEFAULT DNS_DP_ENLISTED
+  pszDpFqdn                      : DomainDnsZones.educatux.edu
  
   pszZoneName                 : _msdcs.educatux.edu
-  Flags                       : DNS_RPC_ZONE_DSINTEGRATED DNS_RPC_ZONE_UPDATE_SECURE
-  ZoneType                    : DNS_ZONE_TYPE_PRIMARY
-  Version                     : 50
-  dwDpFlags                   : DNS_DP_AUTOCREATED DNS_DP_FOREST_DEFAULT DNS_DP_ENLISTED
-  pszDpFqdn                   : ForestDnsZones.educatux.edu
+  Flags                              : DNS_RPC_ZONE_DSINTEGRATED DNS_RPC_ZONE_UPDATE_SECURE
+  ZoneType                       : DNS_ZONE_TYPE_PRIMARY
+  Version                          : 50
+  dwDpFlags                     : DNS_DP_AUTOCREATED DNS_DP_FOREST_DEFAULT DNS_DP_ENLISTED
+  pszDpFqdn                     : ForestDnsZones.educatux.edu
 ```
 
 ```bash
