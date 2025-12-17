@@ -31,12 +31,12 @@ sv restart sshd
 ```
 ip -4 route get 1.1.1.1 | awk '{print $7}'
 ```
-    > Anote o IP da interface de rede e utilize-o para conectar-se à VM via SSH.
+> Anote o IP da interface de rede e utilize-o para conectar-se à VM via SSH.
 
 7. (Opcional) Acesse a VM via SSH a partir do host.  
 - Este passo aplica-se apenas quando o sistema está sendo executado em uma VM; em caso de boot local (sem VM), a instalação pode prosseguir normalmente pelo terminal local.
 
-## Acesse a VM via SSH a partir do host para continuar a instalação remotamente.  
+### Acesse a VM via SSH a partir do host para continuar a instalação remotamente.  
 ```bash
 sudo ssh root@<ip-da-vm>
 ```
