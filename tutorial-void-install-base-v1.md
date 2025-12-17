@@ -195,22 +195,26 @@ cp -f /boot/efi/EFI/void/grubx64.efi /boot/efi/EFI/BOOT/BOOTX64.EFI
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
-# Criar o usuário
-** IMPORTANTE **
+## Criar usuário
+
+⚠️ **IMPORTANTE:** defina abaixo o nome do usuário real.
 ```bash
 export NEWUSER=seu_usuario_aqui
 ```
->Altere para seu usuario real
+
+Crie o usuário com diretório home, grupos básicos e shell Bash:
 ```bash
 useradd -m -G audio,video,wheel,tty -s /bin/bash ${NEWUSER}
 passwd ${NEWUSER}
 ```
-# Trocar senha de root (importante):
+
+## Definir senha do usuário root (IMPORTANTE)
 ```bash
 passwd root
 ```
-# Alterar o shell padrão do usuário root para Bash
-```
+
+## Alterar o shell padrão do usuário root para Bash
+```bash
 chsh -s /bin/bash root
 ```
 
@@ -251,21 +255,28 @@ printf 'nameserver 1.1.1.1\nnameserver 8.8.8.8\n' > /etc/resolv.conf
 cat << 'EOF' > /etc/sudoers.d/g_wheel
 %wheel ALL=(ALL:ALL) NOPASSWD: ALL
 EOF
+
 #Permissões obrigatórias
 chmod 440 /etc/sudoers.d/g_wheel
 ```
 
-# Personalizar o /etc/xbps.d/00-repository-main.conf (opcional, mas recomendável):
-- Cria o diretório de configurações do XBPS (se ainda não existir) e adiciona uma lista de repositórios oficiais e alternativos.
-Os repositórios repo-fastly costumam ter melhor latência.
-```
+## Personalizar `/etc/xbps.d/00-repository-main.conf`  
+*(Opcional, mas recomendável)*
+
+Cria o diretório de configuração do **XBPS** (caso ainda não exista) e define uma lista de repositórios oficiais e alternativos.  
+Os repositórios **repo-fastly** costumam apresentar melhor latência.
+
+```bash
 mkdir -pv /etc/xbps.d
-cat << 'EOF' >> /etc/xbps.d/00-repository-main.conf
+
+cat << 'EOF' > /etc/xbps.d/00-repository-main.conf
+# Repositório oficial (Fastly – melhor latência)
 repository=https://repo-fastly.voidlinux.org/current
 #repository=https://repo-fastly.voidlinux.org/current/nonfree
 #repository=https://repo-fastly.voidlinux.org/current/multilib
 #repository=https://repo-fastly.voidlinux.org/current/multilib/nonfree
 
+# Repositório alternativo (Chili Linux)
 repository=https://void.chililinux.com/voidlinux/current
 #repository=https://void.chililinux.com/voidlinux/current/extras
 #repository=https://void.chililinux.com/voidlinux/current/nonfree
