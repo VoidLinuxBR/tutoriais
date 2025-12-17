@@ -93,7 +93,7 @@ parted --script ${DEVICE} -- print
 
 ```bash
 mkfs.ext4 -F ${DEV_RAIZ}
-mkfs.fat -f -F32 ${DEV_EFI}
+mkfs.fat -F32 ${DEV_EFI}
 ```
 
 ## Montar os volumes em /mnt:
