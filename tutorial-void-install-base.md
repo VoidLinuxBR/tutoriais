@@ -72,11 +72,11 @@ export DEVICE=/dev/sda
 ```
 
 ```
-export DEV_EFI=/dev/sda1
+export DEV_EFI=/dev/sda2
 ```
 
 ```
-export DEV_RAIZ=/dev/sda2
+export DEV_RAIZ=/dev/sda3
 ```
 
 3. Usando o parted (automatico)
