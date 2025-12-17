@@ -335,50 +335,58 @@ chmod 644 \
   "/home/${NEWUSER}/.bashrc"
 ```
 
-## configurar ssh (opcional, mas recomendável):
-```
-mkdir -pv /etc/ssh/sshd_config.d/
+## Configurar SSH  
+*(Opcional, mas recomendável)*
+
+Cria um arquivo de configuração complementar para o **sshd**, mantendo o arquivo principal intacto.
+```bash
+mkdir -pv /etc/ssh/sshd_config.d
+
 cat << 'EOF' > /etc/ssh/sshd_config.d/10-custom.conf
+# Configurações gerais
 PermitTTY yes
 PrintMotd yes
 PrintLastLog yes
 Banner /etc/issue.net
 
+# Autenticação
 PermitRootLogin yes
+PasswordAuthentication yes
 KbdInteractiveAuthentication yes
-X11Forwarding yes
+ChallengeResponseAuthentication yes
 PubkeyAuthentication yes
 PubkeyAcceptedKeyTypes=+ssh-rsa
 AuthorizedKeysFile .ssh/authorized_keys
-PasswordAuthentication yes
-ChallengeResponseAuthentication yes
 UsePAM yes
 
+# Recursos
+X11Forwarding yes
 Subsystem sftp internal-sftp
 EOF
 ```
 
 ## Sair do chroot
-```
+```bash
 exit
 ```
 
-```
-# Desmonta todas as partições montadas em /mnt (subvolumes e /boot/efi)
+Desmonte todas as partições montadas em `/mnt` (incluindo subvolumes e `/boot/efi`):
+```bash
 umount -R /mnt
-
 ```
-# Reinicia a máquina física ou a VM para testar o boot real
+
+Reinicie a máquina física ou a VM para testar o boot real:
+```bash
 reboot
 ```
+
 ---
 
-# 🎉   Enjoy!
-O Void Linux agora está instalado.
+# 🎉 Enjoy!
+O **Void Linux** agora está instalado e pronto para uso.
 
 # DISCLAIMER
-
-```
+```bash
 Este tutorial é livre: você pode usar, copiar, modificar e redistribuir como quiser.  
 O conteúdo é disponibilizado sob a **Licença MIT**, e pode incluir trechos ou comandos derivados de softwares de código aberto sujeitos às suas próprias licenças.
 
