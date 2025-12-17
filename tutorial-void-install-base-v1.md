@@ -76,18 +76,21 @@ fdisk -l | grep -E '^(Disk|Disco) '
 ```
 > Assumiremos para o tutorial `/dev/sda`
 
-2. Altere abaixo, conforme o disco que será usado (IMPORTANTE):
-```
+2. Ajuste as variáveis abaixo conforme o disco que será utilizado (**IMPORTANTE**):
+```bash
+# Discos SATA/SCSI (sdX)
 export DEVICE=/dev/sda
+export DEV_EFI=${DEVICE}2
+export DEV_RAIZ=${DEVICE}3
 ```
 
-```
-export DEV_EFI=/dev/sda2
-```
-
-```
-export DEV_RAIZ=/dev/sda3
-```
+> 📌 **Nota:**  
+> Para discos **NVMe**, o sufixo da partição muda (`p`):
+> ```bash
+> export DEVICE=/dev/nvme0n1
+> export DEV_EFI=${DEVICE}p2
+> export DEV_RAIZ=${DEVICE}p3
+> ```
 
 3. Usando o parted (automatico)
 ```
