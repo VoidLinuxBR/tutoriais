@@ -16,6 +16,12 @@ bash
 ```bash
 loadkeys br-abnt2
 ```
+
+```
+echo 'PermitRootLogin prohibit-password' >> /etc/ssh/sshd_config
+sv restart sshd
+```
+
 4. Cole no terminal (opcional, mas recomendável) — Prompt com cores, usuário@host:caminho e status do último comando (✔/✘). Útil e bonito.
 ```
 export PS1='\[\e[1;32m\]\u\[\e[1;33m\]@\[\e[1;36m\]\h\[\e[1;31m\]:\w \
