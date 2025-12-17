@@ -93,7 +93,7 @@ sudo ssh <ip-da-vm>
 ```
 > Senha padrão: `voidlinux`
 
-7. Configure um prompt colorido no terminal, exibindo usuário, host, caminho atual e o status do último comando:
+8. Configure um prompt colorido no terminal, exibindo usuário, host, caminho atual e o status do último comando:
 ```bash
 export PS1='\[\e[1;32m\]\u\[\e[1;33m\]@\[\e[1;36m\]\h\[\e[1;31m\]:\w \
 $([[ $? -eq 0 ]] && echo -e "\e[1;32m✔" || echo -e "\e[1;31m✘$?") \
@@ -245,6 +245,8 @@ cp -f /boot/efi/EFI/void/grubx64.efi /boot/efi/EFI/BOOT/BOOTX64.EFI
 ```bash
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
+> 📌 Ambos os métodos (BIOS e UEFI) são instalados propositalmente.  
+> Isso permite que o mesmo disco inicialize tanto em sistemas **Legacy BIOS** quanto **UEFI**, aumentando a portabilidade entre máquinas.
 
 ## Criar usuário
 
@@ -415,6 +417,7 @@ X11Forwarding yes
 Subsystem sftp internal-sftp
 EOF
 ```
+> ⚠️ Recomenda-se revisar e endurecer estas configurações de SSH após o primeiro boot, especialmente em sistemas expostos à Internet.
 
 ## Sair do chroot
 ```bash
