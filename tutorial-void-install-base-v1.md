@@ -99,7 +99,7 @@ export PS1='\[\e[1;32m\]\u\[\e[1;33m\]@\[\e[1;36m\]\h\[\e[1;31m\]:\w \
 $([[ $? -eq 0 ]] && echo -e "\e[1;32m✔" || echo -e "\e[1;31m✘$?") \
 \[\e[0m\]\$ '
 ```
-# Conectar à Internet
+## Conectar à Internet
 - Para **Wi-Fi** *(se estiver no cabo, pule esta etapa)*:
 ```bash
 wpa_passphrase "NOME_DA_REDE_WIFI" "SENHA_DA_REDE" > wifi.conf
