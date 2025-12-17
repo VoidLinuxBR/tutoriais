@@ -4,34 +4,30 @@
 Inicie pelo ISO do Void Linux (x86_64 glibc ou musl).
 
 1. Entre como root
-```
+```bash
 login    : root
 password : voidlinux
 ```
 2. Troque o shell de *sh* para o *bash*.  
 O *dash/sh* **NÃO implementa** vários recursos que muitos scripts usam.
-```
+```bash
 bash
 ```
-
-3. Troque o layout de teclado para ABNT2
+3. Troque o layout de teclado para **ABNT2**, garantindo o mapeamento correto de acentos e símbolos:
 ```bash
 loadkeys br-abnt2
 ```
 
-4. Alterar o shell padrão do usuário root para Bash
-```
-chsh -s /bin/bash root
-```
-5. Ativar login root via para acesso ssh
-```
-echo 'PermitRootLogin Yes' >> /etc/ssh/sshd_config
+4. Ative o login do usuário **root** via SSH.  
+Isso é necessário para acessar a **VM a partir do host** e continuar a instalação remotamente; depois disso, os comandos poderão ser executados diretamente no terminal via SSH.
+```bash
+echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
 sv restart sshd
 ip a
 ```
-> Anote o ip da interface e use para logar no host via ssh
+> Anote o IP da interface de rede e utilize-o para conectar-se à VM via SSH.
 
-6. (Opcional) Login via ssh na VM via host
+5. (Opcional) Login via ssh na VM via host
 ```
 sudo ssh root@<ip-da-vm>
 ```
