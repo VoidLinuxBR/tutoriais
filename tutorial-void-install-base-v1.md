@@ -219,6 +219,10 @@ dracut --force --kver ${KVER}
 ```
 
 ## Configurar o GRUB
+
+> 📌 Ambos os métodos (BIOS e UEFI) são instalados propositalmente.  
+> Isso permite que o mesmo disco inicialize tanto em sistemas **Legacy BIOS** quanto **UEFI**, aumentando a portabilidade entre máquinas.
+
 1. Crie o diretório de suporte ao GRUB:
 ```bash
 mkdir -p /boot/grub
@@ -245,8 +249,6 @@ cp -f /boot/efi/EFI/void/grubx64.efi /boot/efi/EFI/BOOT/BOOTX64.EFI
 ```bash
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
-> 📌 Ambos os métodos (BIOS e UEFI) são instalados propositalmente.  
-> Isso permite que o mesmo disco inicialize tanto em sistemas **Legacy BIOS** quanto **UEFI**, aumentando a portabilidade entre máquinas.
 
 ## Criar usuário
 
