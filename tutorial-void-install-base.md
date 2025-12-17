@@ -18,7 +18,7 @@ loadkeys br-abnt2
 ```
 
 ```
-echo 'PermitRootLogin prohibit-password' >> /etc/ssh/sshd_config
+echo 'PermitRootLogin Yes' >> /etc/ssh/sshd_config
 sv restart sshd
 ```
 
