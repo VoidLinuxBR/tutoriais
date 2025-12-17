@@ -146,8 +146,9 @@ xbps-install -Sy -R https://repo-default.voidlinux.org/current \
 > - `linux-firmware-network` → drivers de rede  
 > - `xtools` → necessário para usar `xgenfstab` sem falhas
 
-## Criar fstab
-```
+## Criar o `fstab`
+Gera automaticamente o arquivo de montagem permanente do sistema.
+```bash
 xgenfstab -U /mnt > /mnt/etc/fstab
 ```
 
