@@ -140,12 +140,11 @@ xbps-install -Sy -R https://repo-default.voidlinux.org/current \
   socklog-void wget net-tools tmate ncurses
 ```
 
-## Isso garante:
-
-- grub-x86_64-efi → bootloader UEFI
-- linux → kernel
-- linux-firmware-network → drivers de rede
-- xtools → obrigatório para usar xgenfstab sem falhas
+> 📌 **Nota:**  
+> - `grub-x86_64-efi` → bootloader UEFI  
+> - `linux` → kernel  
+> - `linux-firmware-network` → drivers de rede  
+> - `xtools` → necessário para usar `xgenfstab` sem falhas
 
 ## Criar fstab
 ```
