@@ -158,8 +158,16 @@ Acesse o sistema instalado em `/mnt` para continuar a configuração.
 xchroot /mnt /bin/bash
 ```
 
-## Configurar o GRUB
+## Gerar o INITRAMFS
+Detecta automaticamente a versão do kernel instalada e gera o `initramfs` correspondente usando o **dracut**.
+```bash
+mods=(/usr/lib/modules/*)
+KVER=$(basename "${mods[0]}")
+echo ${KVER}
+dracut --force --kver ${KVER}
+```
 
+## Configurar o GRUB
 1. Crie o diretório de suporte ao GRUB:
 ```bash
 mkdir -p /boot/grub
@@ -187,12 +195,23 @@ cp -f /boot/efi/EFI/void/grubx64.efi /boot/efi/EFI/BOOT/BOOTX64.EFI
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
-## Gerando o INITRAMFS
+# Criar o usuário
+** IMPORTANTE **
+```bash
+export NEWUSER=seu_usuario_aqui
 ```
-mods=(/usr/lib/modules/*)
-KVER=$(basename "${mods[0]}")
-echo ${KVER}
-dracut --force --kver ${KVER}
+>Altere para seu usuario real
+```bash
+useradd -m -G audio,video,wheel,tty -s /bin/bash ${NEWUSER}
+passwd ${NEWUSER}
+```
+# Trocar senha de root (importante):
+```bash
+passwd root
+```
+# Alterar o shell padrão do usuário root para Bash
+```
+chsh -s /bin/bash root
 ```
 
 ## Configurações básicas
@@ -234,27 +253,6 @@ cat << 'EOF' > /etc/sudoers.d/g_wheel
 EOF
 #Permissões obrigatórias
 chmod 440 /etc/sudoers.d/g_wheel
-```
-
-# Criar o usuário
-** IMPORTANTE **
-```
-export NEWUSER=seu_usuario_aqui
-```
->Altere para seu usuario real
-
-```
-useradd -m -G audio,video,wheel,tty -s /bin/bash ${NEWUSER}
-passwd ${NEWUSER}
-```
-
-# Trocar senha de root (importante):
-```bash
-passwd root
-```
-# Alterar o shell padrão do usuário root para Bash
-```
-chsh -s /bin/bash root
 ```
 
 # Personalizar o /etc/xbps.d/00-repository-main.conf (opcional, mas recomendável):
