@@ -228,6 +228,10 @@ passwd ${NEWUSER}
 ```bash
 passwd root
 ```
+# Alterar o shell padrão do usuário root para Bash
+```
+chsh -s /bin/bash root
+```
 
 # Personalizar o /etc/xbps.d/00-repository-main.conf (opcional, mas recomendável):
 - Cria o diretório de configurações do XBPS (se ainda não existir) e adiciona uma lista de repositórios oficiais e alternativos.
