@@ -81,12 +81,14 @@ export DEV_RAIZ=/dev/sda2
 
 3. Usando o parted (automatico)
 ```
-parted --script ${DEVICE} -- \
-    mklabel gpt \
-    mkpart ESP fat32 1MiB 512MiB set 1 esp on name 1 EFI \
-    mkpart ROOT btrfs 512MiB 100% name 2 ROOT \
-    align-check optimal 1
-parted --script ${DEVICE} -- print
+parted --script "${DEVICE}" -- \
+  mklabel gpt \
+  mkpart primary 1MiB 2MiB name 1 BIOS set 1 bios_grub on \
+  mkpart primary fat32 2MiB 514MiB name 2 EFI set 2 esp on \
+  mkpart primary 514MiB 100% name 3 ROOT \
+  align-check optimal 1
+
+parted --script "${DEVICE}" -- print
 ```
 
 ## Formatar partições
