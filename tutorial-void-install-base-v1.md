@@ -380,11 +380,10 @@ Reinicie a máquina física ou a VM para testar o boot real:
 reboot
 ```
 
----
-
 # 🎉 Enjoy!
 O **Void Linux** agora está instalado e pronto para uso.
 
+---
 ---
 
 # DISCLAIMER
