@@ -99,6 +99,8 @@ export PS1='\[\e[1;32m\]\u\[\e[1;33m\]@\[\e[1;36m\]\h\[\e[1;31m\]:\w \
 $([[ $? -eq 0 ]] && echo -e "\e[1;32m✔" || echo -e "\e[1;31m✘$?") \
 \[\e[0m\]\$ '
 ```
+> 📌 Este prompt vale apenas para a sessão atual; para torná-lo permanente, adicione ao `.bashrc`.
+
 ## Conectar à Internet
 - Para **Wi-Fi** *(se estiver no cabo, pule esta etapa)*:
 ```bash
@@ -106,8 +108,12 @@ wpa_passphrase "NOME_DA_REDE_WIFI" "SENHA_DA_REDE" > wifi.conf
 wpa_supplicant -B -i wlan0 -c wifi.conf
 dhcpcd wlan0
 ```
-> 📌 **Nota:** wlan0 pode variar (wlp2s0, wlp0s3, etc.)  
-ip -br a ajuda a identificar a interface correta
+> 📌 **Nota:** `wlan0` pode variar (`wlp2s0`, `wlp0s3`, etc.).  
+> Use o comando abaixo para identificar a interface correta:
+>
+> ```bash
+> ip -br a
+> ```
 
 Testar a conexão:
 ```
