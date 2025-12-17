@@ -383,9 +383,6 @@ reboot
 # 🎉 Enjoy!
 O **Void Linux** agora está instalado e pronto para uso.
 
----
----
-
 # DISCLAIMER
 
 > Este tutorial é livre: você pode usar, copiar, modificar e redistribuir como quiser.  
