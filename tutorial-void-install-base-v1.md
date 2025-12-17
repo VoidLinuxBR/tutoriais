@@ -36,7 +36,8 @@ ip -4 route get 1.1.1.1 | awk '{print $7}'
 7. (Opcional) Acesse a VM via SSH a partir do host.  
 Este passo é opcional e serve apenas para quem preferir continuar a instalação **a partir do host**, usando um terminal mais confortável. 
 - Caso prefira, a instalação pode continuar normalmente **diretamente no console da VM**.
-- Caso o boot não seja feito em uma VM, prossiga normalmente pelo próprio terminal.
+- Caso o boot não seja via VM, este passo pode ser ignorado, e prossiga com a instalação normalmente pelo terminal local.
+
 ```bash
 sudo ssh root@<ip-da-vm>
 ```
