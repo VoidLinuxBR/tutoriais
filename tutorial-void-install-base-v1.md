@@ -92,8 +92,12 @@ export DEV_RAIZ=${DEVICE}3
 > export DEV_RAIZ=${DEVICE}p3
 > ```
 
-3. Usando o parted (automatico)
-```
+3. Particione o disco usando o **parted** (modo automático).  
+Este esquema cria:
+- Partição BIOS (bios_grub)
+- Partição EFI (ESP)
+- Partição raiz (ROOT)
+```bash
 parted --script "${DEVICE}" -- \
   mklabel gpt \
   mkpart primary 1MiB 2MiB name 1 BIOS set 1 bios_grub on \
