@@ -263,7 +263,7 @@ Cria um .bash_profile para o usuário e garante que o .bashrc seja carregado aut
 > confira se criou o usuário no passo anterior
 ```
 wget --quiet --no-check-certificate \
-   -O /etc//skel/.bashrc \
+   -O /etc/skel/.bashrc \
    "https://raw.githubusercontent.com/voidlinux-br/void-installer/refs/heads/main/.bashrc"
 chown root:root /etc/skel/.bashrc
 chmod 644 /etc/skel/.bashrc
