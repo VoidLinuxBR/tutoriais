@@ -114,7 +114,7 @@ sudo ssh <ip-da-vm>
 ```
 > Senha padrão: `voidlinux`
 
-## Configure um prompt colorido no terminal
+## Configure um prompt colorido no terminal (opcional)
 Irá exibir usuário, host, caminho atual e o status do último comando:
 ```bash
 export PS1='\[\e[1;32m\]\u\[\e[1;33m\]@\[\e[1;36m\]\h\[\e[1;31m\]:\w \
@@ -124,6 +124,7 @@ $([[ $? -eq 0 ]] && echo -e "\e[1;32m✔" || echo -e "\e[1;31m✘$?") \
 > 📌 Este prompt vale apenas para a sessão atual; para torná-lo permanente, adicione ao `.bashrc`.
 
 ## Instalar pacotes necessários
+⚠️ **IMPORTANTE:**
 ```bash
 xbps-install -Sy xbps parted nano vim zstd xz bash-completion
 ```
