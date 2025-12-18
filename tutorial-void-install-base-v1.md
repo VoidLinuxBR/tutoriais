@@ -114,7 +114,8 @@ sudo ssh <ip-da-vm>
 ```
 > Senha padrão: `voidlinux`
 
-## Configure um prompt colorido no terminal, exibindo usuário, host, caminho atual e o status do último comando:
+## Configure um prompt colorido no terminal
+Irá exibir usuário, host, caminho atual e o status do último comando:
 ```bash
 export PS1='\[\e[1;32m\]\u\[\e[1;33m\]@\[\e[1;36m\]\h\[\e[1;31m\]:\w \
 $([[ $? -eq 0 ]] && echo -e "\e[1;32m✔" || echo -e "\e[1;31m✘$?") \
