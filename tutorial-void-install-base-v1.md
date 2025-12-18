@@ -269,6 +269,10 @@ export NEWUSER=seu_usuario_aqui
 Crie o usuário com diretório home, grupos básicos e shell Bash:
 ```bash
 useradd -m -G audio,video,wheel,tty -s /bin/bash ${NEWUSER}
+```
+
+## Definir senha do teu usuário (IMPORTANTE)
+```bash
 passwd ${NEWUSER}
 ```
 
