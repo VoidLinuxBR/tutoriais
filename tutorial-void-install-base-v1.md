@@ -434,16 +434,15 @@ EOF
 ```
 > ⚠️ Recomenda-se revisar e endurecer estas configurações de SSH após o primeiro boot, especialmente em sistemas expostos à Internet.
 
-## Sair do chroot
+## Finalizanr instalação
+Sair do chroot
 ```bash
 exit
 ```
-
 Desmonte todas as partições montadas em `/mnt` (incluindo subvolumes e `/boot/efi`):
 ```bash
 umount -R /mnt
 ```
-
 Reinicie a máquina física ou a VM para testar o boot real:
 ```bash
 reboot
