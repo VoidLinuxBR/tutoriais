@@ -69,38 +69,6 @@ bash
 loadkeys br-abnt2
 ```
 
-4. Ative o login do usuário **root** via SSH.  
-Isso é necessário para acessar a **VM a partir do host** e continuar a instalação remotamente; depois disso, os comandos poderão ser colados/executados diretamente no terminal via SSH.
-```bash
-echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
-```
-5. Reinicie o serviço ssh
-```
-sv restart sshd
-```
-6. Exiba o IP da interface de rede
-```
-ip -4 route get 1.1.1.1 | awk '{print $7}'
-```
->Anote o IP da interface de rede e utilize-o para conectar-se à VM via SSH.
-
-7. (Opcional) Acesse a VM via SSH a partir do host.  
-- Este passo aplica-se apenas quando o sistema está sendo executado em uma VM; em caso de boot local (sem VM), a instalação pode prosseguir normalmente pelo terminal local.
-
-- Acesse a VM via SSH a partir do host para continuar a instalação remotamente.  
-```bash
-sudo ssh <ip-da-vm>
-```
-> Senha padrão: `voidlinux`
-
-8. Configure um prompt colorido no terminal, exibindo usuário, host, caminho atual e o status do último comando:
-```bash
-export PS1='\[\e[1;32m\]\u\[\e[1;33m\]@\[\e[1;36m\]\h\[\e[1;31m\]:\w \
-$([[ $? -eq 0 ]] && echo -e "\e[1;32m✔" || echo -e "\e[1;31m✘$?") \
-\[\e[0m\]\$ '
-```
-> 📌 Este prompt vale apenas para a sessão atual; para torná-lo permanente, adicione ao `.bashrc`.
-
 ## Conectar à Internet
 - Para **Wi-Fi** *(se estiver no cabo, pule esta etapa)*:
 ```bash
@@ -120,6 +88,39 @@ Testar a conexão:
 ping -c3 8.8.8.8
 ping -c3 repo-default.voidlinux.org
 ```
+
+## Ative o login do usuário **root** via SSH.  
+Isso é necessário para acessar a **VM a partir do host** e continuar a instalação remotamente; depois disso, os comandos poderão ser colados/executados diretamente no terminal via SSH.
+```bash
+echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
+```
+1. Reinicie o serviço ssh
+```
+sv restart sshd
+```
+2. Exiba o IP da interface de rede
+```
+ip -4 route get 1.1.1.1 | awk '{print $7}'
+```
+>Anote o IP da interface de rede e utilize-o para conectar-se à VM via SSH.
+
+3. (Opcional) Acesse a VM via SSH a partir do host.  
+- Este passo aplica-se apenas quando o sistema está sendo executado em uma VM; em caso de boot local (sem VM), a instalação pode prosseguir normalmente pelo terminal local.
+
+- Acesse a VM via SSH a partir do host para continuar a instalação remotamente.  
+```bash
+sudo ssh <ip-da-vm>
+```
+> Senha padrão: `voidlinux`
+
+## Configure um prompt colorido no terminal, exibindo usuário, host, caminho atual e o status do último comando:
+```bash
+export PS1='\[\e[1;32m\]\u\[\e[1;33m\]@\[\e[1;36m\]\h\[\e[1;31m\]:\w \
+$([[ $? -eq 0 ]] && echo -e "\e[1;32m✔" || echo -e "\e[1;31m✘$?") \
+\[\e[0m\]\$ '
+```
+> 📌 Este prompt vale apenas para a sessão atual; para torná-lo permanente, adicione ao `.bashrc`.
+
 ## Instalar pacotes necessários
 ```bash
 xbps-install -Sy xbps parted nano vim zstd xz bash-completion
