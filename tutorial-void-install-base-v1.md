@@ -92,20 +92,23 @@ ping -c3 repo-default.voidlinux.org
 ## Ative o login do usuário **root** via SSH.  
 Este passo aplica-se apenas quando o sistema está sendo executado em uma VM; em caso de boot local (sem VM), a instalação pode prosseguir normalmente pelo terminal local.  
 - Isso é necessário para acessar a **VM a partir do host** e continuar a instalação remotamente; depois disso, os comandos poderão ser colados/executados diretamente no terminal via SSH.
+
+1. Configurar ssh
 ```bash
 echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
 ```
-1. Reinicie o serviço ssh
+2. Reinicie o serviço ssh
 ```bash
 sv restart sshd
+
 ```bash
-2. Exiba o IP da interface de rede
+3. Exiba o IP da interface de rede
 ```
 ip -4 route get 1.1.1.1 | awk '{print $7}'
 ```
 >Anote o IP da interface de rede e utilize-o para conectar-se à VM via SSH.
 
-3. Acesse a VM via SSH a partir do host.  
+4. Acesse a VM via SSH a partir do host.  
 ```bash
 sudo ssh <ip-da-vm>
 ```
