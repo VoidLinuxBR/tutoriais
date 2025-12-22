@@ -85,7 +85,7 @@ fdisk -l | grep -E '^(Disk|Disco) '
     > 1. **Assumiremos** para o tutorial `/dev/sda` (normal) ou `/dev/nvme0n1` (nvme)  
     > 2. **Ajuste** conforme o teu disco (escolha apenas **um** ou **outro** modelo)   
 
-Para discos **normais**
+Para discos **normais** (ex.: /dev/sda)
 ```bash
 export DEVICE=/dev/sda
 export DEV_BIOS=${DEVICE}1
@@ -93,7 +93,7 @@ export DEV_EFI=${DEVICE}2
 export DEV_RAIZ=${DEVICE}3
 export DEV_LUKS=/dev/mapper/cryptroot
 ```
-Para discos **NVMe**, o sufixo da partição muda (`p`)
+Para discos **NVMe** (ex: /dev/nvme0n1), o sufixo da partição muda (`p`)
 ```bash
 export DEVICE=/dev/nvme0n1
 export DEV_BIOS=${DEVICE}p1
