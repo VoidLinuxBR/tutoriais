@@ -41,9 +41,9 @@ password : voidlinux
 bash
 ```
 
-3. Troque o layout de teclado para o KEYMAP escolhido acima:
+3. Troque o layout de teclado:
 ```bash
-loadkeys "${KEYMAP}"
+loadkeys br-abnt2
 ```
 
 4. Cole no terminal (opcional) — Prompt com cores, usuário@host:caminho e status do último comando (✔/✘). Útil e bonito.
