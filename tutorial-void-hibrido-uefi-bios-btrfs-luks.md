@@ -87,10 +87,6 @@ fdisk -l | grep -E '^(Disk|Disco) '
 - Exemplo abaixo: /dev/sda com 3 partições (BIOS, EFI, ROOT):
 ```bash
 export DEVICE=/dev/sda
-export DEV_LUKS=/dev/mapper/cryptroot
-```
-
-```bash
 export DEV_BIOS=${DEVICE}1
 export DEV_EFI=${DEVICE}2
 export DEV_RAIZ=${DEVICE}3
@@ -115,7 +111,12 @@ Porque declarar tudo no início deixa o processo à prova de erro.
 Em outras palavras:  
 - 👉   Aqui você define a anatomia do disco. Todo o resto do guia apenas segue essas variáveis.
 
-2. Definir KEYMAP e TIMEZONE:  
+2. Definir o mapper do LUKS:  
+```bash
+export DEV_LUKS=/dev/mapper/cryptroot
+```
+
+3. Definir KEYMAP e TIMEZONE:  
 ```bash
 export KEYMAP=br-abnt2
 export TIMEZONE=America/Sao_Paulo
