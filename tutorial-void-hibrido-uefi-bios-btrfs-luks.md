@@ -88,8 +88,6 @@ fdisk -l | grep -E '^(Disk|Disco) '
 ```bash
 export DEVICE=/dev/sda
 export DEV_LUKS=/dev/mapper/cryptroot
-export KEYMAP=br-abnt2
-export TIMEZONE=America/Sao_Paulo
 ```
 
 ```bash
@@ -98,6 +96,10 @@ export DEV_EFI=${DEVICE}2
 export DEV_RAIZ=${DEVICE}3
 ```
 
+```bash
+export KEYMAP=br-abnt2
+export TIMEZONE=America/Sao_Paulo
+```
 
 > DEVICE → disco inteiro  
 DEV_BIOS → partição BIOS boot (1–2 MiB, sem FS, não monta)  
