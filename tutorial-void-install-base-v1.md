@@ -158,13 +158,15 @@ Este esquema cria:
 - Partição EFI (ESP)
 - Partição raiz (ROOT)
 ```bash
+wipefs -a "${DEVICE}"
 parted --script "${DEVICE}" -- \
   mklabel gpt \
   mkpart primary 1MiB 2MiB name 1 BIOS set 1 bios_grub on \
   mkpart primary fat32 2MiB 514MiB name 2 EFI set 2 esp on \
   mkpart primary 514MiB 100% name 3 ROOT \
-  align-check optimal 1
-
+  align-check optimal 1 \
+  align-check optimal 2 \
+  align-check optimal 3
 parted --script "${DEVICE}" -- print
 ```
 
