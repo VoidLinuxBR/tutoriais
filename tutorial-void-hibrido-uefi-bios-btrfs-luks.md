@@ -55,7 +55,7 @@ $([[ $? -eq 0 ]] && echo -e "\e[1;32m✔" || echo -e "\e[1;31m✘$?") \
 ```
 
 # ▶️    2. Conectar à Internet
-- Para Wi-Fi *(se estiver no cabo, pule esta etapa)*:
+- Para **Wi-Fi** *(se estiver no cabo, pule esta etapa)*:
 ```bash
 wpa_passphrase "SSID" "SENHA" > wifi.conf
 wpa_supplicant -B -i wlan0 -c wifi.conf
@@ -68,7 +68,8 @@ ping -c3 8.8.8.8
 ping -c3 repo-default.voidlinux.org
 ```
 
-2. Instale alguns necessários pacotes:
+2. Instalar pacotes necessários
+⚠️ **IMPORTANTE:**
 ```bash
 xbps-install -Sy xbps parted jfsutils xfsprogs nano zstd xz bash-completion
 ```
