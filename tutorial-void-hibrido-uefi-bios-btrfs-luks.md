@@ -95,11 +95,6 @@ export DEV_BIOS=${DEVICE}1
 export DEV_EFI=${DEVICE}2
 export DEV_RAIZ=${DEVICE}3
 ```
-
-```bash
-export KEYMAP=br-abnt2
-export TIMEZONE=America/Sao_Paulo
-```
 > 📌 **Nota:**  
 > Para discos **NVMe**, o sufixo da partição muda (`p`):
 > ```bash
@@ -119,6 +114,11 @@ DEV_LUKS → mapeamento do LUKS (/dev/mapper/cryptroot)
 Porque declarar tudo no início deixa o processo à prova de erro.   
 Em outras palavras:  
 - 👉   Aqui você define a anatomia do disco. Todo o resto do guia apenas segue essas variáveis.
+
+```bash
+export KEYMAP=br-abnt2
+export TIMEZONE=America/Sao_Paulo
+```
 
 ---
 
