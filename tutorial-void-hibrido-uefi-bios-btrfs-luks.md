@@ -82,8 +82,8 @@ fdisk -l | grep -E '^(Disk|Disco) '
 # ▶️    4. Definir variáveis usadas no tutorial:
 
 1. Definir os devices (ANTES de usar qualquer um):  
-   > Assumiremos para o tutorial `/dev/sda` ou `/dev/nvme0n1` (nvme)  
-   > Ajuste conforme o teu disco (escolha apenas um modelo)   
+   > 1. Assumiremos para o tutorial `/dev/sda` ou `/dev/nvme0n1` (nvme)  
+   > 2. Ajuste conforme o teu disco (escolha apenas um modelo)   
 
 Para discos **normais** ex.: /dev/sda com 3 partições (BIOS, EFI, ROOT)
 ```bash
