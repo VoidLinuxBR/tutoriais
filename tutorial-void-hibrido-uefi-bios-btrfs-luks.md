@@ -82,7 +82,7 @@ fdisk -l | grep -E '^(Disk|Disco) '
 # ▶️    4. Definir variáveis usadas no tutorial:
 
 1. Definir os devices (ANTES de usar qualquer um):  
-   > Assumiremos para o tutorial `/dev/sda`
+   > Assumiremos para o tutorial `/dev/sda` e `/dev/nvme0n1` (nvme)
 - Ajuste aqui conforme o teu disco. 
 - Exemplo abaixo: /dev/sda com 3 partições (BIOS, EFI, ROOT):
 ```bash
@@ -115,7 +115,7 @@ Porque declarar tudo no início deixa o processo à prova de erro.
 Em outras palavras:  
 - 👉   Aqui você define a anatomia do disco. Todo o resto do guia apenas segue essas variáveis.
 
-2. Definir KEYMAP e TIMEZONE):  
+2. Definir KEYMAP e TIMEZONE:  
 ```bash
 export KEYMAP=br-abnt2
 export TIMEZONE=America/Sao_Paulo
