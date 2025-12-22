@@ -116,7 +116,7 @@ DEV_LUKS → mapeamento do LUKS (/dev/mapper/cryptroot)
 - 🔎   Por que isso é necessário?  
 Porque declarar tudo no início deixa os próximos processo à prova de erro de digitação.  
 
-2. Definir KEYMAP e TIMEZONE (altere conforme sua necessidade):  
+2. Definir **KEYMAP** e **TIMEZONE** (altere conforme sua necessidade):  
 ```bash
 export KEYMAP=br-abnt2
 ```
@@ -127,9 +127,9 @@ export TIMEZONE=America/Sao_Paulo
 ---
 
 # ▶️    5. Particionar disco
-- A partição BIOS **DEVE** ser a primeira.  
-Isso aumenta compatibilidade com placas-mãe antigas, bootloaders problemáticos e BIOS que esperam o código de boot nas primeiras áreas do disco.  
-A ESP pode vir depois sem problema algum — UEFI não liga para a posição.
+> A partição BIOS **DEVE** ser a primeira.  
+> Isso aumenta compatibilidade com placas-mãe antigas, bootloaders problemáticos e BIOS que esperam o código de boot nas primeiras áreas do disco.  
+> A ESP pode vir depois sem problema algum — UEFI não liga para a posição.
 
 ### Ordem ideal e correta:
 
