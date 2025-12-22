@@ -85,14 +85,14 @@ fdisk -l | grep -E '^(Disk|Disco) '
     > 1. **Assumiremos** para o tutorial `/dev/sda` (normal) ou `/dev/nvme0n1` (nvme)  
     > 2. **Ajuste** conforme o teu disco (escolha apenas um modelo)   
 
-Para discos **normais** ex.: /dev/sda com 3 partições (BIOS, EFI, ROOT)
+Para discos **normais**
 ```bash
 export DEVICE=/dev/sda
 export DEV_BIOS=${DEVICE}1
 export DEV_EFI=${DEVICE}2
 export DEV_RAIZ=${DEVICE}3
 ```
-Para discos **NVMe**, o sufixo da partição muda (`p`):
+Para discos **NVMe**, o sufixo da partição muda (`p`)
 ```bash
 export DEVICE=/dev/nvme0n1
 export DEV_BIOS=${DEVICE}p1
