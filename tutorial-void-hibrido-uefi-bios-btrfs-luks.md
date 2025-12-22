@@ -137,7 +137,7 @@ export TIMEZONE=America/Sao_Paulo
 - 3️⃣ Btrfs/Ext4/Xfs/Jfs (raiz)
 
 ### Particione usando o parted (automatico)
-> Aqui o DEVICE já está definido lá em cima, então não tem variável “mágica”.
+> Aqui o **DEVICE** já está definido lá em cima, então não tem variável “mágica”.
 ```
 wipefs -a "${DEVICE}"
 parted --script "${DEVICE}" -- \
@@ -150,9 +150,9 @@ parted --script "${DEVICE}" -- \
   align-check optimal 1
 parted --script "${DEVICE}" -- print
 ```
-- Partição 1 → BIOS boot (bios_grub, sem FS, não monta)  
-- Partição 2 → EFI (FAT32)  
-- Partição 3 → ROOT (vamos formatar depois com EXT4/XFS/JFS/BTRFS, com ou sem LUKS)  
+- 1. Partição 1 → BIOS boot (bios_grub, sem FS, não monta)  
+- 2. Partição 2 → EFI (FAT32)  
+- 3. Partição 3 → ROOT (vamos formatar depois com EXT4/XFS/JFS/BTRFS, com ou sem LUKS)  
 Usei mkpart primary 514MiB 100% sem especificar FS justamente pra não amarrar o FS. Tu escolhe o FS depois.
 ---
 
