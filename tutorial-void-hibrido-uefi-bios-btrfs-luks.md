@@ -84,21 +84,20 @@ fdisk -l | grep -E '^(Disk|Disco) '
 1. Definir os devices (ANTES de usar qualquer um):  
    > Assumiremos para o tutorial `/dev/sda` ou `/dev/nvme0n1` (nvme)
 - Ajuste aqui conforme o teu disco. 
-- Exemplo abaixo: /dev/sda com 3 partições (BIOS, EFI, ROOT):
+Para discos **normais** ex.: /dev/sda com 3 partições (BIOS, EFI, ROOT)
 ```bash
 export DEVICE=/dev/sda
 export DEV_BIOS=${DEVICE}1
 export DEV_EFI=${DEVICE}2
 export DEV_RAIZ=${DEVICE}3
 ```
-> 📌 **Nota:**  
-> Para discos **NVMe**, o sufixo da partição muda (`p`):
-> ```bash
-> export DEVICE=/dev/nvme0n1
-> export DEV_BIOS=${DEVICE}p1
-> export DEV_EFI=${DEVICE}p2
-> export DEV_RAIZ=${DEVICE}p3
-> ```
+Para discos **NVMe**, o sufixo da partição muda (`p`):
+```bash
+export DEVICE=/dev/nvme0n1
+export DEV_BIOS=${DEVICE}p1
+export DEV_EFI=${DEVICE}p2
+export DEV_RAIZ=${DEVICE}p3
+```
 
 > DEVICE → disco inteiro  
 DEV_BIOS → partição BIOS boot (1–2 MiB, sem FS, não monta)  
