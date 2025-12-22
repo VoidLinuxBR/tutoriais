@@ -111,8 +111,7 @@ DEV_LUKS → mapeamento do LUKS (/dev/mapper/cryptroot)
 
 - 👉   Aqui você define a anatomia do disco. Todo o resto do guia apenas segue essas variáveis.  
 - 🔎   Por que isso é necessário?  
-Porque declarar tudo no início deixa o processo à prova de erro.   
-Em outras palavras:  
+Porque declarar tudo no início deixa o processo à prova de erro em outras palavras:  
 
 2. Definir KEYMAP e TIMEZONE:  
 ```bash
