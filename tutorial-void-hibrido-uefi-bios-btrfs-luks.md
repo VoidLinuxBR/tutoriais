@@ -127,9 +127,9 @@ export TIMEZONE=America/Sao_Paulo
 ---
 
 # ▶️    5. Particionar disco
-> 1. A partição BIOS **DEVE** ser a primeira.  
-> 2. Isso aumenta compatibilidade com placas-mãe antigas, bootloaders problemáticos e BIOS que esperam o código de boot nas primeiras áreas do disco.  
-> 3. A ESP pode vir depois sem problema algum — UEFI não liga para a posição.
+> - A partição BIOS **DEVE** ser a primeira.  
+> - Isso aumenta compatibilidade com placas-mãe antigas, bootloaders problemáticos e BIOS que esperam o código de boot nas primeiras áreas do disco.  
+> - A ESP pode vir depois sem problema algum — UEFI não liga para a posição.
 
 ### Ordem ideal e correta:
 
