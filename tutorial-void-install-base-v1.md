@@ -306,6 +306,7 @@ rm -f /var/service
 ln -sf /etc/runit/runsvdir/default /var/service
 
 # Ativar alguns serviços:
+ln -sf /etc/sv/dbus /var/service/
 ln -sf /etc/sv/dhcpcd /var/service/
 ln -sf /etc/sv/sshd /var/service/
 ln -sf /etc/sv/nanoklogd /var/service/

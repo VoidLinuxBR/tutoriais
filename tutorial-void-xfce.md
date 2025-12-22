@@ -188,11 +188,11 @@ EOF
 
 ## 18. Ativar serviços obrigatórios (runit)
 ```
-sudo ln -s /etc/sv/dbus /var/service/
-sudo ln -s /etc/sv/elogind /var/service/
-sudo ln -s /etc/sv/polkitd /var/service/
-sudo ln -s /etc/sv/NetworkManager /var/service/
-sudo ln -s /etc/sv/lxdm /var/service/
+sudo ln -sf /etc/sv/dbus /var/service/
+sudo ln -sf /etc/sv/elogind /var/service/
+sudo ln -sf /etc/sv/polkitd /var/service/
+sudo ln -sf /etc/sv/NetworkManager /var/service/
+sudo ln -sf /etc/sv/lxdm /var/service/
 ```
 
 ## Finalização
