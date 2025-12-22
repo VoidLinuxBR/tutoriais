@@ -315,7 +315,7 @@ EOF
 chmod 440 /etc/sudoers.d/g_wheel
 ```
 
-# Criando e configurando usuários
+## Criando e configurando usuários
 
 ⚠️ **IMPORTANTE:** defina abaixo o nome do usuário real.
 ```bash
