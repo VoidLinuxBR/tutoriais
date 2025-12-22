@@ -83,7 +83,7 @@ fdisk -l | grep -E '^(Disk|Disco) '
 
 1. Definir os devices (ANTES de usar qualquer um):  
     > 1. **Assumiremos** para o tutorial `/dev/sda` (normal) ou `/dev/nvme0n1` (nvme)  
-    > 2. **Ajuste** conforme o teu disco (escolha apenas ***um**** ou ***outro*** modelo)   
+    > 2. **Ajuste** conforme o teu disco (escolha apenas **um** ou **outro** modelo)   
 
 Para discos **normais**
 ```bash
@@ -100,6 +100,7 @@ export DEV_EFI=${DEVICE}p2
 export DEV_RAIZ=${DEVICE}p3
 ```
 
+> 📌 **Nota:**  
 > DEVICE → disco inteiro  
 DEV_BIOS → partição BIOS boot (1–2 MiB, sem FS, não monta)  
 DEV_EFI → partição EFI (FAT32)  
