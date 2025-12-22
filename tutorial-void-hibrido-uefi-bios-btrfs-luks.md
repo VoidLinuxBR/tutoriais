@@ -68,7 +68,7 @@ ping -c3 8.8.8.8
 ping -c3 repo-default.voidlinux.org
 ```
 
-2. Instalar pacotes necessários  
+2. Instalar pacotes necessários:  
 ⚠️ **IMPORTANTE:**
 ```bash
 xbps-install -Sy xbps parted jfsutils xfsprogs nano zstd xz bash-completion
@@ -81,7 +81,8 @@ xbps-install -Sy xbps parted jfsutils xfsprogs nano zstd xz bash-completion
 fdisk -l | grep -E '^(Disk|Disco) '
 ```
 
-# ▶️    4. Definir variáveis usadas no tutorial:
+# ▶️    4. Definir variáveis usadas no tutorial:  
+⚠️ **IMPORTANTE:**
 
 1. Definir os devices (ANTES de usar qualquer um):  
     > 1. **Assumiremos** para o tutorial `/dev/sda` (normal) ou `/dev/nvme0n1` (nvme)  
