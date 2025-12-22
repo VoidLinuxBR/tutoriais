@@ -1,5 +1,43 @@
 # 🐧 Void Linux + KDE Plasma + PipeWire — Tutorial Definitivo
 
+
+> ⚠️ **IMPORTANTE — LEIA ANTES DE COMEÇAR**
+>
+> Este tutorial **NÃO deve ser executado como `root`**, exceto quando **explicitamente indicado**.
+>
+> Todos os comandos foram pensados para serem executados por **um usuário comum**, utilizando `sudo` quando necessário.
+>
+> Executar todo o tutorial logado como `root`:
+> - quebra a lógica de permissões
+> - invalida etapas como configuração de `sudo`
+> - pode gerar erros silenciosos ou comportamentos inesperados
+>
+> 👉 **Recomendação**  
+> Se você acabou de instalar o sistema e está logado como `root`:
+>
+> 1. Crie um usuário comum
+> 2. Faça login com esse usuário
+> 3. Siga o tutorial normalmente
+>
+> Regra clássica de sistemas Unix/Linux:
+>
+> **`root` é exceção. Usuário comum é regra.**
+
+---
+
+
+## 0. Configurar sudo - (grupo wheel) - evita ficar pedindo senha de root
+```
+sudo usermod -aG wheel "$USER"
+
+sudo tee -a /etc/sudoers.d/g_wheel >/dev/null << EOF
+%wheel ALL=(ALL:ALL) NOPASSWD: ALL
+EOF
+
+#Permissões obrigatórias
+sudo chmod 440 /etc/sudoers.d/g_wheel
+```
+
 ## 1. Atualizar o sistema
 ```
 sudo xbps-install -Syu
