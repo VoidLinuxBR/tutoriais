@@ -100,6 +100,14 @@ export DEV_RAIZ=${DEVICE}3
 export KEYMAP=br-abnt2
 export TIMEZONE=America/Sao_Paulo
 ```
+> 📌 **Nota:**  
+> Para discos **NVMe**, o sufixo da partição muda (`p`):
+> ```bash
+> export DEVICE=/dev/nvme0n1
+> export DEV_BIOS=${DEVICE}p1
+> export DEV_EFI=${DEVICE}p2
+> export DEV_RAIZ=${DEVICE}p3
+> ```
 
 > DEVICE → disco inteiro  
 DEV_BIOS → partição BIOS boot (1–2 MiB, sem FS, não monta)  
