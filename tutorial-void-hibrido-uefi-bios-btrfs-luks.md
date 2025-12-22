@@ -109,10 +109,10 @@ DEV_EFI → partição EFI (FAT32)
 DEV_RAIZ → partição raiz (normal ou LUKS)  
 DEV_LUKS → mapeamento do LUKS (/dev/mapper/cryptroot)  
 
+- 👉   Aqui você define a anatomia do disco. Todo o resto do guia apenas segue essas variáveis.  
 - 🔎   Por que isso é necessário?  
 Porque declarar tudo no início deixa o processo à prova de erro.   
 Em outras palavras:  
-- 👉   Aqui você define a anatomia do disco. Todo o resto do guia apenas segue essas variáveis.
 
 2. Definir KEYMAP e TIMEZONE:  
 ```bash
