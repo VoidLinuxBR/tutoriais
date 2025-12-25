@@ -24,12 +24,12 @@ Aqui a ideia é simples:
 
 ```
 tutoriais/
- ├── instalacao/
- ├── pos-instalacao/
- ├── btrfs/
- ├── luks/
- ├── dicas/
- ├── wrappers/
+ ├── base/
+ ├── DE/
+ ├── samba/
+ ├── jitsi/
+ ├── old/
+ ├── sound/
  └── misc/
 ```
 
