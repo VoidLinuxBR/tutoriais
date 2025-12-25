@@ -220,6 +220,7 @@ xchroot /mnt /bin/bash
 ```
 
 ## Gerar o INITRAMFS
+Configuração do Dracut para ambientes de virtualização (VM-safe)
 ```bash
 cat > /etc/dracut.conf.d/99-vm-safe.conf << 'EOF'
 # /etc/dracut.conf.d/99-vm-safe.conf
