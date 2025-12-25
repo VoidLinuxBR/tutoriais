@@ -50,9 +50,9 @@ Pull Requests são bem-vindos — mas com regra clara:
 
 ## 📡 Comunidade
 
-Telegram: **Void Linux BR**  
-(Grupo alternativo, funcional e sem frescura.)
-
+Telegram : **https://t.me/VoidLinuxBrasil** # (Grupo alternativo, funcional e sem frescura.)
+Youtube  : **https://youtube.com/@voidlinuxbr**
+Github   : **https://github.com/voidlinuxbr**
 ---
 
 ## 📄 Licença
