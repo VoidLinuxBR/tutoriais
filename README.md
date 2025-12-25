@@ -77,7 +77,7 @@ Use, redistribua, melhore — só não seja canalha de apagar créditos.
 
 # DISCLAIMER
 
-> Este tutorial é livre: você pode usar, copiar, modificar e redistribuir como quiser.  
+> Estes tutoriais são livres: você pode usar, copiar, modificar e redistribuir como quiser.  
 > O conteúdo é disponibilizado sob a **Licença MIT** e pode incluir trechos ou comandos derivados de softwares de código aberto, sujeitos às suas próprias licenças.
 >
 > Nenhuma garantia é fornecida — tudo aqui é entregue **“no estado em que se encontra”**.  
