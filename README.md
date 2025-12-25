@@ -10,16 +10,6 @@ Aqui a ideia é simples:
 
 ---
 
-## 📚 O que você encontra aqui
-
-- Instalação do Void Linux (UEFI/BIOS, BTRFS, subvolumes, LUKS, ZRAM)
-- Pós-instalação completa (desktop, áudio PipeWire, drivers, rede, etc.)
-- Truques úteis, wrappers, scripts e ajustes de sistema
-- Configurações validadas **na prática**
-- Conteúdo mantido pela comunidade Void Linux BR
-
----
-
 ## 🔧 Estrutura do repositório
 
 ```
@@ -34,6 +24,16 @@ tutoriais/
 ```
 
 Cada diretório contém `.mds` focado, direto, e testado.
+
+---
+
+## 📚 O que você encontra aqui
+
+- Instalação do Void Linux (UEFI/BIOS, BTRFS, subvolumes, LUKS, ZRAM)
+- Pós-instalação completa (desktop, áudio PipeWire, drivers, rede, etc.)
+- Truques úteis, wrappers, scripts e ajustes de sistema
+- Configurações validadas **na prática**
+- Conteúdo mantido pela comunidade Void Linux BR
 
 ---
 
