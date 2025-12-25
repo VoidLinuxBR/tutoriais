@@ -367,6 +367,24 @@ FONT=Lat2-Terminus16
 EOF
 ```
 
+MOdulos virtio (maquina virtual).  
+```bash
+cat > /etc/modules-load.d/virtio.conf << 'EOF'
+virtio
+virtio_pci
+virtio_net
+virtio_blk
+virtio_scsi
+EOF
+```
+
+```bash
+# /etc/dracut.conf.d/99-vm-safe.conf
+hostonly=no
+compress="gzip"
+add_drivers+=" virtio virtio_pci virtio_blk virtio_net virtio_scsi "
+```
+
 ## Personalizar o `.bashrc` do usuário
 Cria um `.bash_profile` padrão e garante que o `.bashrc` seja carregado automaticamente no login.  
 > ⚠️ Certifique-se de que o usuário foi criado no passo anterior.
