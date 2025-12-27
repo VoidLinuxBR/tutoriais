@@ -70,6 +70,9 @@ sudo xbps-install -y xfce4 \
    p7zip \
    unzip \
    noto-fonts-emoji \
+   font-hack-ttf \
+   nerd-fonts-symbols-ttf \
+   nerd-fonts-ttf \
    htop
 ```
 
