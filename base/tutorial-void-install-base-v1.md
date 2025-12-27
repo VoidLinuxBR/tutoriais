@@ -198,7 +198,7 @@ xbps-install -Sy -R https://repo-default.voidlinux.org/current \
   base-system e2fsprogs grub-x86_64-efi dracut linux \
   linux-headers linux-firmware linux-firmware-network glibc-locales \
   xtools dhcpcd openssh vim nano grc zstd xz bash-completion vpm vsv \
-  socklog-void wget net-tools tmate ncurses
+  socklog-void wget net-tools tmate ncurses chrony
 ```
 
 > 📌 **Nota:**  
@@ -322,6 +322,7 @@ ln -sf /etc/sv/dhcpcd /var/service/
 ln -sf /etc/sv/sshd /var/service/
 ln -sf /etc/sv/nanoklogd /var/service/
 ln -sf /etc/sv/socklog-unix /var/service/
+ln -sf /etc/sv/chronyd /var/service/
 
 # baixar svlogtail customizado (opcional, mas recomendável):
 wget --quiet --no-check-certificate -O /usr/bin/svlogtail \

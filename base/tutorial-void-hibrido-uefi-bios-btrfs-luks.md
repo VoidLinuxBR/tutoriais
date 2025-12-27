@@ -257,7 +257,7 @@ xbps-install -Sy -R https://repo-default.voidlinux.org/current \
    base-system btrfs-progs cryptsetup grub grub-x86_64-efi dracut linux \
    linux-headers linux-firmware linux-firmware-network glibc-locales \
    xtools dhcpcd openssh vim nano grc zstd xz bash-completion vpm vsv \
-   socklog-void wget net-tools tmate ncurses jfsutils xfsprogs duf tree eza
+   socklog-void wget net-tools tmate ncurses jfsutils xfsprogs duf tree eza chrony
 ```
 ---
 
@@ -306,6 +306,7 @@ ln -sf /etc/sv/dhcpcd /var/service/
 ln -sf /etc/sv/sshd /var/service/
 ln -sf /etc/sv/nanoklogd /var/service/
 ln -sf /etc/sv/socklog-unix /var/service/
+ln -sf /etc/sv/chronyd /var/service/
 
 # Configurar sudo - grupo wheel (opcional, mas recomendável)
 cat << 'EOF' > /etc/sudoers.d/g_wheel
