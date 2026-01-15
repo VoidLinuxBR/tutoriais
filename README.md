@@ -52,7 +52,7 @@ Pull Requests são bem-vindos — mas com regra clara:
 Telegram : **https://t.me/VoidLinuxBrasil** **Void Linux BR** - (Grupo alternativo, funcional e sem frescura.)  
 Youtube  : **https://youtube.com/@voidlinuxbr**  
 Github   : **https://github.com/voidlinuxbr**  
-Discord  :
+Discord  : **https://discord.gg/vJz6uvRC**
 
 ---
 
@@ -85,6 +85,7 @@ Use, redistribua, melhore — só não seja canalha de apagar créditos.
 >
 > Você é livre para revisar, adaptar e gerar sua própria versão deste tutorial.
 
+---
 ---
 
 # 🐧 Void Linux BR Tutorials
