@@ -3,7 +3,7 @@
 
 ## 🎯 목표 – 네트워크 클라이언트를 제공하기 위해 파일 서버에 필요한 소스, AD 통합, ACL, 서비스 및 전체 스택에서 Samba4를 컴파일하여 Void Linux(glibc)에 파일 서버를 배포합니다.
 
-## 🔧 QEMU/Virtmanager와의 네트워킹 연구실. 자신의 환경에 맞게 튜토리얼을 조정하세요.
+## 🔧 QEMU/Virtmanager 및 Proxmox를 사용한 네트워킹 연구실. 자신의 환경에 맞게 튜토리얼을 조정하세요.
 
 ---
 
@@ -11,7 +11,7 @@
 
 - 도메인: EDUCATUX.EDU
 
-- 호스트 이름: voidfiles
+- 호스트 이름: 파일 서버
 
 - 방화벽 192.168.70.254(DNS/GW)
 
@@ -49,7 +49,7 @@ xbps-install -S \
 ## 🖥️ 호스트 이름 설정
 
 ```bash
-echo "voidfiles" > /etc/hostname
+echo "fileserver" > /etc/hostname
 ```
 
 ## 🏠 /etc/hosts
@@ -62,8 +62,8 @@ vim /etc/hosts
 
 ```bash
 127.0.0.1      localhost
-127.0.1.1      voidfiles.educatux.edu voidfiles
-192.168.70.251 voidfiles.educatux.edu voidfiles
+127.0.1.1      fileserver.educatux.edu fileserver
+192.168.70.251 fileserver.educatux.edu fileserver
 ```
 
 ## 🌐 고정 IP 구성
@@ -80,7 +80,7 @@ vim /etc/dhcpcd.conf
 interface eth0
 static ip_address=192.168.70.251/24
 static routers=192.168.70.254
-static domain_name_servers=192.168.70.250
+static domain_name_servers=192.168.70.253
 ```
 
 ## 네트워크 인터페이스를 다시 시작합니다.
@@ -100,7 +100,7 @@ vim /etc/resolv.conf
 ```bash
 domain educatux.edu
 search educatux.edu
-nameserver 192.168.70.250
+nameserver 192.168.70.253
 ```
 
 ## resolv.conf 잠금
@@ -258,7 +258,7 @@ vim /etc/chrony.conf
 #pool pool.ntp.org iburst
 
 # PDC Time Servers
-server 192.168.70.250 iburst
+server 192.168.70.253 iburst
 ```
 
 ## runit에서 chronyd 활성화
@@ -298,8 +298,8 @@ vim /etc/krb5.conf
 
 [realms]
     EDUCATUX.EDU = {
-        kdc = 192.168.70.250
-        admin_server = 192.168.70.250
+        kdc = 192.168.70.253
+        admin_server = 192.168.70.253
         default_domain = educatux.edu
     }
 

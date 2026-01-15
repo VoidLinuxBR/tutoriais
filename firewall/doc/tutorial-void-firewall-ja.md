@@ -1,10 +1,10 @@
-# 🧩 TUTORIAL VOID LINUX - IMPLANTAÇÃO DO FIREWALL - LABORATÓRIO OFFICINAS
+# 🧩 VOID LINUX チュートリアル - ファイアウォールの実装 - EDUCATUX LABORATORY
 
-📌 Firewall com IP Público, Void Linux (glibc), IPTables (legacy), NAT, Port Knocking, Fail2ban, DHCP Server e DNS recursivo
+📌 パブリック IP を備えたファイアウォール、Void Linux (glibc)、IPTables (レガシー)、NAT、ポート ノッキング、Fail2ban、DHCP サーバー、再帰的 DNS
 
 ---
 
-## ✅ 1. TOPOLOGIA DA REDE
+## ✅ 1. ネットワークトポロジ
 
 ```bash
 Internet
@@ -20,7 +20,7 @@ eth1 (LAN): 192.168.70.254/24
 [Rede interna / Switch]
 ```
 
-Vista de outro ângulo
+別の角度から見る
 
 ```bash
 Internet
@@ -36,29 +36,29 @@ Fail2ban (analisa auth.log)
 iptables (ban definitivo do IP)
 ```
 
-O firewall é o único host exposto à Internet.
+ファイアウォールは、インターネットに公開される唯一のホストです。
 
-## ✅ 2. OBJETIVOS E PREMISSAS
+## ✅ 2. 目的と前提
 
-- Política default deny
-- Roteamento IPv4 ativo
-- Scanner nunca vê a porta
-- Firewall como único ponto de entrada
-- Nenhum painel web publicado
-- SSH protegido por Port Knocking
-- Controle de brute-force via Fail2ban
-- NAT controlado para a LAN
-- Administração remota via túnel SSH
+- デフォルトポリシーを拒否する
+- アクティブなIPv4ルーティング
+- スキャナーはドアを決して認識しません
+- 唯一のエントリポイントとしてのファイアウォール
+- Web ダッシュボードは公開されていません
+- ポートノッキングで保護されたSSH
+- Fail2banによるブルートフォース制御
+- LAN 用の制御された NAT
+- SSHトンネル経由のリモート管理
 
-## ✅ 3. ATUALIZAÇÃO E INSTALAÇÃO DOS PACOTES NECESSÁRIOS
+## ✅ 3. 必要なパッケージを更新してインストールする
 
-Atualize o sistema
+システムをアップデートする
 
 ```bash
 sudo xbps-install -Syu
 ```
 
-Instale os pacotes
+パッケージをインストールする
 
 ```bash
 sudo xbps-install -y \
@@ -72,13 +72,13 @@ sudo xbps-install -y \
   fail2ban
 ```
 
-## ✅ 4. CONFIGURAÇÃO DO SSH
+## ✅ 4. SSH 設定
 
 ```bash
 sudo vim /etc/ssh/sshd_config
 ```
 
-Ajustes as linhas apontadas
+尖った線を調整する
 
 ```bash
 Port 2222
@@ -92,39 +92,39 @@ SyslogFacility AUTH
 LogLevel INFO
 ```
 
-Fail2ban depende de log, garanta as linhas
+Fail2ban はログに依存し、ラインを保証します
 
 ```bash
 SyslogFacility AUTH
 LogLevel INFO
 ```
 
-Confirme geração de log
+ログの生成を確認する
 
 ```bash
 sudo tail -f /var/log/auth.log
 ```
 
-## Ativação do serviço
+## サービスのアクティベーション
 
 ```bash
 sudo ln -s /etc/sv/sshd /var/service/
 sudo sv start sshd
 ```
 
-## Após a implantação completa:
+## 完全な展開後:
 
-- Desabilitar login de root
+- rootログインを無効にする
 
-- Usar apenas autenticação por chave
+- キー認証のみを使用する
 
-## ✅ 5. CONFIGURAÇÃO DE REDE DO FIREWALL
+## ✅ 5. ファイアウォールネットワークのセットアップ
 
 ```bash
 sudo vim /etc/dhcpcd.conf
 ```
 
-Conteúdo
+コンテンツ
 
 ```bash
 # CONFIGURAÇÃO DE REDE DO FIREWALL
@@ -141,60 +141,60 @@ static ip_address=192.168.70.254/24
 nogateway
 ```
 
-Aplicar
+適用する
 
 ```bash
 sudo sv restart dhcpcd
 ```
 
-## ✅ 6. PORT KNOCKING – SUPORTE EM KERNEL
+## ✅ 6. ポートノッキング – カーネルサポート
 
-Carregar o módulo necessário
+必要なモジュールをロードする
 
 ```bash
 sudo modprobe xt_recent
 ```
 
-Validar:
+検証:
 
 ```bash
 sudo lsmod | grep xt_recent
 ```
 
-Resultado esperado
+期待される結果
 
 ```bash
 xt_recent              24576  0
 x_tables               65536  1 xt_recent
 ```
 
-## ✅ 7. FIREWALL IPTABLES
+## ✅ 7. ファイアウォール IP テーブル
 
-Habilite o roteamento entre as placas de rede do Firewall
+ファイアウォールネットワークカード間のルーティングを有効にする
 
 ```bash
 sudo vim /etc/sysctl.conf
 ```
 
-Conteúdo
+コンテンツ
 
 ```bash
 net.ipv4.ip_forward=1
 ```
 
-Aplicar sem reboot:
+再起動せずに適用します。
 
 ```bash
 sudo sysctl --system
 ```
 
-Criar o script do firewall em /usr/local/bin
+/usr/local/bin にファイアウォール スクリプトを作成します。
 
 ```bash
 sudo vim /usr/local/bin/firewall
 ```
 
-Conteúdo
+コンテンツ
 
 ```bash
 #!/bin/sh
@@ -286,35 +286,35 @@ iptables -A INPUT -p tcp --tcp-flags SYN,FIN SYN,FIN -j DROP
 exit 0
 ```
 
-Aplicar permissão e executar
+権限を適用して実行する
 
 ```bash
 sudo chmod +x /usr/local/bin/firewall
 sudo bash /usr/local/bin/firewall
 ```
 
-## ✅ 8. PERSISTÊNCIA DO FIREWALL NO RUNIT
+## ✅ 8. 実行中のファイアウォールの永続性
 
-Cria o diretório
+ディレクトリを作成する
 
 ```bash
 sudo mkdir -p /etc/sv/firewall
 ```
 
-Cria o arquivo 
+ファイルを作成する
 
 ```bash
 sudo vim /etc/sv/firewall/run
 ```
 
-Conteúdo
+コンテンツ
 
 ```bash
 #!/bin/sh
 exec /usr/local/bin/firewall
 ```
 
-Ativar, rodar e validar status
+アクティブ化、実行、ステータスの検証
 
 ```bash
 sudo chmod +x /etc/sv/firewall/run
@@ -322,26 +322,26 @@ sudo ln -s /etc/sv/firewall /var/service/
 sudo sv status firewall
 ```
 
-## ✅ 9. TESTE E VALIDAÇÃO (Á QUENTE) DO PORT KNOCKING
+## ✅ 9. ポートノッキングのテストと検証 (ホット)
 
-Monitorar o knock em um terminal NO FIREWALL
+ファイアウォールなしで端末のノックを監視する
 
 ```bash
 sudo tcpdump -ni eth0 tcp port 12345
 ```
 
-Enviar o knock PELO NOTEBOOK por acesso EXTERNO
+外部アクセス経由でノートブックでノックを送信
 
 ```bash
 sudo nc -z 39.236.83.109 12345
 ```
 
-✔ o SYN chega
-✔ É DROPado
-✔ Fica registrado
-✔ o estado está visível
+✔ SYNが到着
+✔ 削除されました
+✔ 登録を続ける
+✔ステータスが見える
 
-Resultado esperado no tcpdump
+tcpdump で期待される結果
 
 ```bash
 tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
@@ -355,67 +355,67 @@ listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 0 packets dropped by kernel
 ```
 
-Observação técnica importante
+重要な技術上の注意事項
 
-- O RST é enviado pelo stack TCP
-- O pacote é registrado pelo xt_recent
-- A porta não responde como serviço
-- Não há banner nem fingerprint
+- RST は TCP スタック経由で送信されます
+- パッケージは xt_recent によって登録されます
+- ポートがサービスとして応答しない
+- バナーや指紋はありません
 
-Validar o registro do IP
+IP登録の検証
 
 ```bash
 sudo cat /proc/net/xt_recent/SSH_KNOCK
 ```
 
-Resultado esperado
+期待される結果
 
 ```bash
 src=99.336.74.209 ttl: 61 last_seen: 4302299386 oldest_pkt: 7 4302292227, 4302293242, 4302294266, 4302295290, 4302296314, 4302297338, 4302299386
 ```
 
-SE quiser limpar todos os knocks
+すべての障害をクリアしたい場合
 
 ```bash
 sudo echo clear > /proc/net/xt_recent/SSH_KNOCK
 ```
 
-## ✅ 10. REALIZAR O ACESSO ADMINISTRATIVO EXTERNO
+## ✅ 10. 外部管理アクセスの実行
 
-Executar o knock
+ノックを実行する
 
 ```bash
 nc -z 39.236.83.109 12345
 ```
 
-Dentro de 15 segundos fazer o acesso
+15秒以内にアクセスしてください
 
 ```bash
 ssh -p 2222 supertux@39.236.83.109
 ```
 
-Aliases recomendados
+推奨されるエイリアス
 
 ```bash
 vim ~/.bashrc
 ```
 
-Conteúdo
+コンテンツ
 
 ```bash
 alias knock='nc -z 39.236.83.109 12345'
-alias officinas='ssh -p 2222 supertux@39.236.83.109'
+alias firewall='ssh -p 2222 supertux@39.236.83.109'
 ```
 
-Releia o arquivo para validação
+検証のためにファイルを再読み込みします
 
 ```bash
 source ~/.bashrc
 ```
 
-11. ✅ FAIL2BAN – PROTEÇÃO PÓS-KNOCK
+11. ✅ FAIL2BAN – ノック後の保護
 
-Ajustes de logs para atender o fail2ban
+フェイル2バンに準拠するためのログ調整
 
 ```bash
 sudo xbps-install -y socklog-void
@@ -424,13 +424,13 @@ sudo ln -s /etc/sv/nanoklogd /var/service/
 sudo touch /var/log/auth.log
 ```
 
-Cria o arquivo de configuração (Nunca edite o jail.conf)
+設定ファイルを作成します (jail.conf は編集しないでください)
 
 ```bash
 sudo vim /etc/fail2ban/jail.local
 ```
 
-Conteúdo:
+コンテンツ：
 
 ```bash
 [DEFAULT]
@@ -449,7 +449,7 @@ findtime = 5m
 bantime  = 24h
 ```
 
-Ativação no runit
+Runitのアクティベーション
 
 ```bash
 sudo ln -s /etc/sv/fail2ban /var/service/
@@ -457,43 +457,43 @@ sudo sv start fail2ban
 sudo sv status fail2ban
 ```
 
-## 12. ✅ TESTE DO FAIL2BAN (ATENÇÃO, VC SE TRANCA PRA FORA!)
+## 12. ✅ 2BAN テストに失敗する (注意、自分自身をロックアウトしてしまいます!)
 
-Execute o knock
+オノックを実行する
 
 ```bash
 nc -z 39.236.83.109 12345
 ```
 
-Tente SSH errando a senha 3 vezes
+間違ったパスワードで SSH を 3 回試行してください
 
-Verifique o ban
+禁止事項を確認してください
 
 ```bash
 sudo fail2ban-client status sshd
 ```
 
-Desbanir manualmente:
+手動で禁止を解除する:
 
 ```bash
 sudo fail2ban-client set sshd unbanip X.X.X.X
 ```
 
-## ⚠️ ATENÇÃO: AS SEÇÕES 13 e 14 SEGUINTES, QUE TRATAM DO DNS RECURSIVO E DHCP SERVER, DEVERÃO SER DESCATADAS APÓS SUBIR O SAMBA4 COMO PDC!!
+## ⚠️ 注意: 再帰 DNS と DHCP サーバーを扱う次のセクション 13 と 14 は、SAMBA4 を PDC としてアップグレードした後は破棄する必要があります。
 
-## 13. ✅ IMPLANTANDO UM DNS RECURSIVO TEMPORÁRIO PARA ATENDER A REDE INTERNA
+## 13. ✅ 内部ネットワークにサービスを提供するための一時的な再帰 DNS の展開
 
 ```bash
 sudo xbps-install -y unbound
 ```
 
-Configuração mínima
+最小構成
 
 ```bash
 sudo vim /etc/unbound/unbound.conf
 ```
 
-Conteúdo
+コンテンツ
 
 ```bash
 server:
@@ -508,35 +508,35 @@ server:
   qname-minimisation: yes
 ```
 
-Ativar serviço (runit):
+サービス (runit) をアクティブ化します。
 
 ```bash
 ln -s /etc/sv/unbound /var/service/
 sv start unbound
 ```
 
-## 14. ✅ IMPLEMENTAÇÃO DO DHCP SERVER TEMPORÁRIO PARA ATENDER A REDE INTERNA
+## 14. ✅ 内部ネットワークにサービスを提供するための一時的な DHCP サーバーの実装
 
-Instalação do pacote
+パッケージのインストール
 
 ```bash
 sudo xbps-install -y dhcp
 ```
 
-Esse pacote instala:
+このパッケージは以下をインストールします:
 
-- dhcpd (servidor)
-- Estrutura de serviço runit:
-    /etc/sv/dhcpd4
-    /etc/sv/dhcpd6
+- dhcpd (サーバー)
+- Runit サービスの構造:
+/etc/sv/dhcpd4
+/etc/sv/dhcpd6
 
-Editar o arquivo e setar as configurações para a rede interna
+ファイルを編集し、内部ネットワークの設定を構成します
 
 ```bash
 sudo vim /etc/dhcpd.conf
 ```
 
-Conteúdo
+コンテンツ
 
 ```bash
 authoritative;
@@ -544,7 +544,7 @@ authoritative;
 default-lease-time 600;
 max-lease-time 7200;
 
-option domain-name "officinas.edu";
+option domain-name "educatux.edu";
 option domain-name-servers 192.168.70.254;
 
 subnet 192.168.70.0 netmask 255.255.255.0 {
@@ -559,97 +559,97 @@ subnet 192.168.70.0 netmask 255.255.255.0 {
 }
 ```
 
-Criar o arquivo de leases:
+リース ファイルを作成します。
 
 ```bash
 sudo mkdir -p /var/lib/dhcp
 sudo touch /var/lib/dhcp/dhcpd.leases
 ```
 
-Criação do serviço do runit
+Runitサービスの作成
 
 ```bash
 sudo vim /etc/sv/dhcpd4/conf
 ```
 
-Conteúdo
+コンテンツ
 
 ```bash
 OPTS="-4 -q -cf /etc/dhcpd.conf eth1"
 ```
 
-Explicação:
+説明：
 
-- -4              → IPv4
-- -q              → modo silencioso
-- -cf             → caminho correto do dhcpd.conf
-- eth1            → interface LAN
+- -4 → IPv4
+- -q → サイレントモード
+- -cf → 正しい dhcpd.conf パス
+- eth1 → インターフェースLAN
 
-Ativar o serviço no runit:
+runit でサービスをアクティブ化します。
 
 ```bash
 sudo ln -s /etc/sv/dhcpd4 /var/service/
 ```
 
-Iniciar/reiniciar:
+開始/再起動:
 
 ```bash
 sudo sv restart dhcpd4
 ```
 
-Verificar status:
+ステータスを確認します:
 
 ```bash
 sudo sv status dhcpd4
 ```
 
-Resultado esperado:
+期待される結果:
 
 ```bash
 run: dhcpd4: (pid 17652) 831s; run: log: (pid 15544) 1213s
 ```
 
-Verificar escuta da porta 67
+ポート67のリスニングを確認してください
 
 ```bash
 UNCONN 0      0            0.0.0.0:67        0.0.0.0:*    users:(("dhcpd",pid=17652,fd=6))  
 ```
 
-Monitorar DHCP em tempo real
+DHCPをリアルタイムで監視する
 
 ```bash
 sudo tcpdump -ni eth1 port 67 or port 68
 ```
 
-Resultado esperado
+期待される結果
 
 ```bash
 tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
 listening on eth1, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 ```
 
-Para debug direto (sem runit)
+直接デバッグ用 (runit なし)
 
 ```bash
 sudo dhcpd -4 -d -cf /etc/dhcpd.conf eth1
 ```
 
-Isso deve mostrar
+これで表示されるはずです
 
-- DHCPDISCOVER
+- DHCPディスカバー
 - DHCPOFFER
-- DHCPREQUEST
+- DHCPリクエスト
 - DHCPACK
 
-Arquivos importantes
+重要なファイル
 
-- /etc/dhcpd.conf                 → Configuração principal
-- /var/lib/dhcp/dhcpd.leases      → Leases
-- /etc/sv/dhcpd4/run              → Script runit
-- /etc/sv/dhcpd4/conf             → Parâmetros do serviço
-- /var/service/dhcpd4             → Serviço ativo
+- /etc/dhcpd.conf → 主な設定
+- /var/lib/dhcp/dhcpd.leases → リース
+- /etc/sv/dhcpd4/run → スクリプト runit
+- /etc/sv/dhcpd4/conf → サービスパラメータ
+- /var/service/dhcpd4 → サービスがアクティブです
 
-Ajuste no script do iptables para permitir DHCP na LAN. Adicione ANTES das regras DROP implícitas:
+LAN 上で DHCP を許可するように iptables スクリプトを調整します。暗黙的な DROP ルールの前に追加します。
 
 ```bash
 # ============================
@@ -660,48 +660,48 @@ iptables -A INPUT  -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
 iptables -A OUTPUT -o $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
 ```
 
-💡 DHCP usa broadcast → sem isso, cliente não pega IP.
+💡 DHCP はブロードキャストを使用します → これがないと、クライアントは IP を取得できません。
 
-Reaplique o firewall:
+ファイアウォールを再適用します。
 
 ```bash
 sudo /usr/local/bin/firewall
 ```
 
-Testes em uma VM da LAN
+LAN VM でのテスト
 
 ```bash
 dhclient -v
 ```
 
-No firewall, acompanhar
+ファイアウォール内で監視
 
 ```bash
 sudo tail -f /var/log/messages
 ```
 
-Ou
+または
 
 ```bash
 sudo tcpdump -ni eth1 port 67 or port 68
 ```
 
-## 15. 🎉  CHECKLIST FINAL
+## 15. 🎉 最終チェックリスト
 
-- SSH invisível sem knock
-- Knock de uso único
-- Janela curta de acesso
-- Fail2ban ativo pós-auth
-- Ban ignora knock
-- NAT funcional
-- Firewall persistente
-- Proxmox acessível apenas via túnel
-- DNS recursivo mínimo (Até entrar o PDC)
-- DHCP Server
+- ノックなしの目に見えない SSH
+- 使い捨てノック
+- 短いアクセスウィンドウ
+- Fail2ban アクティブな認証後
+- ノック無視禁止
+- 機能的NAT
+- 永続的なファイアウォール
+- Proxmox はトンネル経由でのみアクセス可能
+- 最小限の再帰 DNS (PDC が入るまで)
+- DHCPサーバー
 
 ---
 
-🎯 THAT'S ALL FOLKS!
+🎯 以上です!
 
-👉 https://t.me/z3r0l135
-👉 https://t.me/vcatafesta
+👉 チリ_REF_0_チリ
+👉 チリ_REF_0_チリ

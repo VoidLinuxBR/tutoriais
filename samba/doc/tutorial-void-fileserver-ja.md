@@ -3,7 +3,7 @@
 
 ## 🎯 目標 – ソース、AD 統合、ACL、サービス、およびファイル サーバーがネットワーク クライアントにサービスを提供するために必要なスタック全体から Samba4 をコンパイルすることにより、Void Linux (glibc) にファイル サーバーをデプロイします。
 
-## 🔧 QEMU/Virtmanager を使用したネットワーキング ラボ。自分の環境に合わせてチュートリアルを調整してください。
+## 🔧 QEMU/Virtmanager および Proxmox を使用したネットワーキング ラボ。自分の環境に合わせてチュートリアルを調整してください。
 
 ---
 
@@ -11,7 +11,7 @@
 
 - ドメイン: EDUCATUX.EDU
 
-- ホスト名: voidfiles
+- ホスト名: ファイルサーバー
 
 - ファイアウォール 192.168.70.254 (DNS/GW)
 
@@ -49,7 +49,7 @@ xbps-install -S \
 ## 🖥️ ホスト名を設定する
 
 ```bash
-echo "voidfiles" > /etc/hostname
+echo "fileserver" > /etc/hostname
 ```
 
 ## 🏠 /etc/hosts
@@ -62,8 +62,8 @@ vim /etc/hosts
 
 ```bash
 127.0.0.1      localhost
-127.0.1.1      voidfiles.educatux.edu voidfiles
-192.168.70.251 voidfiles.educatux.edu voidfiles
+127.0.1.1      fileserver.educatux.edu fileserver
+192.168.70.251 fileserver.educatux.edu fileserver
 ```
 
 ## 🌐 静的 IP を構成する
@@ -80,7 +80,7 @@ vim /etc/dhcpcd.conf
 interface eth0
 static ip_address=192.168.70.251/24
 static routers=192.168.70.254
-static domain_name_servers=192.168.70.250
+static domain_name_servers=192.168.70.253
 ```
 
 ## ネットワークインターフェースを再起動します。
@@ -100,7 +100,7 @@ vim /etc/resolv.conf
 ```bash
 domain educatux.edu
 search educatux.edu
-nameserver 192.168.70.250
+nameserver 192.168.70.253
 ```
 
 ## resolv.conf をロックする
@@ -258,7 +258,7 @@ vim /etc/chrony.conf
 #pool pool.ntp.org iburst
 
 # PDC Time Servers
-server 192.168.70.250 iburst
+server 192.168.70.253 iburst
 ```
 
 ## runit で chronyd を有効にする
@@ -298,8 +298,8 @@ vim /etc/krb5.conf
 
 [realms]
     EDUCATUX.EDU = {
-        kdc = 192.168.70.250
-        admin_server = 192.168.70.250
+        kdc = 192.168.70.253
+        admin_server = 192.168.70.253
         default_domain = educatux.edu
     }
 

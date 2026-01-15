@@ -3,7 +3,7 @@
 
 ## 🎯 Goal – Deploy a File Server on Void Linux (glibc) by compiling Samba4 from source, AD integration, ACLs, services and the entire stack required for a File Server to serve network clients.
 
-## 🔧 Networking lab with QEMU/Virtmanager. Adjust the tutorial to match your own environment.
+## 🔧 Networking lab with QEMU/Virtmanager and Proxmox. Adjust the tutorial to match your own environment.
 
 ---
 
@@ -11,7 +11,7 @@
 
 - Domain: EDUCATUX.EDU
 
-- Hostname: voidfiles
+- Hostname: fileserver
 
 - Firewall 192.168.70.254 (DNS/GW)
 
@@ -49,7 +49,7 @@ xbps-install -S \
 ## 🖥️ Set hostname
 
 ```bash
-echo "voidfiles" > /etc/hostname
+echo "fileserver" > /etc/hostname
 ```
 
 ## 🏠 /etc/hosts
@@ -62,8 +62,8 @@ vim /etc/hosts
 
 ```bash
 127.0.0.1      localhost
-127.0.1.1      voidfiles.educatux.edu voidfiles
-192.168.70.251 voidfiles.educatux.edu voidfiles
+127.0.1.1      fileserver.educatux.edu fileserver
+192.168.70.251 fileserver.educatux.edu fileserver
 ```
 
 ## 🌐 Configure static IP
@@ -80,7 +80,7 @@ vim /etc/dhcpcd.conf
 interface eth0
 static ip_address=192.168.70.251/24
 static routers=192.168.70.254
-static domain_name_servers=192.168.70.250
+static domain_name_servers=192.168.70.253
 ```
 
 ## Restart network interface:
@@ -100,7 +100,7 @@ vim /etc/resolv.conf
 ```bash
 domain educatux.edu
 search educatux.edu
-nameserver 192.168.70.250
+nameserver 192.168.70.253
 ```
 
 ## Lock resolv.conf
@@ -258,7 +258,7 @@ vim /etc/chrony.conf
 #pool pool.ntp.org iburst
 
 # PDC Time Servers
-server 192.168.70.250 iburst
+server 192.168.70.253 iburst
 ```
 
 ## Enable chronyd in runit
@@ -298,8 +298,8 @@ vim /etc/krb5.conf
 
 [realms]
     EDUCATUX.EDU = {
-        kdc = 192.168.70.250
-        admin_server = 192.168.70.250
+        kdc = 192.168.70.253
+        admin_server = 192.168.70.253
         default_domain = educatux.edu
     }
 

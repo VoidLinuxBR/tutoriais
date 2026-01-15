@@ -3,7 +3,7 @@
 
 ## 🎯 目标 – 通过从源代码编译 Samba4、AD 集成、ACL、服务以及文件服务器为网络客户端提供服务所需的整个堆栈，在 Void Linux (glibc) 上部署文件服务器。
 
-## 🔧 使用 QEMU/Virtmanager 的网络实验室。调整教程以适合您自己的环境。
+## 🔧 使用 QEMU/Virtmanager 和 Proxmox 的网络实验室。调整教程以适合您自己的环境。
 
 ---
 
@@ -11,7 +11,7 @@
 
 - 域名：EDUCATUX.EDU
 
-- 主机名：voidfiles
+- 主机名：文件服务器
 
 - 防火墙 192.168.70.254 (DNS/GW)
 
@@ -49,7 +49,7 @@ xbps-install -S \
 ## 🖥️ 设置主机名
 
 ```bash
-echo "voidfiles" > /etc/hostname
+echo "fileserver" > /etc/hostname
 ```
 
 ## 🏠 /etc/hosts
@@ -62,8 +62,8 @@ vim /etc/hosts
 
 ```bash
 127.0.0.1      localhost
-127.0.1.1      voidfiles.educatux.edu voidfiles
-192.168.70.251 voidfiles.educatux.edu voidfiles
+127.0.1.1      fileserver.educatux.edu fileserver
+192.168.70.251 fileserver.educatux.edu fileserver
 ```
 
 ## 🌐配置静态IP
@@ -80,7 +80,7 @@ vim /etc/dhcpcd.conf
 interface eth0
 static ip_address=192.168.70.251/24
 static routers=192.168.70.254
-static domain_name_servers=192.168.70.250
+static domain_name_servers=192.168.70.253
 ```
 
 ## 重新启动网络接口：
@@ -100,7 +100,7 @@ vim /etc/resolv.conf
 ```bash
 domain educatux.edu
 search educatux.edu
-nameserver 192.168.70.250
+nameserver 192.168.70.253
 ```
 
 ## 锁定resolv.conf
@@ -258,7 +258,7 @@ vim /etc/chrony.conf
 #pool pool.ntp.org iburst
 
 # PDC Time Servers
-server 192.168.70.250 iburst
+server 192.168.70.253 iburst
 ```
 
 ## 在runit中启用chronyd
@@ -298,8 +298,8 @@ vim /etc/krb5.conf
 
 [realms]
     EDUCATUX.EDU = {
-        kdc = 192.168.70.250
-        admin_server = 192.168.70.250
+        kdc = 192.168.70.253
+        admin_server = 192.168.70.253
         default_domain = educatux.edu
     }
 

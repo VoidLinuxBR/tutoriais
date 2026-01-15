@@ -1,10 +1,10 @@
-# 🧩 УЧЕБНОЕ РУКОВОДСТВО ПО VOID LINUX - ВНЕДРЕНИЕ БРАНДМАЭРА - ЛАБОРАТОРНЫЕ СЕМИНАРЫ
+# 🧩 VOID LINUX 튜토리얼 - 방화벽 구현 - EDUCATUX LABORATORY
 
-📌 Брандмауэр с общедоступным IP-адресом, Void Linux (glibc), IPTables (устаревший), NAT, перехват портов, Fail2ban, DHCP-сервер и рекурсивный DNS
+😀 공용 IP를 갖춘 방화벽, Void Linux(glibc), IPTables(레거시), NAT, 포트 노킹, Fail2ban, DHCP 서버 및 재귀 DNS
 
 ---
 
-## ✅ 1. ТОПОЛОГИЯ СЕТИ
+## ✅ 1. 네트워크 토폴로지
 
 ```bash
 Internet
@@ -20,7 +20,7 @@ eth1 (LAN): 192.168.70.254/24
 [Rede interna / Switch]
 ```
 
-Взгляд под другим углом
+다른 각도에서 보기
 
 ```bash
 Internet
@@ -36,29 +36,29 @@ Fail2ban (analisa auth.log)
 iptables (ban definitivo do IP)
 ```
 
-Брандмауэр — единственный хост, подключенный к Интернету.
+방화벽은 인터넷에 노출되는 유일한 호스트입니다.
 
-## ✅ 2. ЦЕЛИ И ПРЕДПОЛОЖЕНИЯ
+## ✅ 2. 목표 및 가정
 
-- Запретить политику по умолчанию
-- Активная маршрутизация IPv4
-- Сканер никогда не видит дверь
-- Брандмауэр как единственная точка входа
-- Веб-панели не опубликованы
-- SSH защищен с помощью Port Knocking
-- Контроль брутфорса через Fail2ban
-- Контролируемый NAT для локальной сети
-- Удаленное администрирование через SSH-туннель
+- 기본 정책 거부
+- 활성 IPv4 라우팅
+- 스캐너가 문을 보지 못함
+- 유일한 진입점인 방화벽
+- 게시된 웹 대시보드가 없습니다.
+- 포트 노킹으로 보호되는 SSH
+- Fail2ban을 통한 무차별 대입 제어
+- LAN용 제어 NAT
+- SSH 터널을 통한 원격 관리
 
-## ✅ 3. ОБНОВИТЬ И УСТАНОВИТЬ НЕОБХОДИМЫЕ ПАКЕТЫ
+## ✅ 3. 필요한 패키지 업데이트 및 설치
 
-Обновите систему
+시스템 업데이트
 
 ```bash
 sudo xbps-install -Syu
 ```
 
-Установите пакеты
+패키지 설치
 
 ```bash
 sudo xbps-install -y \
@@ -72,13 +72,13 @@ sudo xbps-install -y \
   fail2ban
 ```
 
-## ✅ 4. КОНФИГУРАЦИЯ SSH
+## ✅ 4. SSH 구성
 
 ```bash
 sudo vim /etc/ssh/sshd_config
 ```
 
-Отрегулируйте заостренные линии
+뾰족한 선을 조정하세요
 
 ```bash
 Port 2222
@@ -92,39 +92,39 @@ SyslogFacility AUTH
 LogLevel INFO
 ```
 
-Fail2ban зависит от журнала, гарантируйте линии
+Fail2ban은 로그에 따라 다르며 라인을 보장합니다.
 
 ```bash
 SyslogFacility AUTH
 LogLevel INFO
 ```
 
-Подтвердить создание журнала
+로그 생성 확인
 
 ```bash
 sudo tail -f /var/log/auth.log
 ```
 
-## Активация услуги
+## 서비스 활성화
 
 ```bash
 sudo ln -s /etc/sv/sshd /var/service/
 sudo sv start sshd
 ```
 
-## После полного развертывания:
+## 전체 배포 후:
 
-- Отключить root-вход
+- 루트 로그인 비활성화
 
-- Используйте только ключевую аутентификацию
+- 키 인증만 사용
 
-## ✅ 5. НАСТРОЙКА СЕТИ БРАНДМАУЭРА
+## ✅ 5. 방화벽 네트워크 설정
 
 ```bash
 sudo vim /etc/dhcpcd.conf
 ```
 
-Содержание
+콘텐츠
 
 ```bash
 # CONFIGURAÇÃO DE REDE DO FIREWALL
@@ -141,60 +141,60 @@ static ip_address=192.168.70.254/24
 nogateway
 ```
 
-Применять
+적용하다
 
 ```bash
 sudo sv restart dhcpcd
 ```
 
-## ✅ 6. УДАЛЕНИЕ ПОРТОВ – ПОДДЕРЖКА ЯДРА
+## ✅ 6. 포트 노킹 – 커널 지원
 
-Загрузите необходимый модуль
+필요한 모듈을 로드하세요.
 
 ```bash
 sudo modprobe xt_recent
 ```
 
-Подтвердить:
+검증:
 
 ```bash
 sudo lsmod | grep xt_recent
 ```
 
-Ожидаемый результат
+예상되는 결과
 
 ```bash
 xt_recent              24576  0
 x_tables               65536  1 xt_recent
 ```
 
-## ✅ 7. IPTABLES БРАНДМАУЭРА
+## ✅ 7. 방화벽 IP테이블
 
-Включить маршрутизацию между сетевыми картами брандмауэра
+방화벽 네트워크 카드 간 라우팅 활성화
 
 ```bash
 sudo vim /etc/sysctl.conf
 ```
 
-Содержание
+콘텐츠
 
 ```bash
 net.ipv4.ip_forward=1
 ```
 
-Применить без перезагрузки:
+재부팅 없이 적용:
 
 ```bash
 sudo sysctl --system
 ```
 
-Создайте скрипт брандмауэра в /usr/local/bin.
+/usr/local/bin에 방화벽 스크립트를 만듭니다.
 
 ```bash
 sudo vim /usr/local/bin/firewall
 ```
 
-Содержание
+콘텐츠
 
 ```bash
 #!/bin/sh
@@ -286,35 +286,35 @@ iptables -A INPUT -p tcp --tcp-flags SYN,FIN SYN,FIN -j DROP
 exit 0
 ```
 
-Применить разрешение и выполнить
+권한 적용 및 실행
 
 ```bash
 sudo chmod +x /usr/local/bin/firewall
 sudo bash /usr/local/bin/firewall
 ```
 
-## ✅ 8. СОХРАНЕНИЕ БРАНДМАУРА В RUNIT
+## ✅ 8. RUNIT의 방화벽 지속성
 
-Создать каталог
+디렉터리 만들기
 
 ```bash
 sudo mkdir -p /etc/sv/firewall
 ```
 
-Создать файл
+파일 만들기
 
 ```bash
 sudo vim /etc/sv/firewall/run
 ```
 
-Содержание
+콘텐츠
 
 ```bash
 #!/bin/sh
 exec /usr/local/bin/firewall
 ```
 
-Активируйте, запустите и проверьте статус
+활성화, 실행 및 상태 확인
 
 ```bash
 sudo chmod +x /etc/sv/firewall/run
@@ -322,26 +322,26 @@ sudo ln -s /etc/sv/firewall /var/service/
 sudo sv status firewall
 ```
 
-## ✅ 9. ТЕСТИРОВАНИЕ И ВАЛИДАЦИЯ (ГОРЯЧАЯ) СТОНКИ ПОРТОВ
+## ✅ 9. 포트 노킹 테스트 및 검증(핫)
 
-Монитор стучит в терминал БЕЗ ФИРМЭРАЛА
+방화벽 없이 터미널 노크를 모니터링하세요.
 
 ```bash
 sudo tcpdump -ni eth0 tcp port 12345
 ```
 
-Отправить стук ЧЕРЕЗ НОУТБУК через ВНЕШНИЙ доступ
+외부 액세스를 통해 노트북으로 노크 보내기
 
 ```bash
 sudo nc -z 39.236.83.109 12345
 ```
 
-✔ SYN прибывает
-✔ Оно выпало
-✔ Оставайтесь зарегистрированными
-✔ статус виден
+✔ SYN 도착
+✔ 삭제되었습니다.
+✔ 등록 상태 유지
+✔ 상태가 표시됩니다
 
-Ожидаемый результат в tcpdump
+tcpdump의 예상 결과
 
 ```bash
 tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
@@ -355,67 +355,67 @@ listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 0 packets dropped by kernel
 ```
 
-Важное техническое примечание
+중요한 기술 노트
 
-- RST отправляется через стек TCP.
-- Пакет зарегистрирован xt_recent
-- Порт не отвечает как услуга
-- Нет баннера или отпечатка пальца
+- RST는 TCP 스택을 통해 전송됩니다.
+- 패키지가 xt_recent에 의해 등록되었습니다.
+- 포트가 서비스로 응답하지 않습니다.
+- 배너나 지문이 없습니다.
 
-Подтвердить регистрацию IP
+IP 등록 확인
 
 ```bash
 sudo cat /proc/net/xt_recent/SSH_KNOCK
 ```
 
-Ожидаемый результат
+예상되는 결과
 
 ```bash
 src=99.336.74.209 ttl: 61 last_seen: 4302299386 oldest_pkt: 7 4302292227, 4302293242, 4302294266, 4302295290, 4302296314, 4302297338, 4302299386
 ```
 
-ЕСЛИ вы хотите устранить все удары
+모든 노크를 없애고 싶다면
 
 ```bash
 sudo echo clear > /proc/net/xt_recent/SSH_KNOCK
 ```
 
-## ✅ 10. ОСУЩЕСТВЛЯТЬ ВНЕШНИЙ АДМИНИСТРАТИВНЫЙ ДОСТУП
+## ✅ 10. 외부 관리 액세스 수행
 
-Выполнить стук
+노크를 실행
 
 ```bash
 nc -z 39.236.83.109 12345
 ```
 
-В течение 15 секунд получите доступ
+15초 이내에 접속
 
 ```bash
 ssh -p 2222 supertux@39.236.83.109
 ```
 
-Рекомендуемые псевдонимы
+권장 별칭
 
 ```bash
 vim ~/.bashrc
 ```
 
-Содержание
+콘텐츠
 
 ```bash
 alias knock='nc -z 39.236.83.109 12345'
-alias officinas='ssh -p 2222 supertux@39.236.83.109'
+alias firewall='ssh -p 2222 supertux@39.236.83.109'
 ```
 
-Перечитайте файл для проверки.
+유효성 검사를 위해 파일을 다시 읽습니다.
 
 ```bash
 source ~/.bashrc
 ```
 
-11. ✅ FAIL2BAN – ЗАЩИТА ПОСЛЕ УДАРНОСТИ
+11. ✅ FAIL2BAN – 노크 후 보호
 
-Корректировки журнала для соответствия Fail2ban
+Fail2ban을 준수하기 위한 로그 조정
 
 ```bash
 sudo xbps-install -y socklog-void
@@ -424,13 +424,13 @@ sudo ln -s /etc/sv/nanoklogd /var/service/
 sudo touch /var/log/auth.log
 ```
 
-Создайте файл конфигурации (никогда не редактируйте Jail.conf)
+구성 파일 생성(jail.conf를 편집하지 않음)
 
 ```bash
 sudo vim /etc/fail2ban/jail.local
 ```
 
-Содержание:
+콘텐츠:
 
 ```bash
 [DEFAULT]
@@ -449,7 +449,7 @@ findtime = 5m
 bantime  = 24h
 ```
 
-Активация рунита
+Runit 활성화
 
 ```bash
 sudo ln -s /etc/sv/fail2ban /var/service/
@@ -457,43 +457,43 @@ sudo sv start fail2ban
 sudo sv status fail2ban
 ```
 
-## 12. ✅ ТЕСТ FAIL2BAN (ВНИМАНИЕ, ВЫ ЗАБЛОКИРУЕТЕСЬ СЕБЯ!)
+## 12. ✅ FAIL2BAN 테스트(주의하세요. 스스로 잠길 수 있습니다!)
 
-Выполнить или постучать
+실행 o 노크
 
 ```bash
 nc -z 39.236.83.109 12345
 ```
 
-Попробуйте SSH с неправильным паролем 3 раза.
+잘못된 비밀번호로 SSH를 3번 시도해보세요
 
-Проверьте бан
+금지사항을 확인하세요
 
 ```bash
 sudo fail2ban-client status sshd
 ```
 
-Разблокировать вручную:
+수동으로 차단 해제:
 
 ```bash
 sudo fail2ban-client set sshd unbanip X.X.X.X
 ```
 
-## ⚠️ ВНИМАНИЕ: СЛЕДУЮЩИЕ РАЗДЕЛЫ 13 и 14, КОТОРЫЕ ИМЕЮТ РЕКУРСИВНЫЙ DNS И DHCP-СЕРВЕР, НЕОБХОДИМО ОТКАЗАТЬ ПОСЛЕ ОБНОВЛЕНИЯ SAMBA4 КАК PDC!!
+## ⚠️ 주의: 재귀 DNS 및 DHCP 서버를 다루는 다음 섹션 13 및 14는 Samba4를 PDC로 업그레이드한 후 폐기해야 합니다!!
 
-## 13. ✅ РАЗВЕРТЫВАНИЕ ВРЕМЕННОГО РЕКУРСИВНОГО DNS ДЛЯ ОБСЛУЖИВАНИЯ ВНУТРЕННЕЙ СЕТИ.
+## 13. ✅ 내부 네트워크에 서비스를 제공하기 위해 임시 재귀 DNS 배포
 
 ```bash
 sudo xbps-install -y unbound
 ```
 
-Минимальная конфигурация
+최소 구성
 
 ```bash
 sudo vim /etc/unbound/unbound.conf
 ```
 
-Содержание
+콘텐츠
 
 ```bash
 server:
@@ -508,35 +508,35 @@ server:
   qname-minimisation: yes
 ```
 
-Активировать услугу (запустить):
+서비스 활성화(runit):
 
 ```bash
 ln -s /etc/sv/unbound /var/service/
 sv start unbound
 ```
 
-## 14. ✅ РЕАЛИЗАЦИЯ ВРЕМЕННОГО DHCP-СЕРВЕРА ДЛЯ ОБСЛУЖИВАНИЯ ВНУТРЕННЕЙ СЕТИ.
+## 14. ✅ 내부 네트워크 서비스를 위한 임시 DHCP 서버 구현
 
-Установка пакета
+패키지 설치
 
 ```bash
 sudo xbps-install -y dhcp
 ```
 
-Этот пакет устанавливает:
+이 패키지는 다음을 설치합니다:
 
-- dhcpd (сервер)
-- Структура сервиса Рунит:
+- dhcpd(서버)
+- Runit 서비스 구조:
 /etc/sv/dhcpd4
 /etc/sv/dhcpd6
 
-Отредактируйте файл и настройте параметры внутренней сети.
+파일 편집 및 내부 네트워크 설정 구성
 
 ```bash
 sudo vim /etc/dhcpd.conf
 ```
 
-Содержание
+콘텐츠
 
 ```bash
 authoritative;
@@ -544,7 +544,7 @@ authoritative;
 default-lease-time 600;
 max-lease-time 7200;
 
-option domain-name "officinas.edu";
+option domain-name "educatux.edu";
 option domain-name-servers 192.168.70.254;
 
 subnet 192.168.70.0 netmask 255.255.255.0 {
@@ -559,97 +559,97 @@ subnet 192.168.70.0 netmask 255.255.255.0 {
 }
 ```
 
-Создайте файл аренды:
+임대 파일을 만듭니다.
 
 ```bash
 sudo mkdir -p /var/lib/dhcp
 sudo touch /var/lib/dhcp/dhcpd.leases
 ```
 
-Создание сервиса Runit
+Runit 서비스 생성
 
 ```bash
 sudo vim /etc/sv/dhcpd4/conf
 ```
 
-Содержание
+콘텐츠
 
 ```bash
 OPTS="-4 -q -cf /etc/dhcpd.conf eth1"
 ```
 
-Объяснение:
+설명:
 
 - -4 → IPv4
-- -q → беззвучный режим
-- -cf → исправить путь к dhcpd.conf
-- eth1 → интерфейс LAN
+- -q → 자동 모드
+- -cf → 올바른 dhcpd.conf 경로
+- eth1 → 인터페이스 LAN
 
-Активируйте службу в runit:
+runit에서 서비스를 활성화합니다:
 
 ```bash
 sudo ln -s /etc/sv/dhcpd4 /var/service/
 ```
 
-Запуск/Перезапуск:
+시작/다시 시작:
 
 ```bash
 sudo sv restart dhcpd4
 ```
 
-Проверить статус:
+상태 확인:
 
 ```bash
 sudo sv status dhcpd4
 ```
 
-Ожидаемый результат:
+예상 결과:
 
 ```bash
 run: dhcpd4: (pid 17652) 831s; run: log: (pid 15544) 1213s
 ```
 
-Проверьте прослушивание порта 67
+포트 67 수신 대기를 확인하세요.
 
 ```bash
 UNCONN 0      0            0.0.0.0:67        0.0.0.0:*    users:(("dhcpd",pid=17652,fd=6))  
 ```
 
-Мониторинг DHCP в режиме реального времени
+실시간으로 DHCP 모니터링
 
 ```bash
 sudo tcpdump -ni eth1 port 67 or port 68
 ```
 
-Ожидаемый результат
+예상되는 결과
 
 ```bash
 tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
 listening on eth1, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 ```
 
-Для прямой отладки (без рунита)
+직접 디버깅용(runit 없이)
 
 ```bash
 sudo dhcpd -4 -d -cf /etc/dhcpd.conf eth1
 ```
 
-Это должно показать
+이 표시되어야합니다
 
-- DHCPОБНАРУЖЕНИЕ
-- DHCPПредложение
-- DHCPREQUEST
+- DHCP 검색
+- DHCP 제안
+- DHCP요청
 - DHCPACK
 
-Важные файлы
+중요한 파일
 
-- /etc/dhcpd.conf → Основная конфигурация
-- /var/lib/dhcp/dhcpd.leases → Аренда
-- /etc/sv/dhcpd4/run → Запуск сценария
-- /etc/sv/dhcpd4/conf → Параметры службы
-- /var/service/dhcpd4 → Служба активна
+- /etc/dhcpd.conf → 기본 구성
+- /var/lib/dhcp/dhcpd.leases → 임대
+- /etc/sv/dhcpd4/run → 스크립트 runit
+- /etc/sv/dhcpd4/conf → 서비스 매개변수
+- /var/service/dhcpd4 → 서비스 활성화
 
-Настройте сценарий iptables, чтобы разрешить DHCP в локальной сети. Добавьте ПЕРЕД неявными правилами DROP:
+LAN에서 DHCP를 허용하도록 iptables 스크립트를 조정하십시오. 암시적 DROP 규칙 앞에 추가합니다.
 
 ```bash
 # ============================
@@ -660,48 +660,48 @@ iptables -A INPUT  -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
 iptables -A OUTPUT -o $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
 ```
 
-💡 DHCP использует широковещательную рассылку → без этого клиент не получит IP.
+💡 DHCP는 브로드캐스트를 사용합니다. → 이것이 없으면 클라이언트는 IP를 얻지 못합니다.
 
-Повторно примените брандмауэр:
+방화벽을 다시 적용합니다.
 
 ```bash
 sudo /usr/local/bin/firewall
 ```
 
-Тестирование на виртуальной машине в локальной сети
+LAN VM에서 테스트
 
 ```bash
 dhclient -v
 ```
 
-В брандмауэре мониторьте
+방화벽에서 모니터링
 
 ```bash
 sudo tail -f /var/log/messages
 ```
 
-Или
+또는
 
 ```bash
 sudo tcpdump -ni eth1 port 67 or port 68
 ```
 
-## 15. 🎉 ЗАКЛЮЧИТЕЛЬНЫЙ КОНТРОЛЬНЫЙ СПИСОК
+## 15. 🎉 체크리스트 최종
 
-- Невидимый SSH без стука
-- Одноразовый стук
-- Короткое окно доступа
-- Активная пост-аутентификация Fail2ban
-- Забанить игнорировать стук
-- Функциональный НАТ
-- Постоянный брандмауэр
-- Proxmox доступен только через туннель
-- Минимальный рекурсивный DNS (до входа PDC)
-- DHCP-сервер
+- 노크 없이 보이지 않는 SSH
+- 일회용 노크
+- 짧은 액세스 창
+- Fail2ban 활성 사후 인증
+- 노크 무시 금지
+- 기능적 NAT
+- 영구 방화벽
+- Proxmox는 터널을 통해서만 접근 가능
+- 최소 재귀 DNS(PDC가 진입할 때까지)
+- DHCP 서버
 
 ---
 
-🎯ВОТ ВСЕ, ЛЮДИ!
+🎯 그게 전부입니다!
 
 👉 https://t.me/z3r0l135
 👉 https://t.me/vcatafesta

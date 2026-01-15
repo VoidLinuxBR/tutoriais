@@ -7,7 +7,7 @@
 ## 先决条件
 
 - Samba4 作为域控制器 (PDC)
-- Linux 的 DNS 和时间与 PDC 一致
+- Linux 的 DNS 和时间与 PDC 一致 (192.168.70.253)
 - 与服务器的连接
 
 ---
@@ -36,8 +36,8 @@ sudo apt update && sudo apt install samba winbind libpam-winbind libnss-winbind 
 
 [realms]
     EDUCATUX.EDU = {
-        kdc = 192.168.70.250
-        admin_server = 192.168.70.250
+        kdc = 192.168.70.253
+        admin_server = 192.168.70.253
         default_domain = educatux.edu
     }
 
@@ -197,7 +197,7 @@ vim /etc/resolv.conf
 ```bash
 domain educatux.edu
 search educatux.edu.
-nameserver 192.168.70.250
+nameserver 192.168.70.253
 ```
 
 ## 锁定文件以防止自动编辑

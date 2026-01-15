@@ -7,7 +7,7 @@
 ## 前提条件
 
 - ドメイン コントローラー (PDC) としての Samba4
-- Linux と DNS および PDC との時間調整
+- DNS を使用し、PDC と時刻調整された Linux (192.168.70.253)
 - サーバーへの接続
 
 ---
@@ -36,8 +36,8 @@ sudo apt update && sudo apt install samba winbind libpam-winbind libnss-winbind 
 
 [realms]
     EDUCATUX.EDU = {
-        kdc = 192.168.70.250
-        admin_server = 192.168.70.250
+        kdc = 192.168.70.253
+        admin_server = 192.168.70.253
         default_domain = educatux.edu
     }
 
@@ -197,7 +197,7 @@ vim /etc/resolv.conf
 ```bash
 domain educatux.edu
 search educatux.edu.
-nameserver 192.168.70.250
+nameserver 192.168.70.253
 ```
 
 ## 自動編集に対してファイルをロックする

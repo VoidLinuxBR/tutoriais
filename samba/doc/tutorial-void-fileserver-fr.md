@@ -3,7 +3,7 @@
 
 ## 🎯 Objectif – Déployer un serveur de fichiers sur Void Linux (glibc) en compilant Samba4 à partir des sources, de l'intégration AD, des ACL, des services et de toute la pile requise pour qu'un serveur de fichiers serve les clients du réseau.
 
-## 🔧 Laboratoire de mise en réseau avec QEMU/Virtmanager. Ajustez le didacticiel en fonction de votre propre environnement.
+## 🔧 Laboratoire de mise en réseau avec QEMU/Virtmanager et Proxmox. Ajustez le didacticiel en fonction de votre propre environnement.
 
 ---
 
@@ -11,7 +11,7 @@
 
 - Domaine : EDUCATUX.EDU
 
-- Nom d'hôte : fichiers vides
+- Nom d'hôte : serveur de fichiers
 
 - Pare-feu 192.168.70.254 (DNS/GW)
 
@@ -49,7 +49,7 @@ xbps-install -S \
 ## 🖥️ Définir le nom d'hôte
 
 ```bash
-echo "voidfiles" > /etc/hostname
+echo "fileserver" > /etc/hostname
 ```
 
 ## 🏠 /etc/hosts
@@ -62,8 +62,8 @@ vim /etc/hosts
 
 ```bash
 127.0.0.1      localhost
-127.0.1.1      voidfiles.educatux.edu voidfiles
-192.168.70.251 voidfiles.educatux.edu voidfiles
+127.0.1.1      fileserver.educatux.edu fileserver
+192.168.70.251 fileserver.educatux.edu fileserver
 ```
 
 ## 🌐 Configurer l'IP statique
@@ -80,7 +80,7 @@ vim /etc/dhcpcd.conf
 interface eth0
 static ip_address=192.168.70.251/24
 static routers=192.168.70.254
-static domain_name_servers=192.168.70.250
+static domain_name_servers=192.168.70.253
 ```
 
 ## Redémarrez l'interface réseau :
@@ -100,7 +100,7 @@ vim /etc/resolv.conf
 ```bash
 domain educatux.edu
 search educatux.edu
-nameserver 192.168.70.250
+nameserver 192.168.70.253
 ```
 
 ## Verrouiller resolv.conf
@@ -258,7 +258,7 @@ vim /etc/chrony.conf
 #pool pool.ntp.org iburst
 
 # PDC Time Servers
-server 192.168.70.250 iburst
+server 192.168.70.253 iburst
 ```
 
 ## Activer Chronyd dans Runit
@@ -298,8 +298,8 @@ vim /etc/krb5.conf
 
 [realms]
     EDUCATUX.EDU = {
-        kdc = 192.168.70.250
-        admin_server = 192.168.70.250
+        kdc = 192.168.70.253
+        admin_server = 192.168.70.253
         default_domain = educatux.edu
     }
 

@@ -1,10 +1,10 @@
-# 🧩 VOID LINUX 教程 - 防火墙实现 - 实验室研讨会
+# 🧩 TUTORIEL VOID LINUX - IMPLÉMENTATION DU PARE-FEU - LABORATOIRE EDUCATUX
 
-📌 具有公共 IP、Void Linux (glibc)、IPTables（旧版）、NAT、端口敲门、Fail2ban、DHCP 服务器和递归 DNS 的防火墙
+📌 Pare-feu avec IP publique, Void Linux (glibc), IPTables (héritage), NAT, Port Knocking, Fail2ban, serveur DHCP et DNS récursif
 
 ---
 
-## ✅ 1. 网络拓扑
+## ✅ 1. TOPOLOGIE DU RÉSEAU
 
 ```bash
 Internet
@@ -20,7 +20,7 @@ eth1 (LAN): 192.168.70.254/24
 [Rede interna / Switch]
 ```
 
-从另一个角度看
+Vue sous un autre angle
 
 ```bash
 Internet
@@ -36,29 +36,29 @@ Fail2ban (analisa auth.log)
 iptables (ban definitivo do IP)
 ```
 
-防火墙是唯一暴露于互联网的主机。
+Le pare-feu est le seul hôte exposé à Internet.
 
-## ✅ 2. 目标和假设
+## ✅ 2. OBJECTIFS ET HYPOTHÈSES
 
-- 拒绝默认策略
-- 主动 IPv4 路由
-- 扫描仪永远看不到门
-- 防火墙作为唯一的入口点
-- 没有发布网络仪表板
-- 受端口敲门保护的 SSH
-- 通过 Fail2ban 进行暴力控制
-- LAN 的受控 NAT
-- 通过 SSH 隧道进行远程管理
+- Refuser la stratégie par défaut
+- Routage IPv4 actif
+- Le scanner ne voit jamais la porte
+- Le pare-feu comme seul point d'entrée
+- Aucun tableau de bord Web publié
+- SSH protégé par Port Knocking
+- Contrôle par force brute via Fail2ban
+- NAT contrôlé pour le LAN
+- Administration à distance via tunnel SSH
 
-## ✅ 3.更新并安装必要的软件包
+## ✅ 3. METTRE À JOUR ET INSTALLER LES FORFAITS NÉCESSAIRES
 
-更新系统
+Mettre à jour le système
 
 ```bash
 sudo xbps-install -Syu
 ```
 
-安装软件包
+Installer les paquets
 
 ```bash
 sudo xbps-install -y \
@@ -72,13 +72,13 @@ sudo xbps-install -y \
   fail2ban
 ```
 
-## ✅ 4.SSH 配置
+## ✅ 4. CONFIGURATION SSH
 
 ```bash
 sudo vim /etc/ssh/sshd_config
 ```
 
-调整尖线
+Ajustez les lignes pointues
 
 ```bash
 Port 2222
@@ -92,39 +92,39 @@ SyslogFacility AUTH
 LogLevel INFO
 ```
 
-Fail2ban依赖日志，保证线路
+Fail2ban dépend du journal, garantissez les lignes
 
 ```bash
 SyslogFacility AUTH
 LogLevel INFO
 ```
 
-确认日志生成
+Confirmer la génération du journal
 
 ```bash
 sudo tail -f /var/log/auth.log
 ```
 
-## 服务激活
+## Activation des services
 
 ```bash
 sudo ln -s /etc/sv/sshd /var/service/
 sudo sv start sshd
 ```
 
-## 全面部署后：
+## Après le déploiement complet :
 
-- 禁用 root 登录
+- Désactiver la connexion root
 
-- 仅使用密钥身份验证
+- Utiliser uniquement l'authentification par clé
 
-## ✅ 5. 防火墙网络设置
+## ✅ 5. CONFIGURATION DU RÉSEAU PARE-FEU
 
 ```bash
 sudo vim /etc/dhcpcd.conf
 ```
 
-内容
+Contenu
 
 ```bash
 # CONFIGURAÇÃO DE REDE DO FIREWALL
@@ -141,60 +141,60 @@ static ip_address=192.168.70.254/24
 nogateway
 ```
 
-申请
+Appliquer
 
 ```bash
 sudo sv restart dhcpcd
 ```
 
-## ✅ 6. 端口敲击 – 内核支持
+## ✅ 6. COUP DE PORT – SUPPORT DU NOYAU
 
-加载所需模块
+Charger le module requis
 
 ```bash
 sudo modprobe xt_recent
 ```
 
-证实：
+Valider:
 
 ```bash
 sudo lsmod | grep xt_recent
 ```
 
-预期结果
+Résultat attendu
 
 ```bash
 xt_recent              24576  0
 x_tables               65536  1 xt_recent
 ```
 
-## ✅ 7. 防火墙 IPTables
+## ✅ 7. PARE-FEU IPTABLES
 
-启用防火墙网卡之间的路由
+Activer le routage entre les cartes réseau du pare-feu
 
 ```bash
 sudo vim /etc/sysctl.conf
 ```
 
-内容
+Contenu
 
 ```bash
 net.ipv4.ip_forward=1
 ```
 
-无需重启即可应用：
+Appliquer sans redémarrage :
 
 ```bash
 sudo sysctl --system
 ```
 
-在 /usr/local/bin 中创建防火墙脚本
+Créez le script de pare-feu dans /usr/local/bin
 
 ```bash
 sudo vim /usr/local/bin/firewall
 ```
 
-内容
+Contenu
 
 ```bash
 #!/bin/sh
@@ -286,35 +286,35 @@ iptables -A INPUT -p tcp --tcp-flags SYN,FIN SYN,FIN -j DROP
 exit 0
 ```
 
-申请权限并执行
+Appliquer l'autorisation et exécuter
 
 ```bash
 sudo chmod +x /usr/local/bin/firewall
 sudo bash /usr/local/bin/firewall
 ```
 
-## ✅ 8. RUNIT 中的防火墙持久性
+## ✅ 8. PERSISTANCE DU PARE-FEU EN RUNIT
 
-创建目录
+Créer le répertoire
 
 ```bash
 sudo mkdir -p /etc/sv/firewall
 ```
 
-创建文件
+Créer le fichier
 
 ```bash
 sudo vim /etc/sv/firewall/run
 ```
 
-内容
+Contenu
 
 ```bash
 #!/bin/sh
 exec /usr/local/bin/firewall
 ```
 
-激活、运行和验证状态
+Activer, exécuter et valider le statut
 
 ```bash
 sudo chmod +x /etc/sv/firewall/run
@@ -322,26 +322,26 @@ sudo ln -s /etc/sv/firewall /var/service/
 sudo sv status firewall
 ```
 
-## ✅ 9. 端口敲击的测试和验证（热）
+## ✅ 9. TESTS ET VALIDATION (À CHAUD) DU PORT KNOCKING
 
-无需防火墙即可监控终端敲击
+Surveiller frapper sur un terminal SANS PARE-FEU
 
 ```bash
 sudo tcpdump -ni eth0 tcp port 12345
 ```
 
-通过外部访问通过笔记本发送敲门声
+Envoyez le coup PAR CARNET via un accès EXTERNE
 
 ```bash
 sudo nc -z 39.236.83.109 12345
 ```
 
-✔ SYN 到达
-✔ 已删除
-✔ 保持注册状态
-✔ 状态可见
+✔ SYN arrive
+✔ C'est abandonné
+✔ Restez inscrit
+✔ le statut est visible
 
-tcpdump 中的预期结果
+Résultat attendu dans tcpdump
 
 ```bash
 tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
@@ -355,67 +355,67 @@ listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 0 packets dropped by kernel
 ```
 
-重要技术说明
+Note technique importante
 
-- RST 通过 TCP 堆栈发送
-- 该包由 xt_recent 注册
-- 端口不作为服务响应
-- 没有横幅或指纹
+- Le RST est envoyé via la pile TCP
+- Le package est enregistré par xt_recent
+- Le port ne répond pas en tant que service
+- Il n'y a pas de bannière ni d'empreinte digitale
 
-验证IP注册
+Valider l'enregistrement IP
 
 ```bash
 sudo cat /proc/net/xt_recent/SSH_KNOCK
 ```
 
-预期结果
+Résultat attendu
 
 ```bash
 src=99.336.74.209 ttl: 61 last_seen: 4302299386 oldest_pkt: 7 4302292227, 4302293242, 4302294266, 4302295290, 4302296314, 4302297338, 4302299386
 ```
 
-如果你想清除所有的敲门声
+SI vous voulez effacer tous les coups
 
 ```bash
 sudo echo clear > /proc/net/xt_recent/SSH_KNOCK
 ```
 
-## ✅ 10. 执行外部管理访问
+## ✅ 10. EFFECTUER UN ACCÈS ADMINISTRATIF EXTERNE
 
-执行敲击
+Exécuter le coup
 
 ```bash
 nc -z 39.236.83.109 12345
 ```
 
-15秒内，访问
+En 15 secondes, accédez
 
 ```bash
 ssh -p 2222 supertux@39.236.83.109
 ```
 
-推荐别名
+Alias recommandés
 
 ```bash
 vim ~/.bashrc
 ```
 
-内容
+Contenu
 
 ```bash
 alias knock='nc -z 39.236.83.109 12345'
-alias officinas='ssh -p 2222 supertux@39.236.83.109'
+alias firewall='ssh -p 2222 supertux@39.236.83.109'
 ```
 
-重新读取文件进行验证
+Relisez le fichier pour validation
 
 ```bash
 source ~/.bashrc
 ```
 
-11. ✅ FAIL2BAN – 爆震后保护
+11. ✅ FAIL2BAN – PROTECTION POST-COUP
 
-日志调整以符合fail2ban
+Consigner les ajustements pour se conformer à fail2ban
 
 ```bash
 sudo xbps-install -y socklog-void
@@ -424,13 +424,13 @@ sudo ln -s /etc/sv/nanoklogd /var/service/
 sudo touch /var/log/auth.log
 ```
 
-创建配置文件（切勿编辑jail.conf）
+Créer un fichier de configuration (ne modifiez jamais jail.conf)
 
 ```bash
 sudo vim /etc/fail2ban/jail.local
 ```
 
-内容：
+Contenu:
 
 ```bash
 [DEFAULT]
@@ -449,7 +449,7 @@ findtime = 5m
 bantime  = 24h
 ```
 
-运行单元激活
+Activation de l'unité d'exécution
 
 ```bash
 sudo ln -s /etc/sv/fail2ban /var/service/
@@ -457,43 +457,43 @@ sudo sv start fail2ban
 sudo sv status fail2ban
 ```
 
-## 12. ✅ FAIL2BAN 测试（注意，你把自己锁在外面了！）
+## 12. ✅ TEST FAIL2BAN (ATTENTION, VOUS VOUS VERROUILLEZ !)
 
-执行敲门
+Exécuter ou frapper
 
 ```bash
 nc -z 39.236.83.109 12345
 ```
 
-使用错误密码尝试 SSH 3 次
+Essayez SSH avec le mauvais mot de passe 3 fois
 
-检查禁令
+Vérifiez l'interdiction
 
 ```bash
 sudo fail2ban-client status sshd
 ```
 
-手动解禁：
+Annuler le ban manuellement :
 
 ```bash
 sudo fail2ban-client set sshd unbanip X.X.X.X
 ```
 
-## ⚠️ 注意：以下第 13 和 14 节涉及递归 DNS 和 DHCP 服务器，在将 SAMBA4 升级为 PDC 后必须丢弃！
+## ⚠️ ATTENTION : LES SECTIONS SUIVANTES 13 et 14, QUI TRAITENT LE SERVEUR DNS RÉCURSIF ET DHCP, DOIVENT ÊTRE ÉLIMINÉES APRÈS LA MISE À NIVEAU DE SAMBA4 EN TANT QUE PDC !!
 
-## 13. ✅ 部署临时递归 DNS 来为内部网络提供服务
+## 13. ✅ DÉPLOYER UN DNS RÉCURSIF TEMPORAIRE POUR SERVIR LE RÉSEAU INTERNE
 
 ```bash
 sudo xbps-install -y unbound
 ```
 
-最低配置
+Configuration minimale
 
 ```bash
 sudo vim /etc/unbound/unbound.conf
 ```
 
-内容
+Contenu
 
 ```bash
 server:
@@ -508,35 +508,35 @@ server:
   qname-minimisation: yes
 ```
 
-激活服务（运行单元）：
+Activer le service (runit) :
 
 ```bash
 ln -s /etc/sv/unbound /var/service/
 sv start unbound
 ```
 
-## 14. ✅ 实施临时 DHCP 服务器来为内部网络提供服务
+## 14. ✅ MISE EN PLACE D'UN SERVEUR DHCP TEMPORAIRE POUR SERVIR LE RÉSEAU INTERNE
 
-包安装
+Installation du paquet
 
 ```bash
 sudo xbps-install -y dhcp
 ```
 
-该软件包安装：
+Ce package installe :
 
-- dhcpd（服务器）
-- Runit服务结构：
+- dhcpd (serveur)
+- Structure du service Runit :
 /etc/sv/dhcpd4
 /etc/sv/dhcpd6
 
-编辑文件并配置内部网络的设置
+Modifiez le fichier et configurez les paramètres du réseau interne
 
 ```bash
 sudo vim /etc/dhcpd.conf
 ```
 
-内容
+Contenu
 
 ```bash
 authoritative;
@@ -544,7 +544,7 @@ authoritative;
 default-lease-time 600;
 max-lease-time 7200;
 
-option domain-name "officinas.edu";
+option domain-name "educatux.edu";
 option domain-name-servers 192.168.70.254;
 
 subnet 192.168.70.0 netmask 255.255.255.0 {
@@ -559,97 +559,97 @@ subnet 192.168.70.0 netmask 255.255.255.0 {
 }
 ```
 
-创建租赁文件：
+Créez le fichier de bail :
 
 ```bash
 sudo mkdir -p /var/lib/dhcp
 sudo touch /var/lib/dhcp/dhcpd.leases
 ```
 
-Runit服务创建
+Création de services Runit
 
 ```bash
 sudo vim /etc/sv/dhcpd4/conf
 ```
 
-内容
+Contenu
 
 ```bash
 OPTS="-4 -q -cf /etc/dhcpd.conf eth1"
 ```
 
-解释：
+Explication:
 
 - -4 → IPv4
-- -q → 静默模式
-- -cf → 正确的 dhcpd.conf 路径
-- eth1 → 接口 LAN
+- -q → mode silencieux
+- -cf → corriger le chemin dhcpd.conf
+- eth1 → interface réseau local
 
-在runit中激活服务：
+Activez le service dans runit :
 
 ```bash
 sudo ln -s /etc/sv/dhcpd4 /var/service/
 ```
 
-启动/重新启动：
+Démarrer/Redémarrer :
 
 ```bash
 sudo sv restart dhcpd4
 ```
 
-检查状态：
+Vérifier l'état :
 
 ```bash
 sudo sv status dhcpd4
 ```
 
-预期结果：
+Résultat attendu :
 
 ```bash
 run: dhcpd4: (pid 17652) 831s; run: log: (pid 15544) 1213s
 ```
 
-检查67端口监听
+Vérifiez le port 67 en écoute
 
 ```bash
 UNCONN 0      0            0.0.0.0:67        0.0.0.0:*    users:(("dhcpd",pid=17652,fd=6))  
 ```
 
-实时监控 DHCP
+Surveillez DHCP en temps réel
 
 ```bash
 sudo tcpdump -ni eth1 port 67 or port 68
 ```
 
-预期结果
+Résultat attendu
 
 ```bash
 tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
 listening on eth1, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 ```
 
-用于直接调试（无需 runit）
+Pour le débogage direct (sans runit)
 
 ```bash
 sudo dhcpd -4 -d -cf /etc/dhcpd.conf eth1
 ```
 
-这应该显示
+Cela devrait montrer
 
-- DHCP发现
-- DHCP优惠
-- DHCP请求
-- DHCP确认
+- DHCPDÉCOUVRIR
+- OFFRE DHCP
+- DEMANDE DHCP
+- DHCPACK
 
-重要文件
+Fichiers importants
 
-- /etc/dhcpd.conf → 主要配置
-- /var/lib/dhcp/dhcpd.leases → 租约
-- /etc/sv/dhcpd4/run → 脚本 runit
-- /etc/sv/dhcpd4/conf → 服务参数
-- /var/service/dhcpd4 → 服务处于活动状态
+- /etc/dhcpd.conf → Configuration principale
+- /var/lib/dhcp/dhcpd.leases → Baux
+- /etc/sv/dhcpd4/run → Exécution du script
+- /etc/sv/dhcpd4/conf → Paramètres du service
+- /var/service/dhcpd4 → Service actif
 
-调整 iptables 脚本以允许 LAN 上的 DHCP。在隐式 DROP 规则之前添加：
+Ajustez le script iptables pour autoriser DHCP sur le réseau local. Ajoutez AVANT les règles DROP implicites :
 
 ```bash
 # ============================
@@ -660,48 +660,48 @@ iptables -A INPUT  -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
 iptables -A OUTPUT -o $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
 ```
 
-💡 DHCP 使用广播 → 如果没有广播，客户端将无法获得 IP。
+💡 DHCP utilise la diffusion → sans cela, le client n'obtient pas d'adresse IP.
 
-重新应用防火墙：
+Réappliquez le pare-feu :
 
 ```bash
 sudo /usr/local/bin/firewall
 ```
 
-在 LAN VM 上测试
+Test sur une VM LAN
 
 ```bash
 dhclient -v
 ```
 
-在防火墙中，监控
+Dans le pare-feu, surveillez
 
 ```bash
 sudo tail -f /var/log/messages
 ```
 
-或者
+Ou
 
 ```bash
 sudo tcpdump -ni eth1 port 67 or port 68
 ```
 
-## 15. 🎉 最终检查清单
+## 15. 🎉 LISTE DE CONTRÔLE FINALE
 
-- 隐形SSH无需敲门
-- 一次性敲击器
-- 访问窗口短
-- Fail2ban 主动身份验证后
-- 禁止无视敲门
-- 功能性NAT
-- 持久防火墙
-- Proxmox 只能通过隧道访问
-- 最小递归 DNS（直到 PDC 进入）
-- DHCP服务器
+- SSH invisible sans frapper
+- Coup à usage unique
+- Fenêtre d'accès courte
+- Post-authentification active Fail2ban
+- Interdire d'ignorer frapper
+- NAT fonctionnel
+- Pare-feu persistant
+- Proxmox uniquement accessible via tunnel
+- DNS récursif minimal (jusqu'à ce que PDC entre)
+- Serveur DHCP
 
 ---
 
-🎯 这就是大家！
+🎯 C'EST TOUS LES GENS !
 
 👉 https://t.me/z3r0l135
 👉 https://t.me/vcatafesta

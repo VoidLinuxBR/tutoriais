@@ -3,7 +3,7 @@
 
 ## 🎯 Objetivo: implementar un servidor de archivos en Void Linux (glibc) compilando Samba4 desde el código fuente, la integración de AD, las ACL, los servicios y toda la pila necesaria para que un servidor de archivos atienda a los clientes de la red.
 
-## 🔧 Laboratorio de networking con QEMU/Virtmanager. Ajuste el tutorial para que coincida con su propio entorno.
+## 🔧 Laboratorio de networking con QEMU/Virtmanager y Proxmox. Ajuste el tutorial para que coincida con su propio entorno.
 
 ---
 
@@ -11,7 +11,7 @@
 
 - Dominio: EDUCATUX.EDU
 
-- Nombre de host: archivos vacíos
+- Nombre de host: servidor de archivos
 
 - Cortafuegos 192.168.70.254 (DNS/GW)
 
@@ -49,7 +49,7 @@ xbps-install -S \
 ## 🖥️ Establecer nombre de host
 
 ```bash
-echo "voidfiles" > /etc/hostname
+echo "fileserver" > /etc/hostname
 ```
 
 ## 🏠 /etc/hosts
@@ -62,8 +62,8 @@ vim /etc/hosts
 
 ```bash
 127.0.0.1      localhost
-127.0.1.1      voidfiles.educatux.edu voidfiles
-192.168.70.251 voidfiles.educatux.edu voidfiles
+127.0.1.1      fileserver.educatux.edu fileserver
+192.168.70.251 fileserver.educatux.edu fileserver
 ```
 
 ## 🌐 Configurar IP estática
@@ -80,7 +80,7 @@ vim /etc/dhcpcd.conf
 interface eth0
 static ip_address=192.168.70.251/24
 static routers=192.168.70.254
-static domain_name_servers=192.168.70.250
+static domain_name_servers=192.168.70.253
 ```
 
 ## Reinicie la interfaz de red:
@@ -100,7 +100,7 @@ vim /etc/resolv.conf
 ```bash
 domain educatux.edu
 search educatux.edu
-nameserver 192.168.70.250
+nameserver 192.168.70.253
 ```
 
 ## Bloquear resolución.conf
@@ -258,7 +258,7 @@ vim /etc/chrony.conf
 #pool pool.ntp.org iburst
 
 # PDC Time Servers
-server 192.168.70.250 iburst
+server 192.168.70.253 iburst
 ```
 
 ## Habilitar chronyd en runit
@@ -298,8 +298,8 @@ vim /etc/krb5.conf
 
 [realms]
     EDUCATUX.EDU = {
-        kdc = 192.168.70.250
-        admin_server = 192.168.70.250
+        kdc = 192.168.70.253
+        admin_server = 192.168.70.253
         default_domain = educatux.edu
     }
 

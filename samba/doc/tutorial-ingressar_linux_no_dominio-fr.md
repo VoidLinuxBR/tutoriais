@@ -7,7 +7,7 @@
 ## Conditions préalables
 
 - Samba4 comme contrôleur de domaine (PDC)
-- Linux avec DNS et temps aligné sur PDC
+- Linux avec DNS et heure alignée sur PDC (192.168.70.253)
 - Connectivité au serveur
 
 ---
@@ -36,8 +36,8 @@ sudo apt update && sudo apt install samba winbind libpam-winbind libnss-winbind 
 
 [realms]
     EDUCATUX.EDU = {
-        kdc = 192.168.70.250
-        admin_server = 192.168.70.250
+        kdc = 192.168.70.253
+        admin_server = 192.168.70.253
         default_domain = educatux.edu
     }
 
@@ -197,7 +197,7 @@ vim /etc/resolv.conf
 ```bash
 domain educatux.edu
 search educatux.edu.
-nameserver 192.168.70.250
+nameserver 192.168.70.253
 ```
 
 ## Verrouillage du fichier contre l'édition automatique

@@ -1,10 +1,10 @@
-# 🧩 TUTORIAL VOID LINUX - IMPLEMENTAZIONE FIREWALL - WORKSHOP IN LABORATORIO
+# 🧩 УЧЕБНОЕ РУКОВОДСТВО ПО VOID LINUX - ВНЕДРЕНИЕ БРАНДМАЭРА - ЛАБОРАТОРИЯ EDUCATUX
 
-📌 Firewall con IP pubblico, Void Linux (glibc), IPTables (legacy), NAT, Port Knocking, Fail2ban, DHCP Server e DNS ricorsivo
+📌 Брандмауэр с общедоступным IP-адресом, Void Linux (glibc), IPTables (устаревший), NAT, перехват портов, Fail2ban, DHCP-сервер и рекурсивный DNS
 
 ---
 
-## ✅ 1. TOPOLOGIA DELLA RETE
+## ✅ 1. ТОПОЛОГИЯ СЕТИ
 
 ```bash
 Internet
@@ -20,7 +20,7 @@ eth1 (LAN): 192.168.70.254/24
 [Rede interna / Switch]
 ```
 
-Vista da un'altra angolazione
+Взгляд под другим углом
 
 ```bash
 Internet
@@ -36,29 +36,29 @@ Fail2ban (analisa auth.log)
 iptables (ban definitivo do IP)
 ```
 
-Il firewall è l'unico host esposto a Internet.
+Брандмауэр — единственный хост, подключенный к Интернету.
 
-## ✅ 2. OBIETTIVI E ASSUNZIONI
+## ✅ 2. ЦЕЛИ И ПРЕДПОЛОЖЕНИЯ
 
-- Nega la politica predefinita
-- Routing IPv4 attivo
-- Lo scanner non vede mai la porta
-- Firewall come unico punto di accesso
-- Nessun dashboard web pubblicato
-- SSH protetto da Port Knocking
-- Controllo della forza bruta tramite Fail2ban
-- NAT controllato per la LAN
-- Amministrazione remota tramite tunnel SSH
+- Запретить политику по умолчанию
+- Активная маршрутизация IPv4
+- Сканер никогда не видит дверь
+- Брандмауэр как единственная точка входа
+- Веб-панели не опубликованы
+- SSH защищен с помощью Port Knocking
+- Контроль брутфорса через Fail2ban
+- Контролируемый NAT для локальной сети
+- Удаленное администрирование через SSH-туннель
 
-## ✅ 3. AGGIORNA E INSTALLA I PACCHETTI NECESSARI
+## ✅ 3. ОБНОВИТЬ И УСТАНОВИТЬ НЕОБХОДИМЫЕ ПАКЕТЫ
 
-Aggiorna il sistema
+Обновите систему
 
 ```bash
 sudo xbps-install -Syu
 ```
 
-Installa i pacchetti
+Установите пакеты
 
 ```bash
 sudo xbps-install -y \
@@ -72,13 +72,13 @@ sudo xbps-install -y \
   fail2ban
 ```
 
-## ✅ 4. CONFIGURAZIONE SSH
+## ✅ 4. КОНФИГУРАЦИЯ SSH
 
 ```bash
 sudo vim /etc/ssh/sshd_config
 ```
 
-Regola le linee appuntite
+Отрегулируйте заостренные линии
 
 ```bash
 Port 2222
@@ -92,39 +92,39 @@ SyslogFacility AUTH
 LogLevel INFO
 ```
 
-Fail2ban dipende dal log, garantisce le linee
+Fail2ban зависит от журнала, гарантируйте линии
 
 ```bash
 SyslogFacility AUTH
 LogLevel INFO
 ```
 
-Conferma la generazione del registro
+Подтвердить создание журнала
 
 ```bash
 sudo tail -f /var/log/auth.log
 ```
 
-## Attivazione del servizio
+## Активация услуги
 
 ```bash
 sudo ln -s /etc/sv/sshd /var/service/
 sudo sv start sshd
 ```
 
-## Dopo la distribuzione completa:
+## После полного развертывания:
 
-- Disabilita l'accesso root
+- Отключить root-вход
 
-- Utilizzare solo l'autenticazione con chiave
+- Используйте только ключевую аутентификацию
 
-## ✅ 5. CONFIGURAZIONE DELLA RETE FIREWALL
+## ✅ 5. НАСТРОЙКА СЕТИ БРАНДМАУЭРА
 
 ```bash
 sudo vim /etc/dhcpcd.conf
 ```
 
-Contenuto
+Содержание
 
 ```bash
 # CONFIGURAÇÃO DE REDE DO FIREWALL
@@ -141,60 +141,60 @@ static ip_address=192.168.70.254/24
 nogateway
 ```
 
-Fare domanda a
+Применять
 
 ```bash
 sudo sv restart dhcpcd
 ```
 
-## ✅ 6. BATTUTA DEL PORTO – SUPPORTO DEL NOCCIOLO
+## ✅ 6. УДАЛЕНИЕ ПОРТОВ – ПОДДЕРЖКА ЯДРА
 
-Caricare il modulo richiesto
+Загрузите необходимый модуль
 
 ```bash
 sudo modprobe xt_recent
 ```
 
-Convalidare:
+Подтвердить:
 
 ```bash
 sudo lsmod | grep xt_recent
 ```
 
-Risultato atteso
+Ожидаемый результат
 
 ```bash
 xt_recent              24576  0
 x_tables               65536  1 xt_recent
 ```
 
-## ✅ 7. IPTABLES FIREWALL
+## ✅ 7. IPTABLES БРАНДМАУЭРА
 
-Abilita il routing tra le schede di rete Firewall
+Включить маршрутизацию между сетевыми картами брандмауэра
 
 ```bash
 sudo vim /etc/sysctl.conf
 ```
 
-Contenuto
+Содержание
 
 ```bash
 net.ipv4.ip_forward=1
 ```
 
-Applica senza riavviare:
+Применить без перезагрузки:
 
 ```bash
 sudo sysctl --system
 ```
 
-Crea lo script del firewall in /usr/local/bin
+Создайте скрипт брандмауэра в /usr/local/bin.
 
 ```bash
 sudo vim /usr/local/bin/firewall
 ```
 
-Contenuto
+Содержание
 
 ```bash
 #!/bin/sh
@@ -286,35 +286,35 @@ iptables -A INPUT -p tcp --tcp-flags SYN,FIN SYN,FIN -j DROP
 exit 0
 ```
 
-Applicare l'autorizzazione ed eseguire
+Применить разрешение и выполнить
 
 ```bash
 sudo chmod +x /usr/local/bin/firewall
 sudo bash /usr/local/bin/firewall
 ```
 
-## ✅ 8. PERSISTENZA DEL FIREWALL IN RUNIT
+## ✅ 8. СОХРАНЕНИЕ БРАНДМАУРА В RUNIT
 
-Crea la directory
+Создать каталог
 
 ```bash
 sudo mkdir -p /etc/sv/firewall
 ```
 
-Crea il file
+Создать файл
 
 ```bash
 sudo vim /etc/sv/firewall/run
 ```
 
-Contenuto
+Содержание
 
 ```bash
 #!/bin/sh
 exec /usr/local/bin/firewall
 ```
 
-Attiva, esegui e convalida lo stato
+Активируйте, запустите и проверьте статус
 
 ```bash
 sudo chmod +x /etc/sv/firewall/run
@@ -322,26 +322,26 @@ sudo ln -s /etc/sv/firewall /var/service/
 sudo sv status firewall
 ```
 
-## ✅ 9. TEST E VALIDAZIONE (A CALDO) DEI PORTO
+## ✅ 9. ТЕСТИРОВАНИЕ И ВАЛИДАЦИЯ (ГОРЯЧАЯ) СТОНКИ ПОРТОВ
 
-Monitorare il knock su un terminale SENZA FIREWALL
+Монитор стучит в терминал БЕЗ ФИРМЭРАЛА
 
 ```bash
 sudo tcpdump -ni eth0 tcp port 12345
 ```
 
-Invia la bussata TRAMITE NOTEBOOK tramite accesso ESTERNO
+Отправить стук ЧЕРЕЗ НОУТБУК через ВНЕШНИЙ доступ
 
 ```bash
 sudo nc -z 39.236.83.109 12345
 ```
 
-✔ Arriva il SYN
-✔ È caduto
-✔ Rimani registrato
-✔ lo stato è visibile
+✔ SYN прибывает
+✔ Оно выпало
+✔ Оставайтесь зарегистрированными
+✔ статус виден
 
-Risultato previsto in tcpdump
+Ожидаемый результат в tcpdump
 
 ```bash
 tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
@@ -355,67 +355,67 @@ listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 0 packets dropped by kernel
 ```
 
-Nota tecnica importante
+Важное техническое примечание
 
-- L'RST viene inviato tramite lo stack TCP
-- Il pacchetto è registrato da xt_recent
-- La porta non risponde come servizio
-- Non c'è banner o impronta digitale
+- RST отправляется через стек TCP.
+- Пакет зарегистрирован xt_recent
+- Порт не отвечает как услуга
+- Нет баннера или отпечатка пальца
 
-Convalidare la registrazione IP
+Подтвердить регистрацию IP
 
 ```bash
 sudo cat /proc/net/xt_recent/SSH_KNOCK
 ```
 
-Risultato atteso
+Ожидаемый результат
 
 ```bash
 src=99.336.74.209 ttl: 61 last_seen: 4302299386 oldest_pkt: 7 4302292227, 4302293242, 4302294266, 4302295290, 4302296314, 4302297338, 4302299386
 ```
 
-SE vuoi eliminare tutti i colpi
+ЕСЛИ вы хотите устранить все удары
 
 ```bash
 sudo echo clear > /proc/net/xt_recent/SSH_KNOCK
 ```
 
-## ✅ 10. EFFETTUARE L'ACCESSO AMMINISTRATIVO ESTERNO
+## ✅ 10. ОСУЩЕСТВЛЯТЬ ВНЕШНИЙ АДМИНИСТРАТИВНЫЙ ДОСТУП
 
-Esegui il colpo
+Выполнить стук
 
 ```bash
 nc -z 39.236.83.109 12345
 ```
 
-Entro 15 secondi, accesso
+В течение 15 секунд получите доступ
 
 ```bash
 ssh -p 2222 supertux@39.236.83.109
 ```
 
-Alias consigliati
+Рекомендуемые псевдонимы
 
 ```bash
 vim ~/.bashrc
 ```
 
-Contenuto
+Содержание
 
 ```bash
 alias knock='nc -z 39.236.83.109 12345'
-alias officinas='ssh -p 2222 supertux@39.236.83.109'
+alias firewall='ssh -p 2222 supertux@39.236.83.109'
 ```
 
-Rileggere il file per la convalida
+Перечитайте файл для проверки.
 
 ```bash
 source ~/.bashrc
 ```
 
-11. ✅ FAIL2BAN – PROTEZIONE POST-KNOCK
+11. ✅ FAIL2BAN – ЗАЩИТА ПОСЛЕ УДАРНОСТИ
 
-Registra le modifiche per conformarsi a fail2ban
+Корректировки журнала для соответствия Fail2ban
 
 ```bash
 sudo xbps-install -y socklog-void
@@ -424,13 +424,13 @@ sudo ln -s /etc/sv/nanoklogd /var/service/
 sudo touch /var/log/auth.log
 ```
 
-Crea file di configurazione (non modificare mai jail.conf)
+Создайте файл конфигурации (никогда не редактируйте Jail.conf)
 
 ```bash
 sudo vim /etc/fail2ban/jail.local
 ```
 
-Contenuto:
+Содержание:
 
 ```bash
 [DEFAULT]
@@ -449,7 +449,7 @@ findtime = 5m
 bantime  = 24h
 ```
 
-Attivazione di Runit
+Активация рунита
 
 ```bash
 sudo ln -s /etc/sv/fail2ban /var/service/
@@ -457,43 +457,43 @@ sudo sv start fail2ban
 sudo sv status fail2ban
 ```
 
-## 12. ✅ TEST FAIL2BAN (ATTENZIONE, TI CHIUDI FUORI!)
+## 12. ✅ ТЕСТ FAIL2BAN (ВНИМАНИЕ, ВЫ ЗАБЛОКИРУЕТЕСЬ СЕБЯ!)
 
-Esegui o bussa
+Выполнить или постучать
 
 ```bash
 nc -z 39.236.83.109 12345
 ```
 
-Prova SSH con la password sbagliata 3 volte
+Попробуйте SSH с неправильным паролем 3 раза.
 
-Controlla il divieto
+Проверьте бан
 
 ```bash
 sudo fail2ban-client status sshd
 ```
 
-Sblocca manualmente:
+Разблокировать вручную:
 
 ```bash
 sudo fail2ban-client set sshd unbanip X.X.X.X
 ```
 
-## ⚠️ ATTENZIONE: LE SEGUENTI SEZIONI 13 e 14, CHE TRATTANO DNS RICORSIVI E SERVER DHCP, DEVONO ESSERE ELIMINATE DOPO AVER AGGIORNATO SAMBA4 COME PDC!!
+## ⚠️ ВНИМАНИЕ: СЛЕДУЮЩИЕ РАЗДЕЛЫ 13 и 14, КОТОРЫЕ ИМЕЮТ РЕКУРСИВНЫЙ DNS И DHCP-СЕРВЕР, НЕОБХОДИМО ОТКАЗАТЬ ПОСЛЕ ОБНОВЛЕНИЯ SAMBA4 КАК PDC!!
 
-## 13. ✅ IMPLEMENTAZIONE DI UN DNS RICORSIVO TEMPORANEO PER SERVIRE LA RETE INTERNA
+## 13. ✅ РАЗВЕРТЫВАНИЕ ВРЕМЕННОГО РЕКУРСИВНОГО DNS ДЛЯ ОБСЛУЖИВАНИЯ ВНУТРЕННЕЙ СЕТИ.
 
 ```bash
 sudo xbps-install -y unbound
 ```
 
-Configurazione minima
+Минимальная конфигурация
 
 ```bash
 sudo vim /etc/unbound/unbound.conf
 ```
 
-Contenuto
+Содержание
 
 ```bash
 server:
@@ -508,35 +508,35 @@ server:
   qname-minimisation: yes
 ```
 
-Attiva il servizio (runit):
+Активировать услугу (запустить):
 
 ```bash
 ln -s /etc/sv/unbound /var/service/
 sv start unbound
 ```
 
-## 14. ✅ IMPLEMENTAZIONE DI UN SERVER DHCP TEMPORANEO PER SERVIRE LA RETE INTERNA
+## 14. ✅ РЕАЛИЗАЦИЯ ВРЕМЕННОГО DHCP-СЕРВЕРА ДЛЯ ОБСЛУЖИВАНИЯ ВНУТРЕННЕЙ СЕТИ.
 
-Installazione del pacchetto
+Установка пакета
 
 ```bash
 sudo xbps-install -y dhcp
 ```
 
-Questo pacchetto installa:
+Этот пакет устанавливает:
 
-- DHCP (server)
-- Struttura del servizio Runit:
+- dhcpd (сервер)
+- Структура сервиса Рунит:
 /etc/sv/dhcpd4
 /etc/sv/dhcpd6
 
-Modifica il file e configura le impostazioni per la rete interna
+Отредактируйте файл и настройте параметры внутренней сети.
 
 ```bash
 sudo vim /etc/dhcpd.conf
 ```
 
-Contenuto
+Содержание
 
 ```bash
 authoritative;
@@ -544,7 +544,7 @@ authoritative;
 default-lease-time 600;
 max-lease-time 7200;
 
-option domain-name "officinas.edu";
+option domain-name "educatux.edu";
 option domain-name-servers 192.168.70.254;
 
 subnet 192.168.70.0 netmask 255.255.255.0 {
@@ -559,97 +559,97 @@ subnet 192.168.70.0 netmask 255.255.255.0 {
 }
 ```
 
-Creare il file di locazione:
+Создайте файл аренды:
 
 ```bash
 sudo mkdir -p /var/lib/dhcp
 sudo touch /var/lib/dhcp/dhcpd.leases
 ```
 
-Creazione del servizio runit
+Создание сервиса Runit
 
 ```bash
 sudo vim /etc/sv/dhcpd4/conf
 ```
 
-Contenuto
+Содержание
 
 ```bash
 OPTS="-4 -q -cf /etc/dhcpd.conf eth1"
 ```
 
-Spiegazione:
+Объяснение:
 
-- -4→IPv4
-- -q → modalità silenziosa
-- -cf → percorso corretto di dhcpd.conf
-- eth1 → interfaccia LAN
+- -4 → IPv4
+- -q → беззвучный режим
+- -cf → исправить путь к dhcpd.conf
+- eth1 → интерфейс LAN
 
-Attiva il servizio in runit:
+Активируйте службу в runit:
 
 ```bash
 sudo ln -s /etc/sv/dhcpd4 /var/service/
 ```
 
-Avvio/Riavvio:
+Запуск/Перезапуск:
 
 ```bash
 sudo sv restart dhcpd4
 ```
 
-Controlla lo stato:
+Проверить статус:
 
 ```bash
 sudo sv status dhcpd4
 ```
 
-Risultato atteso:
+Ожидаемый результат:
 
 ```bash
 run: dhcpd4: (pid 17652) 831s; run: log: (pid 15544) 1213s
 ```
 
-Controllare l'ascolto sulla porta 67
+Проверьте прослушивание порта 67
 
 ```bash
 UNCONN 0      0            0.0.0.0:67        0.0.0.0:*    users:(("dhcpd",pid=17652,fd=6))  
 ```
 
-Monitora il DHCP in tempo reale
+Мониторинг DHCP в режиме реального времени
 
 ```bash
 sudo tcpdump -ni eth1 port 67 or port 68
 ```
 
-Risultato atteso
+Ожидаемый результат
 
 ```bash
 tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
 listening on eth1, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 ```
 
-Per il debug diretto (senza runit)
+Для прямой отладки (без рунита)
 
 ```bash
 sudo dhcpd -4 -d -cf /etc/dhcpd.conf eth1
 ```
 
-Questo dovrebbe essere visibile
+Это должно показать
 
-- DHCPDISCOVER
-- OFFERTA DHCP
-- RICHIESTA DHCP
+- DHCPОБНАРУЖЕНИЕ
+- DHCPПредложение
+- DHCPREQUEST
 - DHCPACK
 
-File importanti
+Важные файлы
 
-- /etc/dhcpd.conf → Configurazione principale
-- /var/lib/dhcp/dhcpd.leases → Leasing
-- /etc/sv/dhcpd4/run → Script runit
-- /etc/sv/dhcpd4/conf → Parametri del servizio
-- /var/service/dhcpd4 → Servizio attivo
+- /etc/dhcpd.conf → Основная конфигурация
+- /var/lib/dhcp/dhcpd.leases → Аренда
+- /etc/sv/dhcpd4/run → Запуск сценария
+- /etc/sv/dhcpd4/conf → Параметры службы
+- /var/service/dhcpd4 → Служба активна
 
-Modifica lo script iptables per consentire il DHCP sulla LAN. Aggiungi PRIMA delle regole DROP implicite:
+Настройте сценарий iptables, чтобы разрешить DHCP в локальной сети. Добавьте ПЕРЕД неявными правилами DROP:
 
 ```bash
 # ============================
@@ -660,48 +660,48 @@ iptables -A INPUT  -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
 iptables -A OUTPUT -o $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
 ```
 
-💡 DHCP utilizza il broadcast → senza questo, il client non ottiene un IP.
+💡 DHCP использует широковещательную рассылку → без этого клиент не получит IP.
 
-Riapplicare il firewall:
+Повторно примените брандмауэр:
 
 ```bash
 sudo /usr/local/bin/firewall
 ```
 
-Test su una VM LAN
+Тестирование на виртуальной машине в локальной сети
 
 ```bash
 dhclient -v
 ```
 
-Nel firewall, monitora
+В брандмауэре мониторьте
 
 ```bash
 sudo tail -f /var/log/messages
 ```
 
-O
+Или
 
 ```bash
 sudo tcpdump -ni eth1 port 67 or port 68
 ```
 
-## 15. 🎉 CHECKLIST FINALE
+## 15. 🎉 ЗАКЛЮЧИТЕЛЬНЫЙ КОНТРОЛЬНЫЙ СПИСОК
 
-- SSH invisibile senza bussare
-- Bussare monouso
-- Finestra di accesso breve
-- Fail2ban attivo dopo l'autenticazione
-- Divieto di ignorare bussare
-- NAT funzionale
-- Firewall persistente
-- Proxmox accessibile solo tramite tunnel
-- DNS ricorsivo minimo (fino all'ingresso del PDC)
-- Server DHCP
+- Невидимый SSH без стука
+- Одноразовый стук
+- Короткое окно доступа
+- Активная пост-аутентификация Fail2ban
+- Забанить игнорировать стук
+- Функциональный НАТ
+- Постоянный брандмауэр
+- Proxmox доступен только через туннель
+- Минимальный рекурсивный DNS (до входа PDC)
+- DHCP-сервер
 
 ---
 
-🎯 E' TUTTO RAGAZZE!
+🎯ВОТ ВСЕ, ЛЮДИ!
 
 👉 https://t.me/z3r0l135
 👉 https://t.me/vcatafesta

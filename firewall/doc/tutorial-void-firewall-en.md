@@ -1,10 +1,10 @@
-# 🧩 VOID LINUX TUTORIAL – FIREWALL-IMPLEMENTIERUNG – LABOR-WORKSHOPS
+# 🧩 VOID LINUX TUTORIAL - FIREWALL IMPLEMENTATION - EDUCATUX LABORATORY
 
-📌 Firewall mit öffentlicher IP, Void Linux (glibc), IPTables (Legacy), NAT, Port Knocking, Fail2ban, DHCP-Server und rekursivem DNS
+📌 Firewall with Public IP, Void Linux (glibc), IPTables (legacy), NAT, Port Knocking, Fail2ban, DHCP Server and recursive DNS
 
 ---
 
-## ✅ 1. NETZWERKTOPOLOGIE
+## ✅ 1. NETWORK TOPOLOGY
 
 ```bash
 Internet
@@ -20,7 +20,7 @@ eth1 (LAN): 192.168.70.254/24
 [Rede interna / Switch]
 ```
 
-Blick aus einem anderen Blickwinkel
+View from another angle
 
 ```bash
 Internet
@@ -36,29 +36,29 @@ Fail2ban (analisa auth.log)
 iptables (ban definitivo do IP)
 ```
 
-Die Firewall ist der einzige Host, der dem Internet ausgesetzt ist.
+The firewall is the only host exposed to the Internet.
 
-## ✅ 2. ZIELE UND ANNAHMEN
+## ✅ 2. OBJECTIVES AND ASSUMPTIONS
 
-- Standardrichtlinie verweigern
-- Aktives IPv4-Routing
-- Der Scanner sieht die Tür nie
-- Firewall als einziger Eintrittspunkt
-- Keine Web-Dashboards veröffentlicht
-- SSH geschützt durch Port Knocking
-- Brute-Force-Kontrolle über Fail2ban
-- Kontrolliertes NAT für das LAN
-- Fernverwaltung über SSH-Tunnel
+- Deny default policy
+- Active IPv4 routing
+- Scanner never sees the door
+- Firewall as the only point of entry
+- No web dashboards published
+- SSH protected by Port Knocking
+- Brute-force control via Fail2ban
+- Controlled NAT for the LAN
+- Remote administration via SSH tunnel
 
-## ✅ 3. ERFORDERLICHE PAKETE AKTUALISIEREN UND INSTALLIEREN
+## ✅ 3. UPDATE AND INSTALL NECESSARY PACKAGES
 
-Aktualisieren Sie das System
+Update the system
 
 ```bash
 sudo xbps-install -Syu
 ```
 
-Installieren Sie die Pakete
+Install the packages
 
 ```bash
 sudo xbps-install -y \
@@ -72,13 +72,13 @@ sudo xbps-install -y \
   fail2ban
 ```
 
-## ✅ 4. SSH-KONFIGURATION
+## ✅ 4. SSH CONFIGURATION
 
 ```bash
 sudo vim /etc/ssh/sshd_config
 ```
 
-Passen Sie die spitzen Linien an
+Adjust the pointed lines
 
 ```bash
 Port 2222
@@ -92,39 +92,39 @@ SyslogFacility AUTH
 LogLevel INFO
 ```
 
-Fail2ban hängt vom Protokoll ab, garantiert die Leitungen
+Fail2ban depends on log, guarantee the lines
 
 ```bash
 SyslogFacility AUTH
 LogLevel INFO
 ```
 
-Bestätigen Sie die Protokollerstellung
+Confirm log generation
 
 ```bash
 sudo tail -f /var/log/auth.log
 ```
 
-## Dienstaktivierung
+## Service activation
 
 ```bash
 sudo ln -s /etc/sv/sshd /var/service/
 sudo sv start sshd
 ```
 
-## Nach vollständiger Bereitstellung:
+## After full deployment:
 
-- Deaktivieren Sie die Root-Anmeldung
+- Disable root login
 
-- Verwenden Sie nur die Schlüsselauthentifizierung
+- Use only key authentication
 
-## ✅ 5. FIREWALL-NETZWERK-EINRICHTUNG
+## ✅ 5. FIREWALL NETWORK SETUP
 
 ```bash
 sudo vim /etc/dhcpcd.conf
 ```
 
-Inhalt
+Content
 
 ```bash
 # CONFIGURAÇÃO DE REDE DO FIREWALL
@@ -141,27 +141,27 @@ static ip_address=192.168.70.254/24
 nogateway
 ```
 
-Anwenden
+Apply
 
 ```bash
 sudo sv restart dhcpcd
 ```
 
-## ✅ 6. PORT KNOCKING – KERNEL-UNTERSTÜTZUNG
+## ✅ 6. PORT KNOCKING – KERNEL SUPPORT
 
-Laden Sie das erforderliche Modul
+Load the required module
 
 ```bash
 sudo modprobe xt_recent
 ```
 
-Bestätigen:
+Validate:
 
 ```bash
 sudo lsmod | grep xt_recent
 ```
 
-Erwartetes Ergebnis
+Expected result
 
 ```bash
 xt_recent              24576  0
@@ -170,31 +170,31 @@ x_tables               65536  1 xt_recent
 
 ## ✅ 7. FIREWALL IPTABLES
 
-Aktivieren Sie das Routing zwischen Firewall-Netzwerkkarten
+Enable routing between Firewall network cards
 
 ```bash
 sudo vim /etc/sysctl.conf
 ```
 
-Inhalt
+Content
 
 ```bash
 net.ipv4.ip_forward=1
 ```
 
-Ohne Neustart anwenden:
+Apply without reboot:
 
 ```bash
 sudo sysctl --system
 ```
 
-Erstellen Sie das Firewall-Skript in /usr/local/bin
+Create the firewall script in /usr/local/bin
 
 ```bash
 sudo vim /usr/local/bin/firewall
 ```
 
-Inhalt
+Content
 
 ```bash
 #!/bin/sh
@@ -286,35 +286,35 @@ iptables -A INPUT -p tcp --tcp-flags SYN,FIN SYN,FIN -j DROP
 exit 0
 ```
 
-Berechtigung anwenden und ausführen
+Apply permission and execute
 
 ```bash
 sudo chmod +x /usr/local/bin/firewall
 sudo bash /usr/local/bin/firewall
 ```
 
-## ✅ 8. Firewall-Persistenz in Runit
+## ✅ 8. FIREWALL PERSISTENCE IN RUNIT
 
-Erstellen Sie das Verzeichnis
+Create the directory
 
 ```bash
 sudo mkdir -p /etc/sv/firewall
 ```
 
-Erstellen Sie die Datei
+Create the file
 
 ```bash
 sudo vim /etc/sv/firewall/run
 ```
 
-Inhalt
+Content
 
 ```bash
 #!/bin/sh
 exec /usr/local/bin/firewall
 ```
 
-Status aktivieren, ausführen und validieren
+Activate, run and validate status
 
 ```bash
 sudo chmod +x /etc/sv/firewall/run
@@ -322,26 +322,26 @@ sudo ln -s /etc/sv/firewall /var/service/
 sudo sv status firewall
 ```
 
-## ✅ 9. TESTEN UND VALIDIEREN (HEISS) VON PORT KNOCKING
+## ✅ 9. TESTING AND VALIDATION (HOT) OF PORT KNOCKING
 
-Überwachen Sie das Klopfen an einem Terminal OHNE FIREWALL
+Monitor knock on a terminal WITHOUT FIREWALL
 
 ```bash
 sudo tcpdump -ni eth0 tcp port 12345
 ```
 
-Senden Sie den Klopf DURCH NOTIZBUCH über EXTERNEN Zugriff
+Send the knock BY NOTEBOOK via EXTERNAL access
 
 ```bash
 sudo nc -z 39.236.83.109 12345
 ```
 
-✔ SYN kommt
-✔ Es ist GEFALLEN
-✔ Bleiben Sie registriert
-✔ Status ist sichtbar
+✔ SYN arrives
+✔ It's DROPed
+✔ Stay registered
+✔ status is visible
 
-Erwartetes Ergebnis in tcpdump
+Expected result in tcpdump
 
 ```bash
 tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
@@ -355,67 +355,67 @@ listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 0 packets dropped by kernel
 ```
 
-Wichtiger technischer Hinweis
+Important technical note
 
-- Der RST wird über den TCP-Stack gesendet
-- Das Paket wird von xt_recent registriert
-- Der Port antwortet nicht als Dienst
-- Es gibt kein Banner oder Fingerabdruck
+- The RST is sent via the TCP stack
+- The package is registered by xt_recent
+- Port does not respond as a service
+- There is no banner or fingerprint
 
-Validieren Sie die IP-Registrierung
+Validate IP registration
 
 ```bash
 sudo cat /proc/net/xt_recent/SSH_KNOCK
 ```
 
-Erwartetes Ergebnis
+Expected result
 
 ```bash
 src=99.336.74.209 ttl: 61 last_seen: 4302299386 oldest_pkt: 7 4302292227, 4302293242, 4302294266, 4302295290, 4302296314, 4302297338, 4302299386
 ```
 
-WENN Sie alle Stöße beseitigen möchten
+IF you want to clear all knocks
 
 ```bash
 sudo echo clear > /proc/net/xt_recent/SSH_KNOCK
 ```
 
-## ✅ 10. EXTERNEN ADMINISTRATIVEN ZUGRIFF DURCHFÜHREN
+## ✅ 10. PERFORM EXTERNAL ADMINISTRATIVE ACCESS
 
-Führe den Klopf aus
+Execute the knock
 
 ```bash
 nc -z 39.236.83.109 12345
 ```
 
-Innerhalb von 15 Sekunden Zugriff
+Within 15 seconds, access
 
 ```bash
 ssh -p 2222 supertux@39.236.83.109
 ```
 
-Empfohlene Aliase
+Recommended aliases
 
 ```bash
 vim ~/.bashrc
 ```
 
-Inhalt
+Content
 
 ```bash
 alias knock='nc -z 39.236.83.109 12345'
-alias officinas='ssh -p 2222 supertux@39.236.83.109'
+alias firewall='ssh -p 2222 supertux@39.236.83.109'
 ```
 
-Lesen Sie die Datei zur Validierung erneut
+Reread the file for validation
 
 ```bash
 source ~/.bashrc
 ```
 
-11. ✅ FAIL2BAN – NACHKLOPFSCHUTZ
+11. ✅ FAIL2BAN – POST-KNOCK PROTECTION
 
-Protokollanpassungen zur Einhaltung von fail2ban
+Log adjustments to comply with fail2ban
 
 ```bash
 sudo xbps-install -y socklog-void
@@ -424,13 +424,13 @@ sudo ln -s /etc/sv/nanoklogd /var/service/
 sudo touch /var/log/auth.log
 ```
 
-Konfigurationsdatei erstellen (niemals jail.conf bearbeiten)
+Create configuration file (Never edit jail.conf)
 
 ```bash
 sudo vim /etc/fail2ban/jail.local
 ```
 
-Inhalt:
+Content:
 
 ```bash
 [DEFAULT]
@@ -449,7 +449,7 @@ findtime = 5m
 bantime  = 24h
 ```
 
-Runit-Aktivierung
+Runit activation
 
 ```bash
 sudo ln -s /etc/sv/fail2ban /var/service/
@@ -457,43 +457,43 @@ sudo sv start fail2ban
 sudo sv status fail2ban
 ```
 
-## 12. ✅ FAIL2BAN-TEST (ACHTUNG, SIE SPERREN SICH AUS!)
+## 12. ✅ FAIL2BAN TEST (ATTENTION, YOU LOCK YOURSELF OUT!)
 
-Ausführen oder klopfen
+Execute o knock
 
 ```bash
 nc -z 39.236.83.109 12345
 ```
 
-Versuchen Sie dreimal SSH mit dem falschen Passwort
+Try SSH with the wrong password 3 times
 
-Überprüfen Sie das Verbot
+Check the ban
 
 ```bash
 sudo fail2ban-client status sshd
 ```
 
-Manuell entsperren:
+Unban manually:
 
 ```bash
 sudo fail2ban-client set sshd unbanip X.X.X.X
 ```
 
-## ⚠️ ACHTUNG: DIE FOLGENDEN ABSCHNITTE 13 und 14, DIE SICH MIT REKURSIVEM DNS UND DHCP-SERVER BEHANDELN, MÜSSEN NACH DEM UPGRADE VON SAMBA4 ALS PDC ENTFERNT WERDEN!!
+## ⚠️ ATTENTION: THE FOLLOWING SECTIONS 13 and 14, WHICH DEAL WITH RECURSIVE DNS AND DHCP SERVER, MUST BE DISCARDED AFTER UPGRADING SAMBA4 AS PDC!!
 
-## 13. ✅ BEREITSTELLEN EINES TEMPORÄREN REKURSIVEN DNS, UM DAS INTERNE NETZWERK ZU BEDIENEN
+## 13. ✅ DEPLOYING A TEMPORARY RECURSIVE DNS TO SERVE THE INTERNAL NETWORK
 
 ```bash
 sudo xbps-install -y unbound
 ```
 
-Mindestkonfiguration
+Minimum configuration
 
 ```bash
 sudo vim /etc/unbound/unbound.conf
 ```
 
-Inhalt
+Content
 
 ```bash
 server:
@@ -508,35 +508,35 @@ server:
   qname-minimisation: yes
 ```
 
-Dienst aktivieren (runit):
+Activate service (runit):
 
 ```bash
 ln -s /etc/sv/unbound /var/service/
 sv start unbound
 ```
 
-## 14. ✅ IMPLEMENTIERUNG EINES TEMPORÄREN DHCP-SERVERS ZUM BEDIENEN DES INTERNEN NETZWERKS
+## 14. ✅ IMPLEMENTATION OF TEMPORARY DHCP SERVER TO SERVE THE INTERNAL NETWORK
 
-Paketinstallation
+Package installation
 
 ```bash
 sudo xbps-install -y dhcp
 ```
 
-Dieses Paket installiert:
+This package installs:
 
-- dhcpd (Server)
-- Runit-Dienststruktur:
+- dhcpd (server)
+- Runit service structure:
 /etc/sv/dhcpd4
 /etc/sv/dhcpd6
 
-Bearbeiten Sie die Datei und konfigurieren Sie die Einstellungen für das interne Netzwerk
+Edit the file and configure the settings for the internal network
 
 ```bash
 sudo vim /etc/dhcpd.conf
 ```
 
-Inhalt
+Content
 
 ```bash
 authoritative;
@@ -544,7 +544,7 @@ authoritative;
 default-lease-time 600;
 max-lease-time 7200;
 
-option domain-name "officinas.edu";
+option domain-name "educatux.edu";
 option domain-name-servers 192.168.70.254;
 
 subnet 192.168.70.0 netmask 255.255.255.0 {
@@ -559,97 +559,97 @@ subnet 192.168.70.0 netmask 255.255.255.0 {
 }
 ```
 
-Erstellen Sie die Mietvertragsdatei:
+Create the lease file:
 
 ```bash
 sudo mkdir -p /var/lib/dhcp
 sudo touch /var/lib/dhcp/dhcpd.leases
 ```
 
-Erstellung des Runit-Dienstes
+Runit service creation
 
 ```bash
 sudo vim /etc/sv/dhcpd4/conf
 ```
 
-Inhalt
+Content
 
 ```bash
 OPTS="-4 -q -cf /etc/dhcpd.conf eth1"
 ```
 
-Erläuterung:
+Explanation:
 
 - -4 → IPv4
-- -q → Silent-Modus
-- -cf → korrekten dhcpd.conf-Pfad
-- eth1 → Schnittstelle LAN
+- -q → silent mode
+- -cf → correct dhcpd.conf path
+- eth1            → interface LAN
 
-Aktivieren Sie den Dienst in runit:
+Activate the service in runit:
 
 ```bash
 sudo ln -s /etc/sv/dhcpd4 /var/service/
 ```
 
-Start/Neustart:
+Start/Restart:
 
 ```bash
 sudo sv restart dhcpd4
 ```
 
-Status prüfen:
+Check status:
 
 ```bash
 sudo sv status dhcpd4
 ```
 
-Erwartetes Ergebnis:
+Expected result:
 
 ```bash
 run: dhcpd4: (pid 17652) 831s; run: log: (pid 15544) 1213s
 ```
 
-Überprüfen Sie, ob Port 67 überwacht wird
+Check port 67 listening
 
 ```bash
 UNCONN 0      0            0.0.0.0:67        0.0.0.0:*    users:(("dhcpd",pid=17652,fd=6))  
 ```
 
-Überwachen Sie DHCP in Echtzeit
+Monitor DHCP in real time
 
 ```bash
 sudo tcpdump -ni eth1 port 67 or port 68
 ```
 
-Erwartetes Ergebnis
+Expected result
 
 ```bash
 tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
 listening on eth1, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 ```
 
-Zum direkten Debuggen (ohne Runit)
+For direct debugging (without runit)
 
 ```bash
 sudo dhcpd -4 -d -cf /etc/dhcpd.conf eth1
 ```
 
-Das sollte sich zeigen
+This should show
 
 - DHCPDISCOVER
-- DHCPANGEBOT
+- DHCPOFFER
 - DHCPREQUEST
 - DHCPACK
 
-Wichtige Dateien
+Important files
 
-- /etc/dhcpd.conf → Hauptkonfiguration
-- /var/lib/dhcp/dhcpd.leases → Leasingverträge
-- /etc/sv/dhcpd4/run → Skript runit
-- /etc/sv/dhcpd4/conf → Dienstparameter
-- /var/service/dhcpd4 → Dienst aktiv
+- /etc/dhcpd.conf → Main configuration
+- /var/lib/dhcp/dhcpd.leases      → Leases
+- /etc/sv/dhcpd4/run              → Script runit
+- /etc/sv/dhcpd4/conf → Service parameters
+- /var/service/dhcpd4 → Service active
 
-Passen Sie das iptables-Skript an, um DHCP im LAN zuzulassen. Fügen Sie VOR den impliziten DROP-Regeln Folgendes hinzu:
+Adjust the iptables script to allow DHCP on the LAN. Add BEFORE the implicit DROP rules:
 
 ```bash
 # ============================
@@ -660,48 +660,48 @@ iptables -A INPUT  -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
 iptables -A OUTPUT -o $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
 ```
 
-💡 DHCP nutzt Broadcast → ohne dies erhält der Client keine IP.
+💡 DHCP uses broadcast → without this, the client does not get an IP.
 
-Wenden Sie die Firewall erneut an:
+Reapply the firewall:
 
 ```bash
 sudo /usr/local/bin/firewall
 ```
 
-Testen auf einer LAN-VM
+Testing on a LAN VM
 
 ```bash
 dhclient -v
 ```
 
-In der Firewall überwachen
+In the firewall, monitor
 
 ```bash
 sudo tail -f /var/log/messages
 ```
 
-Oder
+Or
 
 ```bash
 sudo tcpdump -ni eth1 port 67 or port 68
 ```
 
-## 15. 🎉 CHECKLISTE FINALE
+## 15. 🎉  CHECKLIST FINAL
 
-- Unsichtbares SSH ohne Klopfen
-- Einweg-Knock
-- Kurzes Zugriffsfenster
-- Fail2ban aktiv nach der Authentifizierung
-- Verbot, Klopfen zu ignorieren
-- Funktionelles NAT
-- Permanente Firewall
-- Proxmox nur über Tunnel erreichbar
-- Minimales rekursives DNS (bis PDC eintritt)
-- DHCP-Server
+- Invisible SSH without knock
+- Single-use Knock
+- Short access window
+- Fail2ban active post-auth
+- Ban ignore knock
+- Functional NAT
+- Persistent firewall
+- Proxmox only accessible via tunnel
+- Minimal recursive DNS (Until PDC enters)
+- DHCP Server
 
 ---
 
-🎯 DAS IST ALLES, LEUTE!
+🎯 THAT'S ALL FOLKS!
 
 👉 https://t.me/z3r0l135
 👉 https://t.me/vcatafesta
