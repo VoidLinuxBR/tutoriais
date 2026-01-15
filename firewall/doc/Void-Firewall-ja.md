@@ -1,4 +1,4 @@
-#  🧩 VOID LINUX チュートリアル — セキュリティ スキームの実装 – ラボラトリー ワークショップ
+# 🧩 VOID LINUX チュートリアル - ファイアウォールの実装 - 実験室ワークショップ
 
 📌 パブリック IP を備えたファイアウォール、Void Linux (glibc)、IPTables (レガシー)、NAT、ポート ノッキング、Fail2ban、DHCP サーバー、再帰的 DNS
 
@@ -524,6 +524,7 @@ sudo xbps-install -y dhcp
 ```
 
 このパッケージは以下をインストールします:
+
 - dhcpd (サーバー)
 - Runit サービスの構造:
 /etc/sv/dhcpd4
@@ -578,6 +579,7 @@ OPTS="-4 -q -cf /etc/dhcpd.conf eth1"
 ```
 
 説明：
+
 - -4 → IPv4
 - -q → サイレントモード
 - -cf → 正しい dhcpd.conf パス
@@ -633,6 +635,7 @@ sudo dhcpd -4 -d -cf /etc/dhcpd.conf eth1
 ```
 
 これで表示されるはずです
+
 - DHCPディスカバー
 - DHCPOFFER
 - DHCPリクエスト
@@ -648,12 +651,14 @@ sudo dhcpd -4 -d -cf /etc/dhcpd.conf eth1
 
 LAN 上で DHCP を許可するように iptables スクリプトを調整します。暗黙的な DROP ルールの前に追加します。
 
-# ==========================================
+```bash
+# ============================
 # DHCP LAN
-# ==========================================
+# ============================
 
-iptables -A INPUT -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+iptables -A INPUT  -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
 iptables -A OUTPUT -o $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+```
 
 💡 DHCP はブロードキャストを使用します → これがないと、クライアントは IP を取得できません。
 
@@ -700,83 +705,3 @@ sudo tcpdump -ni eth1 port 67 or port 68
 
 👉 チリ_REF_0_チリ
 👉 チリ_REF_0_チリ
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,4 +1,4 @@
-#  🧩 TUTORIAL VOID LINUX – IMPLEMENTACIÓN DEL ESQUEMA DE SEGURIDAD – TALLERES DE LABORATORIO
+# 🧩 TUTORIAL VOID LINUX - IMPLEMENTACIÓN DE FIREWALL - TALLERES DE LABORATORIO
 
 📌 Firewall con IP Pública, Void Linux (glibc), IPTables (legacy), NAT, Port Knocking, Fail2ban, Servidor DHCP y DNS recursivo
 
@@ -524,6 +524,7 @@ sudo xbps-install -y dhcp
 ```
 
 Este paquete instala:
+
 - dhcpd (servidor)
 - Estructura del servicio Runit:
 /etc/sv/dhcpd4
@@ -578,6 +579,7 @@ OPTS="-4 -q -cf /etc/dhcpd.conf eth1"
 ```
 
 Explicación:
+
 - -4 → IPv4
 - -q → modo silencioso
 - -cf → ruta correcta de dhcpd.conf
@@ -633,6 +635,7 @@ sudo dhcpd -4 -d -cf /etc/dhcpd.conf eth1
 ```
 
 Esto debería mostrar
+
 - DHCPDESCUBRIR
 - DHCPOFFER
 - DHCPREQUEST
@@ -648,12 +651,14 @@ Archivos importantes
 
 Ajuste el script iptables para permitir DHCP en la LAN. Agregue ANTES de las reglas DROP implícitas:
 
-# =============================================
-# LAN DHCP
-# =============================================
+```bash
+# ============================
+# DHCP LAN
+# ============================
 
-iptables -A ENTRADA -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACEPTAR
-iptables -A SALIDA -o $LAN -p udp --sport 67:68 --dport 67:68 -j ACEPTAR
+iptables -A INPUT  -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+iptables -A OUTPUT -o $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+```
 
 💡 DHCP usa transmisión → sin esto, el cliente no obtiene una IP.
 
@@ -700,83 +705,3 @@ sudo tcpdump -ni eth1 port 67 or port 68
 
 👉https://t.me/z3r0l135
 👉https://t.me/vcatafesta
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

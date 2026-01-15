@@ -1,4 +1,4 @@
-#  🧩 TUTORIAL VOID LINUX — IMPLANTAÇÃO DO ESQUEMA DE SEGURANÇA – LABORATÓRIO OFFICINAS
+# 🧩 TUTORIAL VOID LINUX - IMPLANTAÇÃO DO FIREWALL - LABORATÓRIO OFFICINAS
 
 📌 Firewall com IP Público, Void Linux (glibc), IPTables (legacy), NAT, Port Knocking, Fail2ban, DHCP Server e DNS recursivo
 
@@ -524,6 +524,7 @@ sudo xbps-install -y dhcp
 ```
 
 Esse pacote instala:
+
 - dhcpd (servidor)
 - Estrutura de serviço runit:
     /etc/sv/dhcpd4
@@ -578,6 +579,7 @@ OPTS="-4 -q -cf /etc/dhcpd.conf eth1"
 ```
 
 Explicação:
+
 - -4              → IPv4
 - -q              → modo silencioso
 - -cf             → caminho correto do dhcpd.conf
@@ -633,6 +635,7 @@ sudo dhcpd -4 -d -cf /etc/dhcpd.conf eth1
 ```
 
 Isso deve mostrar
+
 - DHCPDISCOVER
 - DHCPOFFER
 - DHCPREQUEST
@@ -648,12 +651,14 @@ Arquivos importantes
 
 Ajuste no script do iptables para permitir DHCP na LAN. Adicione ANTES das regras DROP implícitas:
 
+```bash
 # ============================
 # DHCP LAN
 # ============================
 
 iptables -A INPUT  -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
 iptables -A OUTPUT -o $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+```
 
 💡 DHCP usa broadcast → sem isso, cliente não pega IP.
 
@@ -700,83 +705,3 @@ sudo tcpdump -ni eth1 port 67 or port 68
 
 👉 https://t.me/z3r0l135
 👉 https://t.me/vcatafesta
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,4 +1,4 @@
-#  🧩 VOID LINUX TUTORIAL – SICHERHEITSSCHEMA-IMPLEMENTIERUNG – LABOR-WORKSHOPS
+# 🧩 VOID LINUX TUTORIAL – FIREWALL-IMPLEMENTIERUNG – LABOR-WORKSHOPS
 
 📌 Firewall mit öffentlicher IP, Void Linux (glibc), IPTables (Legacy), NAT, Port Knocking, Fail2ban, DHCP-Server und rekursivem DNS
 
@@ -524,6 +524,7 @@ sudo xbps-install -y dhcp
 ```
 
 Dieses Paket installiert:
+
 - dhcpd (Server)
 - Runit-Dienststruktur:
 /etc/sv/dhcpd4
@@ -578,6 +579,7 @@ OPTS="-4 -q -cf /etc/dhcpd.conf eth1"
 ```
 
 Erläuterung:
+
 - -4 → IPv4
 - -q → Silent-Modus
 - -cf → korrekten dhcpd.conf-Pfad
@@ -633,6 +635,7 @@ sudo dhcpd -4 -d -cf /etc/dhcpd.conf eth1
 ```
 
 Das sollte sich zeigen
+
 - DHCPDISCOVER
 - DHCPANGEBOT
 - DHCPREQUEST
@@ -648,12 +651,14 @@ Wichtige Dateien
 
 Passen Sie das iptables-Skript an, um DHCP im LAN zuzulassen. Fügen Sie VOR den impliziten DROP-Regeln Folgendes hinzu:
 
-# ==========================================
-# DHCP-LAN
-# ==========================================
+```bash
+# ============================
+# DHCP LAN
+# ============================
 
-iptables -A INPUT -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+iptables -A INPUT  -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
 iptables -A OUTPUT -o $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+```
 
 💡 DHCP nutzt Broadcast → ohne dies erhält der Client keine IP.
 
@@ -700,83 +705,3 @@ sudo tcpdump -ni eth1 port 67 or port 68
 
 👉 https://t.me/z3r0l135
 👉 https://t.me/vcatafesta
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

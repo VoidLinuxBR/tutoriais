@@ -1,4 +1,4 @@
-#  🧩 TUTORIEL VOID LINUX — MISE EN ŒUVRE DU SYSTÈME DE SÉCURITÉ – ATELIERS DE LABORATOIRE
+# 🧩 TUTORIEL VOID LINUX - IMPLÉMENTATION DU PARE-FEU - ATELIERS DE LABORATOIRE
 
 📌 Pare-feu avec IP publique, Void Linux (glibc), IPTables (héritage), NAT, Port Knocking, Fail2ban, serveur DHCP et DNS récursif
 
@@ -524,6 +524,7 @@ sudo xbps-install -y dhcp
 ```
 
 Ce package installe :
+
 - dhcpd (serveur)
 - Structure du service Runit :
 /etc/sv/dhcpd4
@@ -578,6 +579,7 @@ OPTS="-4 -q -cf /etc/dhcpd.conf eth1"
 ```
 
 Explication:
+
 - -4 → IPv4
 - -q → mode silencieux
 - -cf → corriger le chemin dhcpd.conf
@@ -633,6 +635,7 @@ sudo dhcpd -4 -d -cf /etc/dhcpd.conf eth1
 ```
 
 Cela devrait montrer
+
 - DHCPDÉCOUVRIR
 - OFFRE DHCP
 - DEMANDE DHCP
@@ -648,12 +651,14 @@ Fichiers importants
 
 Ajustez le script iptables pour autoriser DHCP sur le réseau local. Ajoutez AVANT les règles DROP implicites :
 
-# ============================================
-# Réseau local DHCP
-# ============================================
+```bash
+# ============================
+# DHCP LAN
+# ============================
 
-iptables -A INPUT -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPTER
+iptables -A INPUT  -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
 iptables -A OUTPUT -o $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+```
 
 💡 DHCP utilise la diffusion → sans cela, le client n'obtient pas d'adresse IP.
 
@@ -700,83 +705,3 @@ sudo tcpdump -ni eth1 port 67 or port 68
 
 👉 https://t.me/z3r0l135
 👉 https://t.me/vcatafesta
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

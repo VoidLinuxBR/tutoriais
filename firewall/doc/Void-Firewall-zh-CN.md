@@ -1,4 +1,4 @@
-#  🧩 VOID LINUX 教程 — 安全方案实施 — 实验室研讨会
+# 🧩 VOID LINUX 教程 - 防火墙实现 - 实验室研讨会
 
 📌 具有公共 IP、Void Linux (glibc)、IPTables（旧版）、NAT、端口敲门、Fail2ban、DHCP 服务器和递归 DNS 的防火墙
 
@@ -524,6 +524,7 @@ sudo xbps-install -y dhcp
 ```
 
 该软件包安装：
+
 - dhcpd（服务器）
 - Runit服务结构：
 /etc/sv/dhcpd4
@@ -578,6 +579,7 @@ OPTS="-4 -q -cf /etc/dhcpd.conf eth1"
 ```
 
 解释：
+
 - -4 → IPv4
 - -q → 静默模式
 - -cf → 正确的 dhcpd.conf 路径
@@ -633,6 +635,7 @@ sudo dhcpd -4 -d -cf /etc/dhcpd.conf eth1
 ```
 
 这应该显示
+
 - DHCP发现
 - DHCP优惠
 - DHCP请求
@@ -648,12 +651,14 @@ sudo dhcpd -4 -d -cf /etc/dhcpd.conf eth1
 
 调整 iptables 脚本以允许 LAN 上的 DHCP。在隐式 DROP 规则之前添加：
 
-# =============================================
-# DHCP 局域网
-# =============================================
+```bash
+# ============================
+# DHCP LAN
+# ============================
 
-iptables -A 输入 -i $LAN -p udp --sport 67:68 --dport 67:68 -j 接受
-iptables -A 输出 -o $LAN -p udp --sport 67:68 --dport 67:68 -j 接受
+iptables -A INPUT  -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+iptables -A OUTPUT -o $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+```
 
 💡 DHCP 使用广播 → 如果没有广播，客户端将无法获得 IP。
 
@@ -700,83 +705,3 @@ sudo tcpdump -ni eth1 port 67 or port 68
 
 👉 https://t.me/z3r0l135
 👉 https://t.me/vcatafesta
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

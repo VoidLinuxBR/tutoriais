@@ -1,4 +1,4 @@
-#  🧩 VOID LINUX 튜토리얼 — 보안 체계 구현 – 실험실 워크샵
+# 🧩 VOID LINUX 튜토리얼 - 방화벽 구현 - 실험실 워크숍
 
 😀 공용 IP를 갖춘 방화벽, Void Linux(glibc), IPTables(레거시), NAT, 포트 노킹, Fail2ban, DHCP 서버 및 재귀 DNS
 
@@ -524,6 +524,7 @@ sudo xbps-install -y dhcp
 ```
 
 이 패키지는 다음을 설치합니다:
+
 - dhcpd(서버)
 - Runit 서비스 구조:
 /etc/sv/dhcpd4
@@ -578,6 +579,7 @@ OPTS="-4 -q -cf /etc/dhcpd.conf eth1"
 ```
 
 설명:
+
 - -4 → IPv4
 - -q → 자동 모드
 - -cf → 올바른 dhcpd.conf 경로
@@ -633,6 +635,7 @@ sudo dhcpd -4 -d -cf /etc/dhcpd.conf eth1
 ```
 
 이 표시되어야합니다
+
 - DHCP 검색
 - DHCP 제안
 - DHCP요청
@@ -648,12 +651,14 @@ sudo dhcpd -4 -d -cf /etc/dhcpd.conf eth1
 
 LAN에서 DHCP를 허용하도록 iptables 스크립트를 조정하십시오. 암시적 DROP 규칙 앞에 추가합니다.
 
-# ===========================================
-# DHCP 랜
-# ===========================================
+```bash
+# ============================
+# DHCP LAN
+# ============================
 
-iptables -A INPUT -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+iptables -A INPUT  -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
 iptables -A OUTPUT -o $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+```
 
 💡 DHCP는 브로드캐스트를 사용합니다. → 이것이 없으면 클라이언트는 IP를 얻지 못합니다.
 
@@ -700,83 +705,3 @@ sudo tcpdump -ni eth1 port 67 or port 68
 
 👉 https://t.me/z3r0l135
 👉 https://t.me/vcatafesta
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
