@@ -1,20 +1,20 @@
-# Configuração do LightDM para insrção do Linux Mint no domínio
+# Configuración de LightDM para unir Linux Mint al dominio
 
-## 🎯 Objetivo Ingressar Linux no Domínio Samba4 com Winbind por integração NSS/PAM
-
----
-
-## Pré-requisitos
-
-- Samba4 como controlador de domínio (PDC)
-- Linux com DNS e horário alinhados com o PDC (192.168.70.253)
-- Conectividade com o servidor
+## 🎯 Objetivo Unir Linux al dominio Samba4 con Winbind a través de la integración NSS/PAM
 
 ---
 
-## 🛠️ Etapas
+## Requisitos previos
 
-## 1. Instalar pacotes necessários
+- Samba4 como controlador de dominio (PDC)
+- Linux con DNS y tiempo alineado con PDC (192.168.70.253)
+- Conectividad al servidor
+
+---
+
+## 🛠️ Pasos
+
+## 1. Instale los paquetes necesarios
 
 ```bash
 sudo apt update && sudo apt install samba winbind libpam-winbind libnss-winbind krb5-user
@@ -82,19 +82,19 @@ group:          compat winbind
 shadow:         compat
 ```
 
-## 5. Ingressar no domínio
+## 5. Únase al dominio
 
 ```bash
 sudo net ads join -U Administrator
 ```
 
-## 6. Reboot do Sistema
+## 6. Reinicio del sistema
 
 ```bash
 sudo reboot
 ```
 
-## 7. Verificações
+## 7. Cheques
 
 ```bash
 sudo net ads testjoin
@@ -103,39 +103,39 @@ wbinfo -g
 getent passwd usuario
 ```
 
-## 8. Criar diretórios HOME automaticamente
+## 8. Crear automáticamente directorios HOME
 
 
-## Edite /etc/pam.d/common-session e adicione:
+## Edite /etc/pam.d/common-session y agregue:
 
 ```bash
 session required pam_mkhomedir.so skel=/etc/skel umask=0022
 ```
 
-## 9. Reiniciar serviços
+## 9. Reiniciar los servicios
 
 ```bash
 sudo systemctl restart smbd nmbd winbind
 sudo systemctl enable winbind
 ```
 
-## 10. Sincronização de Hora
+## 10. Sincronización horaria
 
 ```bash
 sudo timedatectl set-ntp true
 ```
 
-## SE você for usuário de Lightdm, como é o caso do Mint, ajuste pra logar com usuário de rede, ao invés de usuário local apenas.
+## SI es un usuario de Lightdm, como es el caso de Mint, configúrelo para iniciar sesión con un usuario de red, en lugar de solo con un usuario local.
 
-## 🛠️ Passo a Passo: Configurar LightDM para aceitar usuários do domínio
+## 🛠️ Paso a paso: configurar LightDM para aceptar usuarios de dominio
 
-## 1. Editar o arquivo de configuração do LightDM
+## 1. Edite el archivo de configuración de LightDM
 
 ```bash
 sudo vim /etc/lightdm/lightdm.conf
 ```
 
-## Edite as seguintes linhas do arquivo:
+## Edite las siguientes líneas en el archivo:
 
 ```bash
 [Seat:*]
@@ -144,33 +144,33 @@ greeter-hide-users=true
 allow-guest=false
 ```
 
-## Explicações:
+## Explicaciones:
 
-- greeter-show-manual-login=true: Permite digitar o nome de usuário manualmente.
-- greeter-hide-users=true: Esconde a lista local de usuários (útil para ambientes corporativos).
-- allow-guest=false: Impede login de convidados (por segurança).
+- greeter-show-manual-login=true: Le permite ingresar el nombre de usuario manualmente.
+- greeter-hide-users=true: Oculta la lista local de usuarios (útil para entornos corporativos).
+- enable-guest=false: Impide el inicio de sesión de invitado (por seguridad).
 
-## 2. Certifique-se de que PAM está permitindo usuários do domínio
+## 2. Asegúrese de que PAM permita usuarios del dominio
 
-## Se você usou SSSD ou Winbind, o PAM já deve estar integrado corretamente. Mas valide que o módulo home esteja presente:
+## Si usó SSSD o Winbind, PAM ya debería estar integrado correctamente. Pero asegúrese de que el módulo de inicio esté presente:
 
 ```bash
 sudo vim /etc/pam.d/common-session
 ```
 
-## Confirme que esta linha existe OU adicione-a:
+## Confirme que esta línea existe O agréguela:
 
 ```bash
 session required pam_mkhomedir.so skel=/etc/skel umask=0022
 ```
 
-## 3. Reiniciar o LightDM
+## 3. Reinicie LightDM
 
 ```bash
 sudo timedatectl set-ntp true
 ```
 
-## ⚠️ Para Linux MInt baseado em Ubuntu, pode-se desativar o systemd-resolved para controlar o DNS manualmente.
+## ⚠️ Para Linux MInt basado en Ubuntu, puede desactivar systemd-resolved para controlar DNS manualmente.
 
 ```bash
 systemctl status systemd-resolved
@@ -182,13 +182,13 @@ systemctl disable systemd-resolved.service
 sudo systemctl mask systemd-resolved
 ```
 
-## REMOVENDO O ARQUIVO SEM PERMISSÃO DE EDIÇÃO CRIADO PELO SYSTEMD-RESOLVED:
+## ELIMINAR EL ARCHIVO SIN PERMISO DE EDICIÓN CREADO POR SYSTEMD-RESOLVED:
 
 ```bash
 rm -f /etc/resolv.conf
 ```
 
-## Criando um arquivo novo com permissão de edição:
+## Creando un nuevo archivo con permiso de edición:
 
 ```bash
 vim /etc/resolv.conf
@@ -200,13 +200,13 @@ search educatux.edu.
 nameserver 192.168.70.253
 ```
 
-## Bloqueando o arquivo contra edição automática
+## Bloquear el archivo contra la edición automática
 
 ```bash
 sudo chattr +i /etc/resolv.conf
 ```
 
-## Restart do serviço
+## Reinicio del servicio
 
 ```bash
 sudo systemctl restart NetworkManager
@@ -214,8 +214,8 @@ sudo systemctl restart NetworkManager
 
 ---
 
-🎯 THAT'S ALL FOLKS!
+🎯 ¡ESO ES TODO AMIGOS!
 
-👉 Contato: zerolies@disroot.org
-👉 https://t.me/z3r0l135
+👉 Contacto: zerolies@disroot.org
+👉https://t.me/z3r0l135
 

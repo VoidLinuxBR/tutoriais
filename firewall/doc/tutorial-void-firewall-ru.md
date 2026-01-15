@@ -1,6 +1,6 @@
-#  🧩 VOID LINUX TUTORIAL — РЕАЛИЗАЦИЯ СХЕМЫ БЕЗОПАСНОСТИ — ЛАБОРАТОРНЫЕ СЕМИНАРЫ
+# 🧩 УЧЕБНОЕ РУКОВОДСТВО ПО VOID LINUX - ВНЕДРЕНИЕ БРАНДМАЭРА - ЛАБОРАТОРИЯ EDUCATUX
 
-📌 Брандмауэр с IP Público, Void Linux (glibc), IPTables (устаревшая версия), NAT, Port Knocking и Fail2ban
+📌 Брандмауэр с общедоступным IP-адресом, Void Linux (glibc), IPTables (устаревший), NAT, перехват портов, Fail2ban, DHCP-сервер и рекурсивный DNS
 
 ---
 
@@ -68,7 +68,7 @@ sudo xbps-install -y \
   iproute2 \
   openssh \
   tcpdump \
-  conntrack-tools\
+  conntrack-tools \
   fail2ban
 ```
 
@@ -270,6 +270,12 @@ iptables -A INPUT -p icmp --icmp-type echo-request \
   -m limit --limit 1/s -j ACCEPT
 
 # ============================
+# DHCP NA LAN
+# ============================
+iptables -A INPUT  -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+iptables -A OUTPUT -o $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+
+# ============================
 # ANTISCAN
 # ============================
 
@@ -311,9 +317,9 @@ exec /usr/local/bin/firewall
 Активируйте, запустите и проверьте статус
 
 ```bash
-chmod +x /etc/sv/firewall/run
-ln -s /etc/sv/firewall /var/service/
-sv status firewall
+sudo chmod +x /etc/sv/firewall/run
+sudo ln -s /etc/sv/firewall /var/service/
+sudo sv status firewall
 ```
 
 ## ✅ 9. ТЕСТИРОВАНИЕ И ВАЛИДАЦИЯ (ГОРЯЧАЯ) СТОНКИ ПОРТОВ
@@ -359,7 +365,7 @@ listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 Подтвердить регистрацию IP
 
 ```bash
-cat /proc/net/xt_recent/SSH_KNOCK
+sudo cat /proc/net/xt_recent/SSH_KNOCK
 ```
 
 Ожидаемый результат
@@ -371,7 +377,7 @@ src=99.336.74.209 ttl: 61 last_seen: 4302299386 oldest_pkt: 7 4302292227, 430229
 ЕСЛИ вы хотите устранить все удары
 
 ```bash
-echo clear > /proc/net/xt_recent/SSH_KNOCK
+sudo echo clear > /proc/net/xt_recent/SSH_KNOCK
 ```
 
 ## ✅ 10. ОСУЩЕСТВЛЯТЬ ВНЕШНИЙ АДМИНИСТРАТИВНЫЙ ДОСТУП
@@ -391,23 +397,32 @@ ssh -p 2222 supertux@39.236.83.109
 Рекомендуемые псевдонимы
 
 ```bash
-sudo vim .bashrc
+vim ~/.bashrc
 ```
 
 Содержание
 
 ```bash
 alias knock='nc -z 39.236.83.109 12345'
-alias officinas='ssh -p 2222 supertux@39.236.83.109'
+alias firewall='ssh -p 2222 supertux@39.236.83.109'
 ```
 
 Перечитайте файл для проверки.
 
 ```bash
-source .bashrc
+source ~/.bashrc
 ```
 
 11. ✅ FAIL2BAN – ЗАЩИТА ПОСЛЕ УДАРНОСТИ
+
+Корректировки журнала для соответствия Fail2ban
+
+```bash
+sudo xbps-install -y socklog-void
+sudo ln -s /etc/sv/socklog-unix /var/service/
+sudo ln -s /etc/sv/nanoklogd /var/service/
+sudo touch /var/log/auth.log
+```
 
 Создайте файл конфигурации (никогда не редактируйте Jail.conf)
 
@@ -442,7 +457,7 @@ sudo sv start fail2ban
 sudo sv status fail2ban
 ```
 
-12. ✅ ТЕСТ FAIL2BAN (ВНИМАНИЕ вы блокируетесь при внешнем доступе)
+## 12. ✅ ТЕСТ FAIL2BAN (ВНИМАНИЕ, ВЫ ЗАБЛОКИРУЕТЕСЬ СЕБЯ!)
 
 Выполнить или постучать
 
@@ -464,7 +479,214 @@ sudo fail2ban-client status sshd
 sudo fail2ban-client set sshd unbanip X.X.X.X
 ```
 
-13. 🎉 ОКОНЧАТЕЛЬНЫЙ СПИСОК
+## ⚠️ ВНИМАНИЕ: СЛЕДУЮЩИЕ РАЗДЕЛЫ 13 и 14, КОТОРЫЕ ИМЕЮТ РЕКУРСИВНЫЙ DNS И DHCP-СЕРВЕР, НЕОБХОДИМО ОТКАЗАТЬ ПОСЛЕ ОБНОВЛЕНИЯ SAMBA4 КАК PDC!!
+
+## 13. ✅ РАЗВЕРТЫВАНИЕ ВРЕМЕННОГО РЕКУРСИВНОГО DNS ДЛЯ ОБСЛУЖИВАНИЯ ВНУТРЕННЕЙ СЕТИ.
+
+```bash
+sudo xbps-install -y unbound
+```
+
+Минимальная конфигурация
+
+```bash
+sudo vim /etc/unbound/unbound.conf
+```
+
+Содержание
+
+```bash
+server:
+  interface: 127.0.0.1
+  interface: 192.168.70.254
+  access-control: 192.168.70.0/24 allow
+  do-ip4: yes
+  do-udp: yes
+  do-tcp: yes
+  hide-identity: yes
+  hide-version: yes
+  qname-minimisation: yes
+```
+
+Активировать услугу (запустить):
+
+```bash
+ln -s /etc/sv/unbound /var/service/
+sv start unbound
+```
+
+## 14. ✅ РЕАЛИЗАЦИЯ ВРЕМЕННОГО DHCP-СЕРВЕРА ДЛЯ ОБСЛУЖИВАНИЯ ВНУТРЕННЕЙ СЕТИ.
+
+Установка пакета
+
+```bash
+sudo xbps-install -y dhcp
+```
+
+Этот пакет устанавливает:
+
+- dhcpd (сервер)
+- Структура сервиса Рунит:
+/etc/sv/dhcpd4
+/etc/sv/dhcpd6
+
+Отредактируйте файл и настройте параметры внутренней сети.
+
+```bash
+sudo vim /etc/dhcpd.conf
+```
+
+Содержание
+
+```bash
+authoritative;
+
+default-lease-time 600;
+max-lease-time 7200;
+
+option domain-name "educatux.edu";
+option domain-name-servers 192.168.70.254;
+
+subnet 192.168.70.0 netmask 255.255.255.0 {
+
+  range 192.168.70.100 192.168.70.200;
+
+  option routers 192.168.70.254;
+  option subnet-mask 255.255.255.0;
+  option broadcast-address 192.168.70.255;
+
+  option domain-name-servers 192.168.70.254;
+}
+```
+
+Создайте файл аренды:
+
+```bash
+sudo mkdir -p /var/lib/dhcp
+sudo touch /var/lib/dhcp/dhcpd.leases
+```
+
+Создание сервиса Runit
+
+```bash
+sudo vim /etc/sv/dhcpd4/conf
+```
+
+Содержание
+
+```bash
+OPTS="-4 -q -cf /etc/dhcpd.conf eth1"
+```
+
+Объяснение:
+
+- -4 → IPv4
+- -q → беззвучный режим
+- -cf → исправить путь к dhcpd.conf
+- eth1 → интерфейс LAN
+
+Активируйте службу в runit:
+
+```bash
+sudo ln -s /etc/sv/dhcpd4 /var/service/
+```
+
+Запуск/Перезапуск:
+
+```bash
+sudo sv restart dhcpd4
+```
+
+Проверить статус:
+
+```bash
+sudo sv status dhcpd4
+```
+
+Ожидаемый результат:
+
+```bash
+run: dhcpd4: (pid 17652) 831s; run: log: (pid 15544) 1213s
+```
+
+Проверьте прослушивание порта 67
+
+```bash
+UNCONN 0      0            0.0.0.0:67        0.0.0.0:*    users:(("dhcpd",pid=17652,fd=6))  
+```
+
+Мониторинг DHCP в режиме реального времени
+
+```bash
+sudo tcpdump -ni eth1 port 67 or port 68
+```
+
+Ожидаемый результат
+
+```bash
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on eth1, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+```
+
+Для прямой отладки (без рунита)
+
+```bash
+sudo dhcpd -4 -d -cf /etc/dhcpd.conf eth1
+```
+
+Это должно показать
+
+- DHCPОБНАРУЖЕНИЕ
+- DHCPПредложение
+- DHCPREQUEST
+- DHCPACK
+
+Важные файлы
+
+- /etc/dhcpd.conf → Основная конфигурация
+- /var/lib/dhcp/dhcpd.leases → Аренда
+- /etc/sv/dhcpd4/run → Запуск сценария
+- /etc/sv/dhcpd4/conf → Параметры службы
+- /var/service/dhcpd4 → Служба активна
+
+Настройте сценарий iptables, чтобы разрешить DHCP в локальной сети. Добавьте ПЕРЕД неявными правилами DROP:
+
+```bash
+# ============================
+# DHCP LAN
+# ============================
+
+iptables -A INPUT  -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+iptables -A OUTPUT -o $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+```
+
+💡 DHCP использует широковещательную рассылку → без этого клиент не получит IP.
+
+Повторно примените брандмауэр:
+
+```bash
+sudo /usr/local/bin/firewall
+```
+
+Тестирование на виртуальной машине в локальной сети
+
+```bash
+dhclient -v
+```
+
+В брандмауэре мониторьте
+
+```bash
+sudo tail -f /var/log/messages
+```
+
+Или
+
+```bash
+sudo tcpdump -ni eth1 port 67 or port 68
+```
+
+## 15. 🎉 ЗАКЛЮЧИТЕЛЬНЫЙ КОНТРОЛЬНЫЙ СПИСОК
 
 - Невидимый SSH без стука
 - Одноразовый стук
@@ -474,89 +696,12 @@ sudo fail2ban-client set sshd unbanip X.X.X.X
 - Функциональный НАТ
 - Постоянный брандмауэр
 - Proxmox доступен только через туннель
+- Минимальный рекурсивный DNS (до входа PDC)
+- DHCP-сервер
 
 ---
 
 🎯ВОТ ВСЕ, ЛЮДИ!
+
 👉 https://t.me/z3r0l135
 👉 https://t.me/vcatafesta
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

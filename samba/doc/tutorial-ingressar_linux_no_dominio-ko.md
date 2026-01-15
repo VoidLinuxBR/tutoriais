@@ -1,26 +1,26 @@
-# Configuração do LightDM para insrção do Linux Mint no domínio
+# Linux Mint를 도메인에 가입하기 위한 LightDM 구성
 
-## 🎯 Objetivo Ingressar Linux no Domínio Samba4 com Winbind por integração NSS/PAM
-
----
-
-## Pré-requisitos
-
-- Samba4 como controlador de domínio (PDC)
-- Linux com DNS e horário alinhados com o PDC (192.168.70.253)
-- Conectividade com o servidor
+## 🎯 목표 NSS/PAM 통합을 통해 Winbind를 사용하여 Linux를 Samba4 도메인에 연결
 
 ---
 
-## 🛠️ Etapas
+## 전제조건
 
-## 1. Instalar pacotes necessários
+- 도메인 컨트롤러(PDC)로서의 Samba4
+- PDC(192.168.70.253)와 일치하는 DNS 및 시간을 갖춘 Linux
+- 서버에 대한 연결
+
+---
+
+## 🛠️ 단계
+
+## 1. 필수 패키지 설치
 
 ```bash
 sudo apt update && sudo apt install samba winbind libpam-winbind libnss-winbind krb5-user
 ```
 
-## 2. Configurar /etc/krb5.conf
+## 2. /etc/krb5.conf 구성
 
 ```bash
 [libdefaults]
@@ -46,7 +46,7 @@ sudo apt update && sudo apt install samba winbind libpam-winbind libnss-winbind 
     educatux.edu = EDUCATUX.EDU
 ```
 
-## 3. Configurar /etc/samba/smb.conf
+## 3. /etc/samba/smb.conf 구성
 
 ```bash
 [global]
@@ -74,7 +74,7 @@ sudo apt update && sudo apt install samba winbind libpam-winbind libnss-winbind 
    template homedir = /home/%U
 ```
 
-## 4. Configurar /etc/nsswitch.conf
+## 4. /etc/nsswitch.conf 구성
 
 ```bash
 passwd:         compat winbind
@@ -82,19 +82,19 @@ group:          compat winbind
 shadow:         compat
 ```
 
-## 5. Ingressar no domínio
+## 5. 도메인 가입
 
 ```bash
 sudo net ads join -U Administrator
 ```
 
-## 6. Reboot do Sistema
+## 6. 시스템 재부팅
 
 ```bash
 sudo reboot
 ```
 
-## 7. Verificações
+## 7. 수표
 
 ```bash
 sudo net ads testjoin
@@ -103,39 +103,39 @@ wbinfo -g
 getent passwd usuario
 ```
 
-## 8. Criar diretórios HOME automaticamente
+## 8. HOME 디렉토리 자동 생성
 
 
-## Edite /etc/pam.d/common-session e adicione:
+## /etc/pam.d/common-session을 편집하고 다음을 추가합니다.
 
 ```bash
 session required pam_mkhomedir.so skel=/etc/skel umask=0022
 ```
 
-## 9. Reiniciar serviços
+## 9. 서비스 다시 시작
 
 ```bash
 sudo systemctl restart smbd nmbd winbind
 sudo systemctl enable winbind
 ```
 
-## 10. Sincronização de Hora
+## 10. 시간 동기화
 
 ```bash
 sudo timedatectl set-ntp true
 ```
 
-## SE você for usuário de Lightdm, como é o caso do Mint, ajuste pra logar com usuário de rede, ao invés de usuário local apenas.
+## Mint와 마찬가지로 Lightdm 사용자라면 로컬 사용자가 아닌 네트워크 사용자로 로그인하도록 설정하세요.
 
-## 🛠️ Passo a Passo: Configurar LightDM para aceitar usuários do domínio
+## 🛠️ 단계별: 도메인 사용자를 허용하도록 LightDM 구성
 
-## 1. Editar o arquivo de configuração do LightDM
+## 1. LightDM 구성 파일 편집
 
 ```bash
 sudo vim /etc/lightdm/lightdm.conf
 ```
 
-## Edite as seguintes linhas do arquivo:
+## 파일에서 다음 줄을 편집합니다.
 
 ```bash
 [Seat:*]
@@ -144,33 +144,33 @@ greeter-hide-users=true
 allow-guest=false
 ```
 
-## Explicações:
+## 설명:
 
-- greeter-show-manual-login=true: Permite digitar o nome de usuário manualmente.
-- greeter-hide-users=true: Esconde a lista local de usuários (útil para ambientes corporativos).
-- allow-guest=false: Impede login de convidados (por segurança).
+- Greeting-show-manual-login=true: 사용자 이름을 수동으로 입력할 수 있습니다.
+- Greetingr-hide-users=true: 로컬 사용자 목록을 숨깁니다(기업 환경에 유용함).
+- allow-guest=false: 게스트 로그인을 방지합니다(보안을 위해).
 
-## 2. Certifique-se de que PAM está permitindo usuários do domínio
+## 2. PAM이 도메인 사용자를 허용하는지 확인하세요.
 
-## Se você usou SSSD ou Winbind, o PAM já deve estar integrado corretamente. Mas valide que o módulo home esteja presente:
+## SSSD 또는 Winbind를 사용한 경우 PAM이 이미 올바르게 통합되어 있어야 합니다. 하지만 홈 모듈이 있는지 확인하세요.
 
 ```bash
 sudo vim /etc/pam.d/common-session
 ```
 
-## Confirme que esta linha existe OU adicione-a:
+## 이 줄이 있는지 확인하거나 추가하세요.
 
 ```bash
 session required pam_mkhomedir.so skel=/etc/skel umask=0022
 ```
 
-## 3. Reiniciar o LightDM
+## 3. LightDM을 다시 시작하세요
 
 ```bash
 sudo timedatectl set-ntp true
 ```
 
-## ⚠️ Para Linux MInt baseado em Ubuntu, pode-se desativar o systemd-resolved para controlar o DNS manualmente.
+## ⚠️ Ubuntu 기반 Linux MInt의 경우 systemd-resolved를 비활성화하여 DNS를 수동으로 제어할 수 있습니다.
 
 ```bash
 systemctl status systemd-resolved
@@ -182,13 +182,13 @@ systemctl disable systemd-resolved.service
 sudo systemctl mask systemd-resolved
 ```
 
-## REMOVENDO O ARQUIVO SEM PERMISSÃO DE EDIÇÃO CRIADO PELO SYSTEMD-RESOLVED:
+## SYSTEMD-Resolved에 의해 생성된 편집 권한 없이 파일 제거:
 
 ```bash
 rm -f /etc/resolv.conf
 ```
 
-## Criando um arquivo novo com permissão de edição:
+## 편집 권한이 있는 새 파일 만들기:
 
 ```bash
 vim /etc/resolv.conf
@@ -200,13 +200,13 @@ search educatux.edu.
 nameserver 192.168.70.253
 ```
 
-## Bloqueando o arquivo contra edição automática
+## 자동 편집에 대해 파일 잠금
 
 ```bash
 sudo chattr +i /etc/resolv.conf
 ```
 
-## Restart do serviço
+## 서비스 재시작
 
 ```bash
 sudo systemctl restart NetworkManager
@@ -214,8 +214,8 @@ sudo systemctl restart NetworkManager
 
 ---
 
-🎯 THAT'S ALL FOLKS!
+🎯 그게 전부입니다!
 
-👉 Contato: zerolies@disroot.org
+👉 문의: zerolies@disroot.org
 👉 https://t.me/z3r0l135
 

@@ -1,6 +1,6 @@
-#  🧩 VOID LINUX 教程 — 安全方案實施 — 實驗室研討會
+# 🧩 VOID LINUX 教程 - 防火牆實現 - EDUCATUX LABORATORY
 
-📌 防火牆 com IP Público、Void Linux (glibc)、IPTables（舊版）、NAT、端口敲門和 Fail2ban
+📌 具有公共 IP、Void Linux (glibc)、IPTables（舊版）、NAT、端口敲門、Fail2ban、DHCP 服務器和遞歸 DNS 的防火牆
 
 ---
 
@@ -68,7 +68,7 @@ sudo xbps-install -y \
   iproute2 \
   openssh \
   tcpdump \
-  conntrack-tools\
+  conntrack-tools \
   fail2ban
 ```
 
@@ -270,6 +270,12 @@ iptables -A INPUT -p icmp --icmp-type echo-request \
   -m limit --limit 1/s -j ACCEPT
 
 # ============================
+# DHCP NA LAN
+# ============================
+iptables -A INPUT  -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+iptables -A OUTPUT -o $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+
+# ============================
 # ANTISCAN
 # ============================
 
@@ -311,9 +317,9 @@ exec /usr/local/bin/firewall
 激活、運行和驗證狀態
 
 ```bash
-chmod +x /etc/sv/firewall/run
-ln -s /etc/sv/firewall /var/service/
-sv status firewall
+sudo chmod +x /etc/sv/firewall/run
+sudo ln -s /etc/sv/firewall /var/service/
+sudo sv status firewall
 ```
 
 ## ✅ 9. 端口敲擊的測試和驗證（熱）
@@ -359,7 +365,7 @@ listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 驗證IP註冊
 
 ```bash
-cat /proc/net/xt_recent/SSH_KNOCK
+sudo cat /proc/net/xt_recent/SSH_KNOCK
 ```
 
 預期結果
@@ -371,7 +377,7 @@ src=99.336.74.209 ttl: 61 last_seen: 4302299386 oldest_pkt: 7 4302292227, 430229
 如果你想清除所有的敲門聲
 
 ```bash
-echo clear > /proc/net/xt_recent/SSH_KNOCK
+sudo echo clear > /proc/net/xt_recent/SSH_KNOCK
 ```
 
 ## ✅ 10. 執行外部管理訪問
@@ -391,23 +397,32 @@ ssh -p 2222 supertux@39.236.83.109
 推薦別名
 
 ```bash
-sudo vim .bashrc
+vim ~/.bashrc
 ```
 
 內容
 
 ```bash
 alias knock='nc -z 39.236.83.109 12345'
-alias officinas='ssh -p 2222 supertux@39.236.83.109'
+alias firewall='ssh -p 2222 supertux@39.236.83.109'
 ```
 
 重新讀取文件進行驗證
 
 ```bash
-source .bashrc
+source ~/.bashrc
 ```
 
 11. ✅ FAIL2BAN – 爆震後保護
+
+日誌調整以符合fail2ban
+
+```bash
+sudo xbps-install -y socklog-void
+sudo ln -s /etc/sv/socklog-unix /var/service/
+sudo ln -s /etc/sv/nanoklogd /var/service/
+sudo touch /var/log/auth.log
+```
 
 創建配置文件（切勿編輯jail.conf）
 
@@ -442,7 +457,7 @@ sudo sv start fail2ban
 sudo sv status fail2ban
 ```
 
-12. ✅ FAIL2BAN 測試（注意您在外部訪問期間將自己鎖定在外面）
+## 12. ✅ FAIL2BAN 測試（注意，你把自己鎖在外面了！）
 
 執行敲門
 
@@ -464,7 +479,214 @@ sudo fail2ban-client status sshd
 sudo fail2ban-client set sshd unbanip X.X.X.X
 ```
 
-13. 🎉 最終檢查清單
+## ⚠️ 注意：以下第 13 和 14 節涉及遞歸 DNS 和 DHCP 服務器，在將 SAMBA4 升級為 PDC 後必須丟棄！
+
+## 13. ✅ 部署臨時遞歸 DNS 來為內部網絡提供服務
+
+```bash
+sudo xbps-install -y unbound
+```
+
+最低配置
+
+```bash
+sudo vim /etc/unbound/unbound.conf
+```
+
+內容
+
+```bash
+server:
+  interface: 127.0.0.1
+  interface: 192.168.70.254
+  access-control: 192.168.70.0/24 allow
+  do-ip4: yes
+  do-udp: yes
+  do-tcp: yes
+  hide-identity: yes
+  hide-version: yes
+  qname-minimisation: yes
+```
+
+激活服務（運行單元）：
+
+```bash
+ln -s /etc/sv/unbound /var/service/
+sv start unbound
+```
+
+## 14. ✅ 實施臨時 DHCP 服務器來為內部網絡提供服務
+
+包安裝
+
+```bash
+sudo xbps-install -y dhcp
+```
+
+該軟件包安裝：
+
+- dhcpd（服務器）
+- Runit服務結構：
+/etc/sv/dhcpd4
+/etc/sv/dhcpd6
+
+編輯文件並配置內部網絡的設置
+
+```bash
+sudo vim /etc/dhcpd.conf
+```
+
+內容
+
+```bash
+authoritative;
+
+default-lease-time 600;
+max-lease-time 7200;
+
+option domain-name "educatux.edu";
+option domain-name-servers 192.168.70.254;
+
+subnet 192.168.70.0 netmask 255.255.255.0 {
+
+  range 192.168.70.100 192.168.70.200;
+
+  option routers 192.168.70.254;
+  option subnet-mask 255.255.255.0;
+  option broadcast-address 192.168.70.255;
+
+  option domain-name-servers 192.168.70.254;
+}
+```
+
+創建租賃文件：
+
+```bash
+sudo mkdir -p /var/lib/dhcp
+sudo touch /var/lib/dhcp/dhcpd.leases
+```
+
+Runit服務創建
+
+```bash
+sudo vim /etc/sv/dhcpd4/conf
+```
+
+內容
+
+```bash
+OPTS="-4 -q -cf /etc/dhcpd.conf eth1"
+```
+
+解釋：
+
+- -4 → IPv4
+- -q → 靜默模式
+- -cf → 正確的 dhcpd.conf 路徑
+- eth1 → 接口 LAN
+
+在runit中激活服務：
+
+```bash
+sudo ln -s /etc/sv/dhcpd4 /var/service/
+```
+
+啟動/重新啟動：
+
+```bash
+sudo sv restart dhcpd4
+```
+
+檢查狀態：
+
+```bash
+sudo sv status dhcpd4
+```
+
+預期結果：
+
+```bash
+run: dhcpd4: (pid 17652) 831s; run: log: (pid 15544) 1213s
+```
+
+檢查67端口監聽
+
+```bash
+UNCONN 0      0            0.0.0.0:67        0.0.0.0:*    users:(("dhcpd",pid=17652,fd=6))  
+```
+
+實時監控 DHCP
+
+```bash
+sudo tcpdump -ni eth1 port 67 or port 68
+```
+
+預期結果
+
+```bash
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on eth1, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+```
+
+用於直接調試（無需 runit）
+
+```bash
+sudo dhcpd -4 -d -cf /etc/dhcpd.conf eth1
+```
+
+這應該顯示
+
+- DHCP發現
+- DHCP優惠
+- DHCP請求
+- DHCP確認
+
+重要文件
+
+- /etc/dhcpd.conf → 主要配置
+- /var/lib/dhcp/dhcpd.leases → 租約
+- /etc/sv/dhcpd4/run → 腳本 runit
+- /etc/sv/dhcpd4/conf → 服務參數
+- /var/service/dhcpd4 → 服務處於活動狀態
+
+調整 iptables 腳本以允許 LAN 上的 DHCP。在隱式 DROP 規則之前添加：
+
+```bash
+# ============================
+# DHCP LAN
+# ============================
+
+iptables -A INPUT  -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+iptables -A OUTPUT -o $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+```
+
+💡 DHCP 使用廣播 → 如果沒有廣播，客戶端將無法獲得 IP。
+
+重新應用防火牆：
+
+```bash
+sudo /usr/local/bin/firewall
+```
+
+在 LAN VM 上測試
+
+```bash
+dhclient -v
+```
+
+在防火牆中，監控
+
+```bash
+sudo tail -f /var/log/messages
+```
+
+或者
+
+```bash
+sudo tcpdump -ni eth1 port 67 or port 68
+```
+
+## 15. 🎉 最終檢查清單
 
 - 隱形SSH無需敲門
 - 一次性敲擊器
@@ -474,89 +696,12 @@ sudo fail2ban-client set sshd unbanip X.X.X.X
 - 功能性NAT
 - 持久防火牆
 - Proxmox 只能通過隧道訪問
+- 最小遞歸 DNS（直到 PDC 進入）
+- DHCP服務器
 
 ---
 
 🎯 這就是大家！
+
 👉 https://t.me/z3r0l135
 👉 https://t.me/vcatafesta
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

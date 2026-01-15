@@ -1,27 +1,27 @@
-# Controlador de Domínio Primário (Active Directory) rodando Samba4 sob Void Linux Server ;D
+# Void Linux サーバーで Samba4 を実行しているプライマリ ドメイン コントローラー (Active Directory) ;D
 
-## 🎯 Objetivo - Subir um Controlador de Domínio Primário no Void Linux (glibc) compilando o Samba4 a partir do código fonte, configurando DNS interno, Kerberos, integração AD, ACLs, serviços e toda a pilha necessária para controlar os clientes da rede.
+## 🎯 目的 - Void Linux (glibc) にプライマリ ドメイン コントローラーをアップロードし、ソース コードから Samba4 をコンパイルし、内部 DNS、Kerberos、AD 統合、ACL、サービス、およびネットワーク クライアントの制御に必要なスタック全体を構成します。
 
-### 🔧 ADAPTE o tutorial á SUA realidade, obviamente!
+### 🔧 もちろん、チュートリアルをあなたの現実に合わせてください!
 
-## 📡 Layout de rede local
+## 📡 ローカルネットワークのレイアウト
 
-- Domínio: EDUCATUX.EDU
-- Hostname: pdc01
-- Firewall 192.168.70.254 (DNS/GW)
-- Ip: 192.168.70.253
+- ドメイン: EDUCATUX.EDU
+- ホスト名: pdc01
+- ファイアウォール 192.168.70.254 (DNS/GW)
+- IP: 192.168.70.253
 
 ---
 
-## A instalação padrão do Void Linux não será coberta nesse tutorial.
+## Void Linux のデフォルトのインストールについては、このチュートリアルでは説明しません。
 
-## Trocar o Shell padrão do Void, pós instalado
+## インストール後に Void のデフォルトのシェルを変更します。
 
 ```bash
 chsh -s /bin/bash
 ```
 
-## 🧩 Instalar pacotes de dependências para compilar o Samba4 no Void
+## 🧩 Void で Samba4 をコンパイルするための依存関係パッケージをインストールする
 
 ```bash
 xbps-install -S \
@@ -42,9 +42,9 @@ xbps-install -S \
  bind ldns pkg-config vim
 ```
 
-## ⚠️ ATENÇÃO:  O Samba4 compilado inclui o código do kerberos Heimdal, embutido (KDC interno) por default, mas não inclui clientes Kerberos. Nesse caso o repositório disponibiliza pacotes binários do MIT, que podem ser instalados sem qualquer problema ou interferência no kerberos heimdal default, compilado no Controlador de Domínio. Os pacotes são: mit-krb5 mit-krb5-client mit-krb5-devel. PORÉM você NÃO DEVE em hipótese alguma, instalar por repositório o pacote binário do krb5-server, o que causaria serviço concorrente ao kerberos Heimdal, interno do Samba4!
+## ⚠️ 注意: コンパイルされた Samba4 には、デフォルトで組み込み (内部 KDC) である Heimdal Kerberos コードが含まれていますが、Kerberos クライアントは含まれていません。この場合、リポジトリは MIT からバイナリ パッケージを提供します。これは、ドメイン コントローラ上でコンパイルされたデフォルトの kerberos heimdal に問題や干渉を与えることなくインストールできます。パッケージは次のとおりです: mit-krb5 mit-krb5-client mit-krb5-devel。ただし、いかなる状況でも、リポジトリから krb5-server バイナリ パッケージをインストールしてはなりません。Samba4 内部の Heimdal kerberos と競合するサービスが発生する可能性があります。
 
-## Os serviços fornecidos pelos clientes do MIT-krb5, ficam em:
+## MIT-krb5 の顧客が提供するサービスは次のとおりです。
 
 ```bash
 /usr/bin/kinit
@@ -53,7 +53,7 @@ xbps-install -S \
 /usr/bin/kdestroy
 ```
 
-## 🖥️ Setar hostname
+## 🖥️ Setar ホスト名
 
 ```bash
 echo "pdc01" > /etc/hostname
@@ -65,7 +65,7 @@ echo "pdc01" > /etc/hostname
 vim /etc/hosts
 ```
 
-## Conteúdo:
+## コンテンツ：
 
 ```bash
 127.0.0.1      localhost
@@ -73,15 +73,15 @@ vim /etc/hosts
 192.168.70.253 pdc01.educatux.edu pdc01
 ```
 
-## 🌐 Configurar IP fixo
+## 🌐 固定IPを構成する
 
-### 👉 Usaremos o método padrão do Void, o /etc/dhcpcd.conf
+### 👉 Void のデフォルトのメソッド /etc/dhcpcd.conf を使用します。
 
 ```bash
 vim /etc/dhcpcd.conf
 ```
 
-## Adicionar ip, gateway e dns:## 🎯 Objetivo
+## IP、ゲートウェイ、DNS を追加します:## 🎯 目的
 
 ```bash
 interface eth0
@@ -90,25 +90,25 @@ static routers=192.168.70.254
 static domain_name_servers=192.168.70.254
 ```
 
-## Reiniciar a interface de rede:
+## ネットワークインターフェースを再起動します。
 
 ```bash
 sv restart dhcpcd
 ```
 
-## 🌐 Setar o DNS temporário (roteador) ANTES de provisionar
+## 🌐 プロビジョニングの前に一時的な DNS (ルーター) を設定します
 
 ```bash
 echo "nameserver 192.168.70.254" > /etc/resolv.conf
 ```
 
-## Travar a configuração do resolv.conf
+## resolv.conf 構成をロックする
 
 ```bash
 chattr +i /etc/resolv.conf
 ```
 
-## 🔍 Validar endereço atribuído á interface de rede
+## 🔍 ネットワークインターフェースに割り当てられたアドレスを検証する
 
 ```bash
 ip -c addr
@@ -118,7 +118,7 @@ ip -c addr
 ip -br link
 ```
 
-## 📥 Baixar e descompactar o código fonte do Samba4
+## 📥 Samba4 ソースコードをダウンロードして解凍します
 
 ```bash
 wget https://download.samba.org/pub/samba/samba-4.23.4.tar.gz
@@ -128,7 +128,7 @@ wget https://download.samba.org/pub/samba/samba-4.23.4.tar.gz
 tar -xvzf samba-4.23.4.tar.gz
 ```
 
-## Compilar e instalar o código fonte
+## ソースコードをコンパイルしてインストールする
 
 ```bash
 cd samba-4.23.4
@@ -142,14 +142,14 @@ cd samba-4.23.4
 make -j$(nproc) && make install
 ```
 
-## Comentário:
+## コメント：
 
-- O Void não interfere na instalação, pois Samba é compilado em /opt/samba.
-- O make -j acelera muito a compilação, mesmo assim, vá tomar um café.
-- Após instalar, o Samba4 compilado não tem serviços criados no runit.
-- Criaremos os serviços manualmente.
+- Samba は /opt/samba でコンパイルされるため、Void はインストールを妨げません。
+- Make -j を使用すると、コンパイルが大幅に高速化されます。とにかく、コーヒーを飲みに行きましょう。
+- インストール後、コンパイルされた Samba4 には runit 内にサービスが作成されません。
+- サービスは手動で作成します。
 
-## 📁 Adicionar Samba4 ao PATH do Sistema e reler o ambiente
+## 📁 Samba4 をシステム PATH に追加し、環境を再読み込みします
 
 ```bash
 echo 'export PATH=/opt/samba/bin:/opt/samba/sbin:$PATH' >> /etc/profile
@@ -159,19 +159,19 @@ echo 'export PATH=/opt/samba/bin:/opt/samba/sbin:$PATH' >> /etc/profile
 source /etc/profile
 ```
 
-## Testar a inserção do PATH do Samba4 no Sistema Operacional
+## オペレーティング システムへの Samba4 PATH の挿入をテストします。
 
 ```bash
 samba-tool -V
 ```
 
-## Resultado:
+## 結果：
 
 ```bash
 4.23.4
 ```
 
-🏰 Provisionar o domínio SAMBA4 (Criando o PDC propriamente dito)
+🏰 SAMBA4 ドメインのプロビジョニング (PDC 自体の作成)
 
 ```bash
 samba-tool domain provision \
@@ -185,7 +185,7 @@ samba-tool domain provision \
  --function-level=2016
 ```
 
-### Samba4 criará:
+### Samba4 は以下を作成します:
 
 ```bash
 /opt/samba/etc/smb.conf
@@ -193,20 +193,20 @@ samba-tool domain provision \
 /opt/samba/var/locks/sysvol
 ```
 
-## Em resumo o Samba4:
+## Samba4 を要約すると:
 
-- Cria a floresta AD, o DC primário, o DNS interno e o DB das contas.
-- Define domínio, realm, nível funcional 2016 e a senha do Administrator.
-- Void não instala nenhum Samba nativo, então não há conflito.
-- Após isso, o DNS passa a ser o próprio PDC, precisando ajustar /etc/resolv.conf para 127.0.0.1.
+- AD フォレスト、プライマリ DC、内部 DNS、アカウント DB を作成します。
+- ドメイン、レルム、2016 機能レベル、および管理者パスワードを定義します。
+- Void はネイティブ Samba をインストールしないため、競合は発生しません。
+- この後、DNS は PDC 自体になり、/etc/resolv.conf を 127.0.0.1 に調整する必要があります。
 
-## ⚙️ Validar o nível funcional 2016 do Active Directory
+## ⚙️ Active Directory 2016 の機能レベルを検証する
 
 ```bash
 samba-tool domain level show
 ```
 
-## Resultado:
+## 結果：
 
 ```bash
 Domain and forest function level for domain 'DC=educatux,DC=edu'
@@ -215,16 +215,16 @@ Domain function level: (Windows) 2016
 Lowest function level of a DC: (Windows) 2016
 ```
 
-## 🧪 Testar manualmente o serviço AD DC antes de criar o serviço
+## 🧪 サービスを作成する前に AD DC サービスを手動でテストします
 
 ```bash
 /opt/samba/sbin/samba -i -M single
 ```
 
-* -i → foreground
-* -M single → modelo single-process (não dispara daemon forking fora do controle do runit)
+* -i → 前景
+* -M シングル → 単一プロセス モデル (runit 制御外でデーモン フォークをトリガーしません)
 
-## Se tudo estiver bem, você verá:
+## すべて問題なければ、次のように表示されます。
 
 ```bash
 Completed DNS update check OK
@@ -232,11 +232,11 @@ Completed SPN update check OK
 Registered EDUCATUX<1c> ...
 ```
 
-## CTRL+C para sair
+## CTRL+C を押して終了します
 
-## 📦 Criar o serviço RUNIT do samba-ad-dc para subir o AD no boot
+## 📦 起動時に AD をアップロードするための samba-ad-dc RUNIT サービスを作成します
 
-## ⚠️ Esta parte é muito importante. Apague restos antigos SE FOR reajuste de Server pré-existente!!
+## ⚠️この部分はとても重要です。既存のサーバーを再調整する場合は、古い残りを削除してください。
 
 ```bash
 sv stop samba-ad-dc 2>/dev/null
@@ -248,16 +248,16 @@ rm -rf /etc/sv/*/supervise
 rm -rf /var/service/*/supervise
 ```
 
-## Agora vamos criar os serviços e permissões do samba-ad-dc com logs, para o runit subir no boot do Sistema:
+## 次に、システム起動時に runit をロードできるように、ログを含む samba-ad-dc サービスと権限を作成しましょう。
 
-## Criar a estrutura do serviço antes de tudo
+## 何よりもまずサービス構造を作成する
 
 ```bash
 mkdir -p /etc/sv/samba-ad-dc/log
 mkdir -p /var/log/samba-ad-dc
 ```
 
-## Criar o serviço do run
+## 実行サービスを作成する
 
 ```bash
 cat > /etc/sv/samba-ad-dc/run << 'EOF'
@@ -267,13 +267,13 @@ exec /opt/samba/sbin/samba -i -M single --debuglevel=3
 EOF
 ```
 
-## Setar a permissão do serviço do run
+## サービス実行権限を設定する
 
 ```bash
 chmod +x /etc/sv/samba-ad-dc/run
 ```
 
-## Criar o arquivo do log
+## ログファイルを作成する
 
 ```bash
 cat > /etc/sv/samba-ad-dc/log/run << 'EOF'
@@ -282,25 +282,25 @@ exec svlogd -tt /var/log/samba-ad-dc
 EOF
 ```
 
-## Setar a permissão do log/run
+## ログ/実行権限を設定する
 
 ```bash
 chmod +x /etc/sv/samba-ad-dc/log/run
 ```
 
-## Habilitar o serviço do samba-ad-dc para subir no boot:
+## 起動時に samba-ad-dc サービスを実行できるようにします。
 
 ```bash
 ln -sf /etc/sv/samba-ad-dc/ /var/service/
 ```
 
-## Validar se está rodando
+## 実行中かどうかを検証する
 
 ```bash
 sv status samba-ad-dc
 ```
 
-## Você deverá ver algo como:
+## 次のようなものが表示されるはずです。
 
 ```bash
 run: samba-ad-dc: (pid 28032) 4s; run: log: (pid 28031) 4s
@@ -310,7 +310,7 @@ run: samba-ad-dc: (pid 28032) 4s; run: log: (pid 28031) 4s
 samba-tool processes
 ```
 
-## Result received:
+## 受け取った結果:
 
 ```bash
  Service:                          PID
@@ -330,13 +330,13 @@ samba                             1012
 winbind_server                    1019
 ```
 
-## Validar os logs online:
+## ログをオンラインで検証します。
 
 ```bash
 tail -f /var/log/samba-ad-dc/current
 ```
 
-## A saída correta será algo assim:
+## 正しい出力は次のようになります。
 
 ```bash
 2025-11-27_04:14:23.73604 Completed DNS update check OK
@@ -351,23 +351,23 @@ tail -f /var/log/samba-ad-dc/current
 2025-11-27_04:14:37.31557 Completed samba_kcc OK
 ```
 
-## 🕒 NTP / Chrony Server
+## 🕒 NTP / Chronyサーバー
 
-## O Controlador de domínio precisará ser o Time Server da rede local, pois com discrepância de 5min o Kerberos não autenticará mais o cliente
+## 5 分の差があると Kerberos がクライアントを認証しなくなるため、ドメイン コントローラーはローカル ネットワークのタイム サーバーである必要があります。
 
-## Instalar o pacote do Chrony Server
+## Chrony サーバー パッケージをインストールする
 
 ```bash
 xbps-install -Syu chrony
 ```
 
-## Editar o arquivo do Server, substituir os repositórios de sincronizações de tempo e liberar as consultas da rede interna
+## サーバー ファイルを編集し、時刻同期リポジトリを置き換え、内部ネットワーク クエリを解放します。
 
 ```bash
 vim /etc/chrony.conf
 ```
 
-### Apontar os Servidores de tempo públicos do Brasil
+### ブラジルのパブリックタイムサーバーを指摘する
 
 ```bash
 # Comentar a linha do Servidor externo
@@ -383,25 +383,25 @@ server 3.br.pool.ntp.org iburst
 allow 192.168.70.0/24
 ```
 
-## Adicionar o serviço do chronyd ao start do RUNIT
+## chronyd サービスを RUNIT start に追加します。
 
 ```bash
 ln -sf /etc/sv/chronyd/ /var/service/
 ```
 
-## Reiniciar o TimeServer:
+## TimeServer を再起動します。
 
 ```bash
 sv restart chronyd
 ```
 
-## Valide os Servers, são cíclicos e aleatórios durante as consulta
+## サーバーを検証します。サーバーはクエリ中に周期的かつランダムです。
 
 ```bash
 chronyc sources -v
 ```
 
-## 🔐 Criar o arquivo do Kerberos
+## 🔐 Kerberos ファイルを作成する
 
 ```bash
 vim /etc/krb5.conf
@@ -428,7 +428,7 @@ vim /etc/krb5.conf
     educatux.edu = EDUCATUX.EDU
 ```
 
-## 🧭 Destravar e rejustar o /etc/resolv.conf APÓS o provisionamento, e apontar para o próprio PDC
+## 🧭 プロビジョニング後に /etc/resolv.conf のロックを解除してリセットし、PDC 自体をポイントします
 
 ```bash
 chattr -i /etc/resolv.conf
@@ -438,7 +438,7 @@ chattr -i /etc/resolv.conf
 vim /etc/resolv.conf
 ```
 
-## Conteúdo:
+## コンテンツ：
 
 ```bash
 domain educatux.edu
@@ -446,27 +446,27 @@ search educatux.edu
 nameserver 127.0.0.1
 ```
 
-## Travar o arquivo novamente:
+## ファイルを再度ロックします。
 
 ```bash
 chattr +i /etc/resolv.conf
 ```
 
-## 🔗 Linkar bibliotecas do Winbind no Sistema
+## 🔗 システム上の Winbind ライブラリをリンクする
 
-## Validar os paths de libdir:
+## libdir パスを検証します。
 
 ```bash
 /opt/samba/sbin/smbd -b | grep LIBDIR
 ```
 
-## Saída esperada:
+## 期待される出力:
 
 ```bash
 LIBDIR: /opt/samba/lib
 ```
 
-## Criar links entre as bibliotecas. Prefira digitar manualmente ao invés de copiar e colar aqui.
+## ライブラリ間のリンクを作成します。ここではコピーして貼り付けるのではなく、手動で入力することをお勧めします。
 
 ```bash
 ln -sf /opt/samba/lib/libnss_winbind.so.2 /usr/lib/
@@ -476,13 +476,13 @@ ln -sf /opt/samba/lib/libnss_winbind.so.2 /usr/lib/
 ln -sf /usr/lib/libnss_winbind.so.2 /usr/lib/libnss_winbind.so
 ```
 
-## Releia a configuração com as novas bibliotecas linkadas
+## 新しいリンクされたライブラリを使用して構成を再読み込みします
 
 ```bash
 ldconfig
 ```
 
-## Validar efetividade da troca de tickets do kerberos, adicionando winbind ás duas linhas do nsswhitch (passwd e group):
+## Kerberos チケット交換の有効性を検証し、nsswhitch の 2 行 (passwd と group) に winbind を追加します。
 
 ```bash
 vim /etc/nsswitch.conf
@@ -493,9 +493,9 @@ passwd: files winbind
 group:  files winbind
 ```
 
-### O resto do arquivo fica como está
+### ファイルの残りの部分はそのまま残ります
 
-## 📝 Validar o smb.conf criado automagicamente pelo provisionamento
+## 📝 プロビジョニングによって自動的に作成された smb.conf を検証する
 
 ```bash
 cat /opt/samba/etc/smb.conf
@@ -524,13 +524,13 @@ cat /opt/samba/etc/smb.conf
         read only = No
 ```
 
-## 🔍 Agora iremos validar importantes serviços do PDC como DNS, SMB, Winbind e Kerberos
+## 🔍 次に、DNS、SMB、Winbind、Kerberos などの重要な PDC サービスを検証します。
 
 ```bash
 ps aux | grep samba
 ```
 
-## Resultado recebido:
+## 受け取った結果:
 
 ```bash
 root     28030  0.0  0.0   2392  1388 ?        Ss   01:14   0:00 runsv samba-ad-dc
@@ -547,7 +547,7 @@ root     28180  0.0  0.1   6696  2556 pts/0    S+   02:10   0:00 grep samba
 samba-tool user show administrator
 ```
 
-## Resultado recebido:
+## 受け取った結果:
 
 ```bash
 dn: CN=Administrator,CN=Users,DC=educatux,DC=edu
@@ -594,7 +594,7 @@ distinguishedName: CN=Administrator,CN=Users,DC=educatux,DC=edu
 wbinfo -u
 ```
 
-## Resultado recebido:
+## 受け取った結果:
 
 ```bash
 EDUCATUX\administrator
@@ -606,7 +606,7 @@ EDUCATUX\krbtgt
 wbinfo -g
 ```
 
-## Resultado recebido:
+## 受け取った結果:
 
 ```bash
 EDUCATUX\administrator
@@ -636,7 +636,7 @@ EDUCATUX\dnsupdateproxy
 getent group "Domain Admins"
 ```
 
-## Resultado recebido:
+## 受け取った結果:
 
 ```bash
 EDUCATUX\domain admins:x:3000004:
@@ -646,7 +646,7 @@ EDUCATUX\domain admins:x:3000004:
 smbclient -L localhost -U Administrator
 ```
 
-## Resultado recebido:
+## 受け取った結果:
 
 ```bash
 Password for [EDUCATUX\Administrator]:
@@ -663,7 +663,7 @@ SMB1 disabled -- no workgroup available
 samba-tool dns zonelist localhost -U administrator
 ```
 
-## Resultado recebido:
+## 受け取った結果:
 
 ```bash
 Password for [EDUCATUX\administrator]:
@@ -688,7 +688,7 @@ Password for [EDUCATUX\administrator]:
 samba-tool user show administrator
 ```
 
-## Resultado recebido:
+## 受け取った結果:
 
 ```bash
 dn: CN=Administrator,CN=Users,DC=educatux,DC=edu
@@ -731,7 +731,7 @@ logonCount: 5
 distinguishedName: CN=Administrator,CN=Users,DC=educatux,DC=edu
 ```
 
-## 🔐 Desabilitar a complexidade de senhas para usuários do domínio (facilitar testes em laboratório - Inseguro para produção!)
+## 🔐 ドメイン ユーザーのパスワードの複雑さを無効にする (ラボ テストを容易にする - 運用環境では安全ではありません!)
 
 ```bash
 samba-tool domain passwordsettings set --complexity=off
@@ -741,13 +741,13 @@ samba-tool domain passwordsettings set --min-pwd-age=0
 samba-tool user setexpiry Administrator --noexpiry
 ```
 
-## Reler as configurações do Samba4
+## Samba4の設定を再読み込みする
 
 ```bash
 smbcontrol all reload-config
 ```
 
-## 🧪 Validar troca de tickets do Kerberos
+## 🧪 Kerberos チケット交換を検証する
 
 ```bash
 kinit Administrator@EDUCATUX.EDU
@@ -757,7 +757,7 @@ kinit Administrator@EDUCATUX.EDU
 klist
 ```
 
-## Resultado recebido:
+## 受け取った結果:
 
 ```bash
 Ticket cache: FILE:/tmp/krb5cc_0
@@ -772,7 +772,7 @@ Valid starting       Expires              Service principal
 samba-tool dns query pdc01.educatux.edu educatux.edu @ A -U Administrator
 ```
 
-## Resultado recebido:
+## 受け取った結果:
 
 ```bash
 Password for [EDUCATUX\Administrator]:
@@ -793,7 +793,7 @@ Password for [EDUCATUX\Administrator]:
 drill google.com @192.168.70.253
 ```
 
-## Resultado obtido:
+## 得られた結果:
 
 ```bash
 ;; ->>HEADER<<- opcode: QUERY, rcode: NOERROR, id: 50285
@@ -874,27 +874,27 @@ Checking 0 100 389 pdc01.educatux.edu. against SRV _ldap._tcp.Default-First-Site
 No DNS updates needed
 ```
 
-### ✅ RESUMO FINAL
+### ✅ 最終概要
 
-## 🎉 Parabéns — você acaba de montar um domínio AD nível 2016 totalmente funcional no Void Linux!
+## 🎉 おめでとうございます — これで、完全に機能する 2016 AD ドメインが Void Linux 上にセットアップされました。
 
-### 👉 LEMBRE-SE: O Samba4, apesar de poder ser gerenciado por linha de comando, foi projetado para ser gerenciado pelas ferramentas de Gerenciamento de Servidores remotos - RSAT, podendo estas serem instaladas numa máquina com Windows 10, sem problemas!
+### 👉 覚えておいてください: Samba4 はコマンド ラインで管理できるにもかかわらず、リモート サーバー管理ツール - RSAT で管理できるように設計されており、Windows 10 マシンに問題なくインストールできます。
 
-## Agora você pode:
+## 次のことができるようになりました。
 
-- unir máquinas Windows ao domínio
-- usar GPOs
-- testar replication (quando criar um DC2)
-- criar usuários / grupos via RSAT
-- configurar sysvol replication (com Rsync ou com o novo samba-gpupdate)
-- adicionar DNS forwarders
-- ativar DFS
-- criar File Server membro
-- etc.
+- Windows マシンをドメインに参加させる
+- GPO を使用する
+- テストレプリケーション (DC2 作成時)
+- RSAT 経由でユーザー/グループを作成する
+- sysvol レプリケーションを構成します (Rsync または新しい samba-gpupdate を使用)
+- DNSフォワーダーを追加する
+- DFSを有効にする
+- メンバーファイルサーバーの作成
+- 等
 
 ---
 
-🎯 THAT'S ALL FOLKS!
+🎯 以上です!
 
-👉 Contato: zerolies@disroot.org
-👉 https://t.me/z3r0l135
+👉連絡先: zerolies@disroot.org
+👉 チリ_REF_0_チリ

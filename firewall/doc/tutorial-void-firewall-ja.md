@@ -1,6 +1,6 @@
-#  🧩 VOID LINUX チュートリアル — セキュリティ スキームの実装 – ラボラトリー ワークショップ
+# 🧩 VOID LINUX チュートリアル - ファイアウォールの実装 - EDUCATUX LABORATORY
 
-📌 IP Público のファイアウォール、Void Linux (glibc)、IPTables (レガシー)、NAT、ポート ノッキング、Fail2ban
+📌 パブリック IP を備えたファイアウォール、Void Linux (glibc)、IPTables (レガシー)、NAT、ポート ノッキング、Fail2ban、DHCP サーバー、再帰的 DNS
 
 ---
 
@@ -68,7 +68,7 @@ sudo xbps-install -y \
   iproute2 \
   openssh \
   tcpdump \
-  conntrack-tools\
+  conntrack-tools \
   fail2ban
 ```
 
@@ -270,6 +270,12 @@ iptables -A INPUT -p icmp --icmp-type echo-request \
   -m limit --limit 1/s -j ACCEPT
 
 # ============================
+# DHCP NA LAN
+# ============================
+iptables -A INPUT  -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+iptables -A OUTPUT -o $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+
+# ============================
 # ANTISCAN
 # ============================
 
@@ -311,9 +317,9 @@ exec /usr/local/bin/firewall
 アクティブ化、実行、ステータスの検証
 
 ```bash
-chmod +x /etc/sv/firewall/run
-ln -s /etc/sv/firewall /var/service/
-sv status firewall
+sudo chmod +x /etc/sv/firewall/run
+sudo ln -s /etc/sv/firewall /var/service/
+sudo sv status firewall
 ```
 
 ## ✅ 9. ポートノッキングのテストと検証 (ホット)
@@ -359,7 +365,7 @@ listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 IP登録の検証
 
 ```bash
-cat /proc/net/xt_recent/SSH_KNOCK
+sudo cat /proc/net/xt_recent/SSH_KNOCK
 ```
 
 期待される結果
@@ -371,7 +377,7 @@ src=99.336.74.209 ttl: 61 last_seen: 4302299386 oldest_pkt: 7 4302292227, 430229
 すべての障害をクリアしたい場合
 
 ```bash
-echo clear > /proc/net/xt_recent/SSH_KNOCK
+sudo echo clear > /proc/net/xt_recent/SSH_KNOCK
 ```
 
 ## ✅ 10. 外部管理アクセスの実行
@@ -391,23 +397,32 @@ ssh -p 2222 supertux@39.236.83.109
 推奨されるエイリアス
 
 ```bash
-sudo vim .bashrc
+vim ~/.bashrc
 ```
 
 コンテンツ
 
 ```bash
 alias knock='nc -z 39.236.83.109 12345'
-alias officinas='ssh -p 2222 supertux@39.236.83.109'
+alias firewall='ssh -p 2222 supertux@39.236.83.109'
 ```
 
 検証のためにファイルを再読み込みします
 
 ```bash
-source .bashrc
+source ~/.bashrc
 ```
 
 11. ✅ FAIL2BAN – ノック後の保護
+
+フェイル2バンに準拠するためのログ調整
+
+```bash
+sudo xbps-install -y socklog-void
+sudo ln -s /etc/sv/socklog-unix /var/service/
+sudo ln -s /etc/sv/nanoklogd /var/service/
+sudo touch /var/log/auth.log
+```
 
 設定ファイルを作成します (jail.conf は編集しないでください)
 
@@ -442,7 +457,7 @@ sudo sv start fail2ban
 sudo sv status fail2ban
 ```
 
-12. ✅ FAIL2BAN テスト (外部アクセス中はロックアウトされるので注意)
+## 12. ✅ 2BAN テストに失敗する (注意、自分自身をロックアウトしてしまいます!)
 
 オノックを実行する
 
@@ -464,7 +479,214 @@ sudo fail2ban-client status sshd
 sudo fail2ban-client set sshd unbanip X.X.X.X
 ```
 
-13. 🎉 チェックリスト最終版
+## ⚠️ 注意: 再帰 DNS と DHCP サーバーを扱う次のセクション 13 と 14 は、SAMBA4 を PDC としてアップグレードした後は破棄する必要があります。
+
+## 13. ✅ 内部ネットワークにサービスを提供するための一時的な再帰 DNS の展開
+
+```bash
+sudo xbps-install -y unbound
+```
+
+最小構成
+
+```bash
+sudo vim /etc/unbound/unbound.conf
+```
+
+コンテンツ
+
+```bash
+server:
+  interface: 127.0.0.1
+  interface: 192.168.70.254
+  access-control: 192.168.70.0/24 allow
+  do-ip4: yes
+  do-udp: yes
+  do-tcp: yes
+  hide-identity: yes
+  hide-version: yes
+  qname-minimisation: yes
+```
+
+サービス (runit) をアクティブ化します。
+
+```bash
+ln -s /etc/sv/unbound /var/service/
+sv start unbound
+```
+
+## 14. ✅ 内部ネットワークにサービスを提供するための一時的な DHCP サーバーの実装
+
+パッケージのインストール
+
+```bash
+sudo xbps-install -y dhcp
+```
+
+このパッケージは以下をインストールします:
+
+- dhcpd (サーバー)
+- Runit サービスの構造:
+/etc/sv/dhcpd4
+/etc/sv/dhcpd6
+
+ファイルを編集し、内部ネットワークの設定を構成します
+
+```bash
+sudo vim /etc/dhcpd.conf
+```
+
+コンテンツ
+
+```bash
+authoritative;
+
+default-lease-time 600;
+max-lease-time 7200;
+
+option domain-name "educatux.edu";
+option domain-name-servers 192.168.70.254;
+
+subnet 192.168.70.0 netmask 255.255.255.0 {
+
+  range 192.168.70.100 192.168.70.200;
+
+  option routers 192.168.70.254;
+  option subnet-mask 255.255.255.0;
+  option broadcast-address 192.168.70.255;
+
+  option domain-name-servers 192.168.70.254;
+}
+```
+
+リース ファイルを作成します。
+
+```bash
+sudo mkdir -p /var/lib/dhcp
+sudo touch /var/lib/dhcp/dhcpd.leases
+```
+
+Runitサービスの作成
+
+```bash
+sudo vim /etc/sv/dhcpd4/conf
+```
+
+コンテンツ
+
+```bash
+OPTS="-4 -q -cf /etc/dhcpd.conf eth1"
+```
+
+説明：
+
+- -4 → IPv4
+- -q → サイレントモード
+- -cf → 正しい dhcpd.conf パス
+- eth1 → インターフェースLAN
+
+runit でサービスをアクティブ化します。
+
+```bash
+sudo ln -s /etc/sv/dhcpd4 /var/service/
+```
+
+開始/再起動:
+
+```bash
+sudo sv restart dhcpd4
+```
+
+ステータスを確認します:
+
+```bash
+sudo sv status dhcpd4
+```
+
+期待される結果:
+
+```bash
+run: dhcpd4: (pid 17652) 831s; run: log: (pid 15544) 1213s
+```
+
+ポート67のリスニングを確認してください
+
+```bash
+UNCONN 0      0            0.0.0.0:67        0.0.0.0:*    users:(("dhcpd",pid=17652,fd=6))  
+```
+
+DHCPをリアルタイムで監視する
+
+```bash
+sudo tcpdump -ni eth1 port 67 or port 68
+```
+
+期待される結果
+
+```bash
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on eth1, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+```
+
+直接デバッグ用 (runit なし)
+
+```bash
+sudo dhcpd -4 -d -cf /etc/dhcpd.conf eth1
+```
+
+これで表示されるはずです
+
+- DHCPディスカバー
+- DHCPOFFER
+- DHCPリクエスト
+- DHCPACK
+
+重要なファイル
+
+- /etc/dhcpd.conf → 主な設定
+- /var/lib/dhcp/dhcpd.leases → リース
+- /etc/sv/dhcpd4/run → スクリプト runit
+- /etc/sv/dhcpd4/conf → サービスパラメータ
+- /var/service/dhcpd4 → サービスがアクティブです
+
+LAN 上で DHCP を許可するように iptables スクリプトを調整します。暗黙的な DROP ルールの前に追加します。
+
+```bash
+# ============================
+# DHCP LAN
+# ============================
+
+iptables -A INPUT  -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+iptables -A OUTPUT -o $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+```
+
+💡 DHCP はブロードキャストを使用します → これがないと、クライアントは IP を取得できません。
+
+ファイアウォールを再適用します。
+
+```bash
+sudo /usr/local/bin/firewall
+```
+
+LAN VM でのテスト
+
+```bash
+dhclient -v
+```
+
+ファイアウォール内で監視
+
+```bash
+sudo tail -f /var/log/messages
+```
+
+または
+
+```bash
+sudo tcpdump -ni eth1 port 67 or port 68
+```
+
+## 15. 🎉 最終チェックリスト
 
 - ノックなしの目に見えない SSH
 - 使い捨てノック
@@ -474,89 +696,12 @@ sudo fail2ban-client set sshd unbanip X.X.X.X
 - 機能的NAT
 - 永続的なファイアウォール
 - Proxmox はトンネル経由でのみアクセス可能
+- 最小限の再帰 DNS (PDC が入るまで)
+- DHCPサーバー
 
 ---
 
 🎯 以上です!
+
 👉 チリ_REF_0_チリ
 👉 チリ_REF_0_チリ
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

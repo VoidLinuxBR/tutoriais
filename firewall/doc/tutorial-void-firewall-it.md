@@ -1,6 +1,6 @@
-#  🧩 TUTORIAL VOID LINUX — IMPLEMENTAZIONE DELLO SCHEMA DI SICUREZZA – WORKSHOP IN LABORATORIO
+# 🧩 TUTORIAL VOID LINUX - IMPLEMENTAZIONE FIREWALL - LABORATORIO EDUCATUX
 
-📌 Firewall con IP pubblico, Void Linux (glibc), IPTables (legacy), NAT, Port Knocking e Fail2ban
+📌 Firewall con IP pubblico, Void Linux (glibc), IPTables (legacy), NAT, Port Knocking, Fail2ban, DHCP Server e DNS ricorsivo
 
 ---
 
@@ -68,7 +68,7 @@ sudo xbps-install -y \
   iproute2 \
   openssh \
   tcpdump \
-  conntrack-tools\
+  conntrack-tools \
   fail2ban
 ```
 
@@ -270,6 +270,12 @@ iptables -A INPUT -p icmp --icmp-type echo-request \
   -m limit --limit 1/s -j ACCEPT
 
 # ============================
+# DHCP NA LAN
+# ============================
+iptables -A INPUT  -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+iptables -A OUTPUT -o $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+
+# ============================
 # ANTISCAN
 # ============================
 
@@ -311,9 +317,9 @@ exec /usr/local/bin/firewall
 Attiva, esegui e convalida lo stato
 
 ```bash
-chmod +x /etc/sv/firewall/run
-ln -s /etc/sv/firewall /var/service/
-sv status firewall
+sudo chmod +x /etc/sv/firewall/run
+sudo ln -s /etc/sv/firewall /var/service/
+sudo sv status firewall
 ```
 
 ## ✅ 9. TEST E VALIDAZIONE (A CALDO) DEI PORTO
@@ -359,7 +365,7 @@ Nota tecnica importante
 Convalidare la registrazione IP
 
 ```bash
-cat /proc/net/xt_recent/SSH_KNOCK
+sudo cat /proc/net/xt_recent/SSH_KNOCK
 ```
 
 Risultato atteso
@@ -371,7 +377,7 @@ src=99.336.74.209 ttl: 61 last_seen: 4302299386 oldest_pkt: 7 4302292227, 430229
 SE vuoi eliminare tutti i colpi
 
 ```bash
-echo clear > /proc/net/xt_recent/SSH_KNOCK
+sudo echo clear > /proc/net/xt_recent/SSH_KNOCK
 ```
 
 ## ✅ 10. EFFETTUARE L'ACCESSO AMMINISTRATIVO ESTERNO
@@ -391,23 +397,32 @@ ssh -p 2222 supertux@39.236.83.109
 Alias consigliati
 
 ```bash
-sudo vim .bashrc
+vim ~/.bashrc
 ```
 
 Contenuto
 
 ```bash
 alias knock='nc -z 39.236.83.109 12345'
-alias officinas='ssh -p 2222 supertux@39.236.83.109'
+alias firewall='ssh -p 2222 supertux@39.236.83.109'
 ```
 
 Rileggere il file per la convalida
 
 ```bash
-source .bashrc
+source ~/.bashrc
 ```
 
 11. ✅ FAIL2BAN – PROTEZIONE POST-KNOCK
+
+Registra le modifiche per conformarsi a fail2ban
+
+```bash
+sudo xbps-install -y socklog-void
+sudo ln -s /etc/sv/socklog-unix /var/service/
+sudo ln -s /etc/sv/nanoklogd /var/service/
+sudo touch /var/log/auth.log
+```
 
 Crea file di configurazione (non modificare mai jail.conf)
 
@@ -442,7 +457,7 @@ sudo sv start fail2ban
 sudo sv status fail2ban
 ```
 
-12. ✅ TEST FAIL2BAN (ATTENZIONE ti chiudi fuori durante l'accesso esterno)
+## 12. ✅ TEST FAIL2BAN (ATTENZIONE, TI CHIUDI FUORI!)
 
 Esegui o bussa
 
@@ -464,7 +479,214 @@ Sblocca manualmente:
 sudo fail2ban-client set sshd unbanip X.X.X.X
 ```
 
-13. 🎉 CHECKLIST FINALE
+## ⚠️ ATTENZIONE: LE SEGUENTI SEZIONI 13 e 14, CHE TRATTANO DNS RICORSIVI E SERVER DHCP, DEVONO ESSERE ELIMINATE DOPO AVER AGGIORNATO SAMBA4 COME PDC!!
+
+## 13. ✅ IMPLEMENTAZIONE DI UN DNS RICORSIVO TEMPORANEO PER SERVIRE LA RETE INTERNA
+
+```bash
+sudo xbps-install -y unbound
+```
+
+Configurazione minima
+
+```bash
+sudo vim /etc/unbound/unbound.conf
+```
+
+Contenuto
+
+```bash
+server:
+  interface: 127.0.0.1
+  interface: 192.168.70.254
+  access-control: 192.168.70.0/24 allow
+  do-ip4: yes
+  do-udp: yes
+  do-tcp: yes
+  hide-identity: yes
+  hide-version: yes
+  qname-minimisation: yes
+```
+
+Attiva il servizio (runit):
+
+```bash
+ln -s /etc/sv/unbound /var/service/
+sv start unbound
+```
+
+## 14. ✅ IMPLEMENTAZIONE DI UN SERVER DHCP TEMPORANEO PER SERVIRE LA RETE INTERNA
+
+Installazione del pacchetto
+
+```bash
+sudo xbps-install -y dhcp
+```
+
+Questo pacchetto installa:
+
+- DHCP (server)
+- Struttura del servizio Runit:
+/etc/sv/dhcpd4
+/etc/sv/dhcpd6
+
+Modifica il file e configura le impostazioni per la rete interna
+
+```bash
+sudo vim /etc/dhcpd.conf
+```
+
+Contenuto
+
+```bash
+authoritative;
+
+default-lease-time 600;
+max-lease-time 7200;
+
+option domain-name "educatux.edu";
+option domain-name-servers 192.168.70.254;
+
+subnet 192.168.70.0 netmask 255.255.255.0 {
+
+  range 192.168.70.100 192.168.70.200;
+
+  option routers 192.168.70.254;
+  option subnet-mask 255.255.255.0;
+  option broadcast-address 192.168.70.255;
+
+  option domain-name-servers 192.168.70.254;
+}
+```
+
+Creare il file di locazione:
+
+```bash
+sudo mkdir -p /var/lib/dhcp
+sudo touch /var/lib/dhcp/dhcpd.leases
+```
+
+Creazione del servizio runit
+
+```bash
+sudo vim /etc/sv/dhcpd4/conf
+```
+
+Contenuto
+
+```bash
+OPTS="-4 -q -cf /etc/dhcpd.conf eth1"
+```
+
+Spiegazione:
+
+- -4→IPv4
+- -q → modalità silenziosa
+- -cf → percorso corretto di dhcpd.conf
+- eth1 → interfaccia LAN
+
+Attiva il servizio in runit:
+
+```bash
+sudo ln -s /etc/sv/dhcpd4 /var/service/
+```
+
+Avvio/Riavvio:
+
+```bash
+sudo sv restart dhcpd4
+```
+
+Controlla lo stato:
+
+```bash
+sudo sv status dhcpd4
+```
+
+Risultato atteso:
+
+```bash
+run: dhcpd4: (pid 17652) 831s; run: log: (pid 15544) 1213s
+```
+
+Controllare l'ascolto sulla porta 67
+
+```bash
+UNCONN 0      0            0.0.0.0:67        0.0.0.0:*    users:(("dhcpd",pid=17652,fd=6))  
+```
+
+Monitora il DHCP in tempo reale
+
+```bash
+sudo tcpdump -ni eth1 port 67 or port 68
+```
+
+Risultato atteso
+
+```bash
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on eth1, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+```
+
+Per il debug diretto (senza runit)
+
+```bash
+sudo dhcpd -4 -d -cf /etc/dhcpd.conf eth1
+```
+
+Questo dovrebbe essere visibile
+
+- DHCPDISCOVER
+- OFFERTA DHCP
+- RICHIESTA DHCP
+- DHCPACK
+
+File importanti
+
+- /etc/dhcpd.conf → Configurazione principale
+- /var/lib/dhcp/dhcpd.leases → Leasing
+- /etc/sv/dhcpd4/run → Script runit
+- /etc/sv/dhcpd4/conf → Parametri del servizio
+- /var/service/dhcpd4 → Servizio attivo
+
+Modifica lo script iptables per consentire il DHCP sulla LAN. Aggiungi PRIMA delle regole DROP implicite:
+
+```bash
+# ============================
+# DHCP LAN
+# ============================
+
+iptables -A INPUT  -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+iptables -A OUTPUT -o $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+```
+
+💡 DHCP utilizza il broadcast → senza questo, il client non ottiene un IP.
+
+Riapplicare il firewall:
+
+```bash
+sudo /usr/local/bin/firewall
+```
+
+Test su una VM LAN
+
+```bash
+dhclient -v
+```
+
+Nel firewall, monitora
+
+```bash
+sudo tail -f /var/log/messages
+```
+
+O
+
+```bash
+sudo tcpdump -ni eth1 port 67 or port 68
+```
+
+## 15. 🎉 CHECKLIST FINALE
 
 - SSH invisibile senza bussare
 - Bussare monouso
@@ -474,89 +696,12 @@ sudo fail2ban-client set sshd unbanip X.X.X.X
 - NAT funzionale
 - Firewall persistente
 - Proxmox accessibile solo tramite tunnel
+- DNS ricorsivo minimo (fino all'ingresso del PDC)
+- Server DHCP
 
 ---
 
 🎯 E' TUTTO RAGAZZE!
+
 👉 https://t.me/z3r0l135
 👉 https://t.me/vcatafesta
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

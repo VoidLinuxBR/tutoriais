@@ -1,26 +1,26 @@
-# Configuração do LightDM para insrção do Linux Mint no domínio
+# 用於將 Linux Mint 加入域的 LightDM 配置
 
-## 🎯 Objetivo Ingressar Linux no Domínio Samba4 com Winbind por integração NSS/PAM
-
----
-
-## Pré-requisitos
-
-- Samba4 como controlador de domínio (PDC)
-- Linux com DNS e horário alinhados com o PDC (192.168.70.253)
-- Conectividade com o servidor
+## 🎯 目標通過 NSS/PAM 集成使用 Winbind 將 Linux 加入 Samba4 域
 
 ---
 
-## 🛠️ Etapas
+## 先決條件
 
-## 1. Instalar pacotes necessários
+- Samba4 作為域控制器 (PDC)
+- Linux 的 DNS 和時間與 PDC 一致 (192.168.70.253)
+- 與服務器的連接
+
+---
+
+## 🛠️步驟
+
+## 1.安裝需要的包
 
 ```bash
 sudo apt update && sudo apt install samba winbind libpam-winbind libnss-winbind krb5-user
 ```
 
-## 2. Configurar /etc/krb5.conf
+## 2.配置/etc/krb5.conf
 
 ```bash
 [libdefaults]
@@ -46,7 +46,7 @@ sudo apt update && sudo apt install samba winbind libpam-winbind libnss-winbind 
     educatux.edu = EDUCATUX.EDU
 ```
 
-## 3. Configurar /etc/samba/smb.conf
+## 3.配置/etc/samba/smb.conf
 
 ```bash
 [global]
@@ -74,7 +74,7 @@ sudo apt update && sudo apt install samba winbind libpam-winbind libnss-winbind 
    template homedir = /home/%U
 ```
 
-## 4. Configurar /etc/nsswitch.conf
+## 4.配置/etc/nsswitch.conf
 
 ```bash
 passwd:         compat winbind
@@ -82,19 +82,19 @@ group:          compat winbind
 shadow:         compat
 ```
 
-## 5. Ingressar no domínio
+## 5. 加入域
 
 ```bash
 sudo net ads join -U Administrator
 ```
 
-## 6. Reboot do Sistema
+## 6. 系統重啟
 
 ```bash
 sudo reboot
 ```
 
-## 7. Verificações
+## 7. 檢查
 
 ```bash
 sudo net ads testjoin
@@ -103,39 +103,39 @@ wbinfo -g
 getent passwd usuario
 ```
 
-## 8. Criar diretórios HOME automaticamente
+## 8.自動創建HOME目錄
 
 
-## Edite /etc/pam.d/common-session e adicione:
+## 編輯 /etc/pam.d/common-session 並添加：
 
 ```bash
 session required pam_mkhomedir.so skel=/etc/skel umask=0022
 ```
 
-## 9. Reiniciar serviços
+## 9. 重啟服務
 
 ```bash
 sudo systemctl restart smbd nmbd winbind
 sudo systemctl enable winbind
 ```
 
-## 10. Sincronização de Hora
+## 10. 時間同步
 
 ```bash
 sudo timedatectl set-ntp true
 ```
 
-## SE você for usuário de Lightdm, como é o caso do Mint, ajuste pra logar com usuário de rede, ao invés de usuário local apenas.
+## 如果您是 Lightdm 用戶，就像 Mint 的情況一樣，請將其設置為使用網絡用戶登錄，而不僅僅是本地用戶。
 
-## 🛠️ Passo a Passo: Configurar LightDM para aceitar usuários do domínio
+## 🛠️ 一步一步：配置 LightDM 以接受域用戶
 
-## 1. Editar o arquivo de configuração do LightDM
+## 1.編輯LightDM配置文件
 
 ```bash
 sudo vim /etc/lightdm/lightdm.conf
 ```
 
-## Edite as seguintes linhas do arquivo:
+## 編輯文件中的以下行：
 
 ```bash
 [Seat:*]
@@ -144,33 +144,33 @@ greeter-hide-users=true
 allow-guest=false
 ```
 
-## Explicações:
+## 說明：
 
-- greeter-show-manual-login=true: Permite digitar o nome de usuário manualmente.
-- greeter-hide-users=true: Esconde a lista local de usuários (útil para ambientes corporativos).
-- allow-guest=false: Impede login de convidados (por segurança).
+- greeter-show-manual-login=true：允許您手動輸入用戶名。
+- greeter-hide-users=true：隱藏本地用戶列表（對於企業環境有用）。
+- allow-guest=false：阻止訪客登錄（出於安全考慮）。
 
-## 2. Certifique-se de que PAM está permitindo usuários do domínio
+## 2. 確保 PAM 允許域用戶
 
-## Se você usou SSSD ou Winbind, o PAM já deve estar integrado corretamente. Mas valide que o módulo home esteja presente:
+## 如果您使用 SSSD 或 Winbind，PAM 應該已經正確集成。但請確保 home 模塊存在：
 
 ```bash
 sudo vim /etc/pam.d/common-session
 ```
 
-## Confirme que esta linha existe OU adicione-a:
+## 確認此行存在或添加它：
 
 ```bash
 session required pam_mkhomedir.so skel=/etc/skel umask=0022
 ```
 
-## 3. Reiniciar o LightDM
+## 3. 重新啟動LightDM
 
 ```bash
 sudo timedatectl set-ntp true
 ```
 
-## ⚠️ Para Linux MInt baseado em Ubuntu, pode-se desativar o systemd-resolved para controlar o DNS manualmente.
+## ⚠️ 對於基於 Ubuntu 的 Linux MInt，您可以禁用 systemd-resolved 來手動控制 DNS。
 
 ```bash
 systemctl status systemd-resolved
@@ -182,13 +182,13 @@ systemctl disable systemd-resolved.service
 sudo systemctl mask systemd-resolved
 ```
 
-## REMOVENDO O ARQUIVO SEM PERMISSÃO DE EDIÇÃO CRIADO PELO SYSTEMD-RESOLVED:
+## 刪除由 SYSTEMD-RESOLVED 創建的沒有編輯權限的文件：
 
 ```bash
 rm -f /etc/resolv.conf
 ```
 
-## Criando um arquivo novo com permissão de edição:
+## 創建具有編輯權限的新文件：
 
 ```bash
 vim /etc/resolv.conf
@@ -200,13 +200,13 @@ search educatux.edu.
 nameserver 192.168.70.253
 ```
 
-## Bloqueando o arquivo contra edição automática
+## 鎖定文件以防止自動編輯
 
 ```bash
 sudo chattr +i /etc/resolv.conf
 ```
 
-## Restart do serviço
+## 服務重啟
 
 ```bash
 sudo systemctl restart NetworkManager
@@ -214,8 +214,8 @@ sudo systemctl restart NetworkManager
 
 ---
 
-🎯 THAT'S ALL FOLKS!
+🎯 這就是大家！
 
-👉 Contato: zerolies@disroot.org
+👉聯繫方式：zerolies@disroot.org
 👉 https://t.me/z3r0l135
 

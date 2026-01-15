@@ -1,6 +1,6 @@
-#  🧩 VOID LINUX 튜토리얼 — 보안 체계 구현 – 실험실 워크샵
+# 🧩 VOID LINUX 튜토리얼 - 방화벽 구현 - EDUCATUX LABORATORY
 
-😀 IP Público, Void Linux(glibc), IPTables(레거시), NAT, Port Knocking 및 Fail2ban을 위한 방화벽
+😀 공용 IP를 갖춘 방화벽, Void Linux(glibc), IPTables(레거시), NAT, 포트 노킹, Fail2ban, DHCP 서버 및 재귀 DNS
 
 ---
 
@@ -68,7 +68,7 @@ sudo xbps-install -y \
   iproute2 \
   openssh \
   tcpdump \
-  conntrack-tools\
+  conntrack-tools \
   fail2ban
 ```
 
@@ -270,6 +270,12 @@ iptables -A INPUT -p icmp --icmp-type echo-request \
   -m limit --limit 1/s -j ACCEPT
 
 # ============================
+# DHCP NA LAN
+# ============================
+iptables -A INPUT  -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+iptables -A OUTPUT -o $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+
+# ============================
 # ANTISCAN
 # ============================
 
@@ -311,9 +317,9 @@ exec /usr/local/bin/firewall
 활성화, 실행 및 상태 확인
 
 ```bash
-chmod +x /etc/sv/firewall/run
-ln -s /etc/sv/firewall /var/service/
-sv status firewall
+sudo chmod +x /etc/sv/firewall/run
+sudo ln -s /etc/sv/firewall /var/service/
+sudo sv status firewall
 ```
 
 ## ✅ 9. 포트 노킹 테스트 및 검증(핫)
@@ -359,7 +365,7 @@ listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 IP 등록 확인
 
 ```bash
-cat /proc/net/xt_recent/SSH_KNOCK
+sudo cat /proc/net/xt_recent/SSH_KNOCK
 ```
 
 예상되는 결과
@@ -371,7 +377,7 @@ src=99.336.74.209 ttl: 61 last_seen: 4302299386 oldest_pkt: 7 4302292227, 430229
 모든 노크를 없애고 싶다면
 
 ```bash
-echo clear > /proc/net/xt_recent/SSH_KNOCK
+sudo echo clear > /proc/net/xt_recent/SSH_KNOCK
 ```
 
 ## ✅ 10. 외부 관리 액세스 수행
@@ -391,23 +397,32 @@ ssh -p 2222 supertux@39.236.83.109
 권장 별칭
 
 ```bash
-sudo vim .bashrc
+vim ~/.bashrc
 ```
 
 콘텐츠
 
 ```bash
 alias knock='nc -z 39.236.83.109 12345'
-alias officinas='ssh -p 2222 supertux@39.236.83.109'
+alias firewall='ssh -p 2222 supertux@39.236.83.109'
 ```
 
 유효성 검사를 위해 파일을 다시 읽습니다.
 
 ```bash
-source .bashrc
+source ~/.bashrc
 ```
 
 11. ✅ FAIL2BAN – 노크 후 보호
+
+Fail2ban을 준수하기 위한 로그 조정
+
+```bash
+sudo xbps-install -y socklog-void
+sudo ln -s /etc/sv/socklog-unix /var/service/
+sudo ln -s /etc/sv/nanoklogd /var/service/
+sudo touch /var/log/auth.log
+```
 
 구성 파일 생성(jail.conf를 편집하지 않음)
 
@@ -442,7 +457,7 @@ sudo sv start fail2ban
 sudo sv status fail2ban
 ```
 
-12. ✅ FAIL2BAN 테스트(외부 액세스 중에는 자신을 잠글 수 있다는 주의)
+## 12. ✅ FAIL2BAN 테스트(주의하세요. 스스로 잠길 수 있습니다!)
 
 실행 o 노크
 
@@ -464,7 +479,214 @@ sudo fail2ban-client status sshd
 sudo fail2ban-client set sshd unbanip X.X.X.X
 ```
 
-13. 🎉 체크리스트 최종
+## ⚠️ 주의: 재귀 DNS 및 DHCP 서버를 다루는 다음 섹션 13 및 14는 Samba4를 PDC로 업그레이드한 후 폐기해야 합니다!!
+
+## 13. ✅ 내부 네트워크에 서비스를 제공하기 위해 임시 재귀 DNS 배포
+
+```bash
+sudo xbps-install -y unbound
+```
+
+최소 구성
+
+```bash
+sudo vim /etc/unbound/unbound.conf
+```
+
+콘텐츠
+
+```bash
+server:
+  interface: 127.0.0.1
+  interface: 192.168.70.254
+  access-control: 192.168.70.0/24 allow
+  do-ip4: yes
+  do-udp: yes
+  do-tcp: yes
+  hide-identity: yes
+  hide-version: yes
+  qname-minimisation: yes
+```
+
+서비스 활성화(runit):
+
+```bash
+ln -s /etc/sv/unbound /var/service/
+sv start unbound
+```
+
+## 14. ✅ 내부 네트워크 서비스를 위한 임시 DHCP 서버 구현
+
+패키지 설치
+
+```bash
+sudo xbps-install -y dhcp
+```
+
+이 패키지는 다음을 설치합니다:
+
+- dhcpd(서버)
+- Runit 서비스 구조:
+/etc/sv/dhcpd4
+/etc/sv/dhcpd6
+
+파일 편집 및 내부 네트워크 설정 구성
+
+```bash
+sudo vim /etc/dhcpd.conf
+```
+
+콘텐츠
+
+```bash
+authoritative;
+
+default-lease-time 600;
+max-lease-time 7200;
+
+option domain-name "educatux.edu";
+option domain-name-servers 192.168.70.254;
+
+subnet 192.168.70.0 netmask 255.255.255.0 {
+
+  range 192.168.70.100 192.168.70.200;
+
+  option routers 192.168.70.254;
+  option subnet-mask 255.255.255.0;
+  option broadcast-address 192.168.70.255;
+
+  option domain-name-servers 192.168.70.254;
+}
+```
+
+임대 파일을 만듭니다.
+
+```bash
+sudo mkdir -p /var/lib/dhcp
+sudo touch /var/lib/dhcp/dhcpd.leases
+```
+
+Runit 서비스 생성
+
+```bash
+sudo vim /etc/sv/dhcpd4/conf
+```
+
+콘텐츠
+
+```bash
+OPTS="-4 -q -cf /etc/dhcpd.conf eth1"
+```
+
+설명:
+
+- -4 → IPv4
+- -q → 자동 모드
+- -cf → 올바른 dhcpd.conf 경로
+- eth1 → 인터페이스 LAN
+
+runit에서 서비스를 활성화합니다:
+
+```bash
+sudo ln -s /etc/sv/dhcpd4 /var/service/
+```
+
+시작/다시 시작:
+
+```bash
+sudo sv restart dhcpd4
+```
+
+상태 확인:
+
+```bash
+sudo sv status dhcpd4
+```
+
+예상 결과:
+
+```bash
+run: dhcpd4: (pid 17652) 831s; run: log: (pid 15544) 1213s
+```
+
+포트 67 수신 대기를 확인하세요.
+
+```bash
+UNCONN 0      0            0.0.0.0:67        0.0.0.0:*    users:(("dhcpd",pid=17652,fd=6))  
+```
+
+실시간으로 DHCP 모니터링
+
+```bash
+sudo tcpdump -ni eth1 port 67 or port 68
+```
+
+예상되는 결과
+
+```bash
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on eth1, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+```
+
+직접 디버깅용(runit 없이)
+
+```bash
+sudo dhcpd -4 -d -cf /etc/dhcpd.conf eth1
+```
+
+이 표시되어야합니다
+
+- DHCP 검색
+- DHCP 제안
+- DHCP요청
+- DHCPACK
+
+중요한 파일
+
+- /etc/dhcpd.conf → 기본 구성
+- /var/lib/dhcp/dhcpd.leases → 임대
+- /etc/sv/dhcpd4/run → 스크립트 runit
+- /etc/sv/dhcpd4/conf → 서비스 매개변수
+- /var/service/dhcpd4 → 서비스 활성화
+
+LAN에서 DHCP를 허용하도록 iptables 스크립트를 조정하십시오. 암시적 DROP 규칙 앞에 추가합니다.
+
+```bash
+# ============================
+# DHCP LAN
+# ============================
+
+iptables -A INPUT  -i $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+iptables -A OUTPUT -o $LAN -p udp --sport 67:68 --dport 67:68 -j ACCEPT
+```
+
+💡 DHCP는 브로드캐스트를 사용합니다. → 이것이 없으면 클라이언트는 IP를 얻지 못합니다.
+
+방화벽을 다시 적용합니다.
+
+```bash
+sudo /usr/local/bin/firewall
+```
+
+LAN VM에서 테스트
+
+```bash
+dhclient -v
+```
+
+방화벽에서 모니터링
+
+```bash
+sudo tail -f /var/log/messages
+```
+
+또는
+
+```bash
+sudo tcpdump -ni eth1 port 67 or port 68
+```
+
+## 15. 🎉 체크리스트 최종
 
 - 노크 없이 보이지 않는 SSH
 - 일회용 노크
@@ -474,89 +696,12 @@ sudo fail2ban-client set sshd unbanip X.X.X.X
 - 기능적 NAT
 - 영구 방화벽
 - Proxmox는 터널을 통해서만 접근 가능
+- 최소 재귀 DNS(PDC가 진입할 때까지)
+- DHCP 서버
 
 ---
 
 🎯 그게 전부입니다!
+
 👉 https://t.me/z3r0l135
 👉 https://t.me/vcatafesta
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

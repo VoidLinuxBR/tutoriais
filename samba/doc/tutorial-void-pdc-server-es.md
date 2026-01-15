@@ -1,27 +1,27 @@
-# Controlador de Domínio Primário (Active Directory) rodando Samba4 sob Void Linux Server ;D
+# Controlador de dominio principal (Directorio activo) que ejecuta Samba4 en Void Linux Server; D
 
-## 🎯 Objetivo - Subir um Controlador de Domínio Primário no Void Linux (glibc) compilando o Samba4 a partir do código fonte, configurando DNS interno, Kerberos, integração AD, ACLs, serviços e toda a pilha necessária para controlar os clientes da rede.
+## 🎯 Objetivo: cargar un controlador de dominio primario en Void Linux (glibc) compilando Samba4 desde el código fuente, configurando DNS interno, Kerberos, integración AD, ACL, servicios y toda la pila necesaria para controlar los clientes de la red.
 
-### 🔧 ADAPTE o tutorial á SUA realidade, obviamente!
+### 🔧 ADAPTA el tutorial a TU realidad, ¡obviamente!
 
-## 📡 Layout de rede local
+## 📡 Diseño de red local
 
-- Domínio: EDUCATUX.EDU
-- Hostname: pdc01
-- Firewall 192.168.70.254 (DNS/GW)
-- Ip: 192.168.70.253
+- Dominio: EDUCATUX.EDU
+- Nombre de host: pdc01
+- Cortafuegos 192.168.70.254 (DNS/GW)
+- Dirección IP: 192.168.70.253
 
 ---
 
-## A instalação padrão do Void Linux não será coberta nesse tutorial.
+## La instalación predeterminada de Void Linux no se tratará en este tutorial.
 
-## Trocar o Shell padrão do Void, pós instalado
+## Cambie el shell predeterminado de Void, después de instalarlo
 
 ```bash
 chsh -s /bin/bash
 ```
 
-## 🧩 Instalar pacotes de dependências para compilar o Samba4 no Void
+## 🧩 Instale paquetes de dependencia para compilar Samba4 en Void
 
 ```bash
 xbps-install -S \
@@ -42,9 +42,9 @@ xbps-install -S \
  bind ldns pkg-config vim
 ```
 
-## ⚠️ ATENÇÃO:  O Samba4 compilado inclui o código do kerberos Heimdal, embutido (KDC interno) por default, mas não inclui clientes Kerberos. Nesse caso o repositório disponibiliza pacotes binários do MIT, que podem ser instalados sem qualquer problema ou interferência no kerberos heimdal default, compilado no Controlador de Domínio. Os pacotes são: mit-krb5 mit-krb5-client mit-krb5-devel. PORÉM você NÃO DEVE em hipótese alguma, instalar por repositório o pacote binário do krb5-server, o que causaria serviço concorrente ao kerberos Heimdal, interno do Samba4!
+## ⚠️ ATENCIÓN: El Samba4 compilado incluye el código Kerberos Heimdal, incorporado (KDC interno) de forma predeterminada, pero no incluye clientes Kerberos. En este caso, el repositorio proporciona paquetes binarios del MIT, que se pueden instalar sin problemas ni interferencias con el kerberos heimdal predeterminado, compilado en el controlador de dominio. Los paquetes son: mit-krb5 mit-krb5-client mit-krb5-devel. SIN EMBARGO, bajo ninguna circunstancia DEBE instalar el paquete binario krb5-server desde el repositorio, lo que provocaría un servicio competitivo con el kerberos Heimdal, interno de Samba4.
 
-## Os serviços fornecidos pelos clientes do MIT-krb5, ficam em:
+## Los servicios proporcionados por los clientes de MIT-krb5 se encuentran en:
 
 ```bash
 /usr/bin/kinit
@@ -53,7 +53,7 @@ xbps-install -S \
 /usr/bin/kdestroy
 ```
 
-## 🖥️ Setar hostname
+## 🖥️ Establecer nombre de host
 
 ```bash
 echo "pdc01" > /etc/hostname
@@ -65,7 +65,7 @@ echo "pdc01" > /etc/hostname
 vim /etc/hosts
 ```
 
-## Conteúdo:
+## Contenido:
 
 ```bash
 127.0.0.1      localhost
@@ -73,15 +73,15 @@ vim /etc/hosts
 192.168.70.253 pdc01.educatux.edu pdc01
 ```
 
-## 🌐 Configurar IP fixo
+## 🌐 Configurar IP fija
 
-### 👉 Usaremos o método padrão do Void, o /etc/dhcpcd.conf
+### 👉 Usaremos el método predeterminado de Void, /etc/dhcpcd.conf
 
 ```bash
 vim /etc/dhcpcd.conf
 ```
 
-## Adicionar ip, gateway e dns:## 🎯 Objetivo
+## Agregar ip, puerta de enlace y dns:## 🎯 Propósito
 
 ```bash
 interface eth0
@@ -90,25 +90,25 @@ static routers=192.168.70.254
 static domain_name_servers=192.168.70.254
 ```
 
-## Reiniciar a interface de rede:
+## Reinicie la interfaz de red:
 
 ```bash
 sv restart dhcpcd
 ```
 
-## 🌐 Setar o DNS temporário (roteador) ANTES de provisionar
+## 🌐 Configure DNS (enrutador) temporal ANTES del aprovisionamiento
 
 ```bash
 echo "nameserver 192.168.70.254" > /etc/resolv.conf
 ```
 
-## Travar a configuração do resolv.conf
+## Bloquear la configuración de resolv.conf
 
 ```bash
 chattr +i /etc/resolv.conf
 ```
 
-## 🔍 Validar endereço atribuído á interface de rede
+## 🔍 Validar dirección asignada a la interfaz de red
 
 ```bash
 ip -c addr
@@ -118,7 +118,7 @@ ip -c addr
 ip -br link
 ```
 
-## 📥 Baixar e descompactar o código fonte do Samba4
+## 📥 Descargue y descomprima el código fuente de Samba4
 
 ```bash
 wget https://download.samba.org/pub/samba/samba-4.23.4.tar.gz
@@ -128,7 +128,7 @@ wget https://download.samba.org/pub/samba/samba-4.23.4.tar.gz
 tar -xvzf samba-4.23.4.tar.gz
 ```
 
-## Compilar e instalar o código fonte
+## Compile e instale el código fuente.
 
 ```bash
 cd samba-4.23.4
@@ -142,14 +142,14 @@ cd samba-4.23.4
 make -j$(nproc) && make install
 ```
 
-## Comentário:
+## Comentario:
 
-- O Void não interfere na instalação, pois Samba é compilado em /opt/samba.
-- O make -j acelera muito a compilação, mesmo assim, vá tomar um café.
-- Após instalar, o Samba4 compilado não tem serviços criados no runit.
-- Criaremos os serviços manualmente.
+- Void no interfiere con la instalación, ya que Samba está compilado en /opt/samba.
+- Make -j acelera mucho la compilación, de todos modos, ve a tomar un café.
+- Después de la instalación, el Samba4 compilado no tiene servicios creados en el runit.
+- Crearemos los servicios manualmente.
 
-## 📁 Adicionar Samba4 ao PATH do Sistema e reler o ambiente
+## 📁 Agregue Samba4 a la RUTA del sistema y vuelva a leer el entorno
 
 ```bash
 echo 'export PATH=/opt/samba/bin:/opt/samba/sbin:$PATH' >> /etc/profile
@@ -159,7 +159,7 @@ echo 'export PATH=/opt/samba/bin:/opt/samba/sbin:$PATH' >> /etc/profile
 source /etc/profile
 ```
 
-## Testar a inserção do PATH do Samba4 no Sistema Operacional
+## Probar la inserción del PATH Samba4 en el Sistema Operativo
 
 ```bash
 samba-tool -V
@@ -171,7 +171,7 @@ samba-tool -V
 4.23.4
 ```
 
-🏰 Provisionar o domínio SAMBA4 (Criando o PDC propriamente dito)
+🏰 Aprovisionar el dominio SAMBA4 (Creando el propio PDC)
 
 ```bash
 samba-tool domain provision \
@@ -185,7 +185,7 @@ samba-tool domain provision \
  --function-level=2016
 ```
 
-### Samba4 criará:
+### Samba4 creará:
 
 ```bash
 /opt/samba/etc/smb.conf
@@ -193,14 +193,14 @@ samba-tool domain provision \
 /opt/samba/var/locks/sysvol
 ```
 
-## Em resumo o Samba4:
+## En resumen Samba4:
 
-- Cria a floresta AD, o DC primário, o DNS interno e o DB das contas.
-- Define domínio, realm, nível funcional 2016 e a senha do Administrator.
-- Void não instala nenhum Samba nativo, então não há conflito.
-- Após isso, o DNS passa a ser o próprio PDC, precisando ajustar /etc/resolv.conf para 127.0.0.1.
+- Crea el bosque AD, el DC primario, el DNS interno y la base de datos de cuentas.
+- Define dominio, reino, nivel funcional de 2016 y contraseña de administrador.
+- Void no instala ningún Samba nativo, por lo que no hay conflicto.
+- Después de esto, el DNS se convierte en el propio PDC y es necesario ajustar /etc/resolv.conf a 127.0.0.1.
 
-## ⚙️ Validar o nível funcional 2016 do Active Directory
+## ⚙️ Validar nivel funcional de Active Directory 2016
 
 ```bash
 samba-tool domain level show
@@ -215,16 +215,16 @@ Domain function level: (Windows) 2016
 Lowest function level of a DC: (Windows) 2016
 ```
 
-## 🧪 Testar manualmente o serviço AD DC antes de criar o serviço
+## 🧪 Pruebe manualmente el servicio AD DC antes de crear el servicio
 
 ```bash
 /opt/samba/sbin/samba -i -M single
 ```
 
-* -i → foreground
-* -M single → modelo single-process (não dispara daemon forking fora do controle do runit)
+* -i → primer plano
+* -M modelo único → de proceso único (no activa la bifurcación del demonio fuera del control de runit)
 
-## Se tudo estiver bem, você verá:
+## Si todo está bien, verás:
 
 ```bash
 Completed DNS update check OK
@@ -232,11 +232,11 @@ Completed SPN update check OK
 Registered EDUCATUX<1c> ...
 ```
 
-## CTRL+C para sair
+## CTRL+C para salir
 
-## 📦 Criar o serviço RUNIT do samba-ad-dc para subir o AD no boot
+## 📦 Cree el servicio RUNIT samba-ad-dc para cargar AD en el arranque
 
-## ⚠️ Esta parte é muito importante. Apague restos antigos SE FOR reajuste de Server pré-existente!!
+## ⚠️Esta parte es muy importante. ¡Elimine los restos antiguos SI REAJUSTA un servidor preexistente!
 
 ```bash
 sv stop samba-ad-dc 2>/dev/null
@@ -248,16 +248,16 @@ rm -rf /etc/sv/*/supervise
 rm -rf /var/service/*/supervise
 ```
 
-## Agora vamos criar os serviços e permissões do samba-ad-dc com logs, para o runit subir no boot do Sistema:
+## Ahora creemos los servicios y permisos de samba-ad-dc con registros, para que runit pueda cargarse al iniciar el sistema:
 
-## Criar a estrutura do serviço antes de tudo
+## Crear la estructura de servicio en primer lugar.
 
 ```bash
 mkdir -p /etc/sv/samba-ad-dc/log
 mkdir -p /var/log/samba-ad-dc
 ```
 
-## Criar o serviço do run
+## Crear el servicio de ejecución
 
 ```bash
 cat > /etc/sv/samba-ad-dc/run << 'EOF'
@@ -267,13 +267,13 @@ exec /opt/samba/sbin/samba -i -M single --debuglevel=3
 EOF
 ```
 
-## Setar a permissão do serviço do run
+## Establecer el permiso de ejecución del servicio
 
 ```bash
 chmod +x /etc/sv/samba-ad-dc/run
 ```
 
-## Criar o arquivo do log
+## Crear el archivo de registro
 
 ```bash
 cat > /etc/sv/samba-ad-dc/log/run << 'EOF'
@@ -282,25 +282,25 @@ exec svlogd -tt /var/log/samba-ad-dc
 EOF
 ```
 
-## Setar a permissão do log/run
+## Establecer permiso de registro/ejecución
 
 ```bash
 chmod +x /etc/sv/samba-ad-dc/log/run
 ```
 
-## Habilitar o serviço do samba-ad-dc para subir no boot:
+## Habilite el servicio samba-ad-dc para que se ejecute en el arranque:
 
 ```bash
 ln -sf /etc/sv/samba-ad-dc/ /var/service/
 ```
 
-## Validar se está rodando
+## Validar si está en ejecución
 
 ```bash
 sv status samba-ad-dc
 ```
 
-## Você deverá ver algo como:
+## Deberías ver algo como:
 
 ```bash
 run: samba-ad-dc: (pid 28032) 4s; run: log: (pid 28031) 4s
@@ -310,7 +310,7 @@ run: samba-ad-dc: (pid 28032) 4s; run: log: (pid 28031) 4s
 samba-tool processes
 ```
 
-## Result received:
+## Resultado recibido:
 
 ```bash
  Service:                          PID
@@ -330,13 +330,13 @@ samba                             1012
 winbind_server                    1019
 ```
 
-## Validar os logs online:
+## Validar registros en línea:
 
 ```bash
 tail -f /var/log/samba-ad-dc/current
 ```
 
-## A saída correta será algo assim:
+## La salida correcta será algo como esto:
 
 ```bash
 2025-11-27_04:14:23.73604 Completed DNS update check OK
@@ -351,23 +351,23 @@ tail -f /var/log/samba-ad-dc/current
 2025-11-27_04:14:37.31557 Completed samba_kcc OK
 ```
 
-## 🕒 NTP / Chrony Server
+## 🕒 Servidor NTP / Chrony
 
-## O Controlador de domínio precisará ser o Time Server da rede local, pois com discrepância de 5min o Kerberos não autenticará mais o cliente
+## El controlador de dominio deberá ser el servidor de tiempo de la red local, ya que con una discrepancia de 5 minutos, Kerberos ya no autenticará al cliente.
 
-## Instalar o pacote do Chrony Server
+## Instale el paquete del servidor Chrony
 
 ```bash
 xbps-install -Syu chrony
 ```
 
-## Editar o arquivo do Server, substituir os repositórios de sincronizações de tempo e liberar as consultas da rede interna
+## Edite el archivo del servidor, reemplace los repositorios de sincronización horaria y libere consultas de la red interna
 
 ```bash
 vim /etc/chrony.conf
 ```
 
-### Apontar os Servidores de tempo públicos do Brasil
+### Señalar servidores horarios públicos en Brasil
 
 ```bash
 # Comentar a linha do Servidor externo
@@ -383,25 +383,25 @@ server 3.br.pool.ntp.org iburst
 allow 192.168.70.0/24
 ```
 
-## Adicionar o serviço do chronyd ao start do RUNIT
+## Agregue el servicio chronyd al inicio de RUNIT
 
 ```bash
 ln -sf /etc/sv/chronyd/ /var/service/
 ```
 
-## Reiniciar o TimeServer:
+## Reinicie el servidor de tiempo:
 
 ```bash
 sv restart chronyd
 ```
 
-## Valide os Servers, são cíclicos e aleatórios durante as consulta
+## Validar los Servidores, son cíclicos y aleatorios durante las consultas
 
 ```bash
 chronyc sources -v
 ```
 
-## 🔐 Criar o arquivo do Kerberos
+## 🔐 Crear archivo Kerberos
 
 ```bash
 vim /etc/krb5.conf
@@ -428,7 +428,7 @@ vim /etc/krb5.conf
     educatux.edu = EDUCATUX.EDU
 ```
 
-## 🧭 Destravar e rejustar o /etc/resolv.conf APÓS o provisionamento, e apontar para o próprio PDC
+## 🧭 Desbloquee y restablezca /etc/resolv.conf DESPUÉS del aprovisionamiento y apunte al propio PDC
 
 ```bash
 chattr -i /etc/resolv.conf
@@ -438,7 +438,7 @@ chattr -i /etc/resolv.conf
 vim /etc/resolv.conf
 ```
 
-## Conteúdo:
+## Contenido:
 
 ```bash
 domain educatux.edu
@@ -446,27 +446,27 @@ search educatux.edu
 nameserver 127.0.0.1
 ```
 
-## Travar o arquivo novamente:
+## Bloquee el archivo nuevamente:
 
 ```bash
 chattr +i /etc/resolv.conf
 ```
 
-## 🔗 Linkar bibliotecas do Winbind no Sistema
+## 🔗 Vincular bibliotecas Winbind en el sistema
 
-## Validar os paths de libdir:
+## Validar rutas de libdir:
 
 ```bash
 /opt/samba/sbin/smbd -b | grep LIBDIR
 ```
 
-## Saída esperada:
+## Resultado esperado:
 
 ```bash
 LIBDIR: /opt/samba/lib
 ```
 
-## Criar links entre as bibliotecas. Prefira digitar manualmente ao invés de copiar e colar aqui.
+## Crear enlaces entre bibliotecas. Prefiere escribir manualmente en lugar de copiar y pegar aquí.
 
 ```bash
 ln -sf /opt/samba/lib/libnss_winbind.so.2 /usr/lib/
@@ -476,13 +476,13 @@ ln -sf /opt/samba/lib/libnss_winbind.so.2 /usr/lib/
 ln -sf /usr/lib/libnss_winbind.so.2 /usr/lib/libnss_winbind.so
 ```
 
-## Releia a configuração com as novas bibliotecas linkadas
+## Vuelva a leer la configuración con las nuevas bibliotecas vinculadas.
 
 ```bash
 ldconfig
 ```
 
-## Validar efetividade da troca de tickets do kerberos, adicionando winbind ás duas linhas do nsswhitch (passwd e group):
+## Validar la efectividad del intercambio de tickets de Kerberos, agregando winbind a las dos líneas de nsswhitch (passwd y group):
 
 ```bash
 vim /etc/nsswitch.conf
@@ -493,9 +493,9 @@ passwd: files winbind
 group:  files winbind
 ```
 
-### O resto do arquivo fica como está
+### El resto del archivo permanece como está.
 
-## 📝 Validar o smb.conf criado automagicamente pelo provisionamento
+## 📝 Validar el smb.conf creado automáticamente mediante el aprovisionamiento
 
 ```bash
 cat /opt/samba/etc/smb.conf
@@ -524,13 +524,13 @@ cat /opt/samba/etc/smb.conf
         read only = No
 ```
 
-## 🔍 Agora iremos validar importantes serviços do PDC como DNS, SMB, Winbind e Kerberos
+## 🔍 Ahora validaremos servicios PDC importantes como DNS, SMB, Winbind y Kerberos
 
 ```bash
 ps aux | grep samba
 ```
 
-## Resultado recebido:
+## Resultado recibido:
 
 ```bash
 root     28030  0.0  0.0   2392  1388 ?        Ss   01:14   0:00 runsv samba-ad-dc
@@ -547,7 +547,7 @@ root     28180  0.0  0.1   6696  2556 pts/0    S+   02:10   0:00 grep samba
 samba-tool user show administrator
 ```
 
-## Resultado recebido:
+## Resultado recibido:
 
 ```bash
 dn: CN=Administrator,CN=Users,DC=educatux,DC=edu
@@ -594,7 +594,7 @@ distinguishedName: CN=Administrator,CN=Users,DC=educatux,DC=edu
 wbinfo -u
 ```
 
-## Resultado recebido:
+## Resultado recibido:
 
 ```bash
 EDUCATUX\administrator
@@ -606,7 +606,7 @@ EDUCATUX\krbtgt
 wbinfo -g
 ```
 
-## Resultado recebido:
+## Resultado recibido:
 
 ```bash
 EDUCATUX\administrator
@@ -636,7 +636,7 @@ EDUCATUX\dnsupdateproxy
 getent group "Domain Admins"
 ```
 
-## Resultado recebido:
+## Resultado recibido:
 
 ```bash
 EDUCATUX\domain admins:x:3000004:
@@ -646,7 +646,7 @@ EDUCATUX\domain admins:x:3000004:
 smbclient -L localhost -U Administrator
 ```
 
-## Resultado recebido:
+## Resultado recibido:
 
 ```bash
 Password for [EDUCATUX\Administrator]:
@@ -663,7 +663,7 @@ SMB1 disabled -- no workgroup available
 samba-tool dns zonelist localhost -U administrator
 ```
 
-## Resultado recebido:
+## Resultado recibido:
 
 ```bash
 Password for [EDUCATUX\administrator]:
@@ -688,7 +688,7 @@ Password for [EDUCATUX\administrator]:
 samba-tool user show administrator
 ```
 
-## Resultado recebido:
+## Resultado recibido:
 
 ```bash
 dn: CN=Administrator,CN=Users,DC=educatux,DC=edu
@@ -731,7 +731,7 @@ logonCount: 5
 distinguishedName: CN=Administrator,CN=Users,DC=educatux,DC=edu
 ```
 
-## 🔐 Desabilitar a complexidade de senhas para usuários do domínio (facilitar testes em laboratório - Inseguro para produção!)
+## 🔐 Deshabilite la complejidad de las contraseñas para los usuarios del dominio (facilite las pruebas de laboratorio: ¡no es seguro para la producción!)
 
 ```bash
 samba-tool domain passwordsettings set --complexity=off
@@ -741,13 +741,13 @@ samba-tool domain passwordsettings set --min-pwd-age=0
 samba-tool user setexpiry Administrator --noexpiry
 ```
 
-## Reler as configurações do Samba4
+## Vuelva a leer la configuración de Samba4
 
 ```bash
 smbcontrol all reload-config
 ```
 
-## 🧪 Validar troca de tickets do Kerberos
+## 🧪 Validar el intercambio de boletos de Kerberos
 
 ```bash
 kinit Administrator@EDUCATUX.EDU
@@ -757,7 +757,7 @@ kinit Administrator@EDUCATUX.EDU
 klist
 ```
 
-## Resultado recebido:
+## Resultado recibido:
 
 ```bash
 Ticket cache: FILE:/tmp/krb5cc_0
@@ -772,7 +772,7 @@ Valid starting       Expires              Service principal
 samba-tool dns query pdc01.educatux.edu educatux.edu @ A -U Administrator
 ```
 
-## Resultado recebido:
+## Resultado recibido:
 
 ```bash
 Password for [EDUCATUX\Administrator]:
@@ -793,7 +793,7 @@ Password for [EDUCATUX\Administrator]:
 drill google.com @192.168.70.253
 ```
 
-## Resultado obtido:
+## Resultado obtenido:
 
 ```bash
 ;; ->>HEADER<<- opcode: QUERY, rcode: NOERROR, id: 50285
@@ -874,27 +874,27 @@ Checking 0 100 389 pdc01.educatux.edu. against SRV _ldap._tcp.Default-First-Site
 No DNS updates needed
 ```
 
-### ✅ RESUMO FINAL
+### ✅ RESUMEN FINAL
 
-## 🎉 Parabéns — você acaba de montar um domínio AD nível 2016 totalmente funcional no Void Linux!
+## 🎉 Felicitaciones, acaba de configurar un dominio AD 2016 completamente funcional en Void Linux.
 
-### 👉 LEMBRE-SE: O Samba4, apesar de poder ser gerenciado por linha de comando, foi projetado para ser gerenciado pelas ferramentas de Gerenciamento de Servidores remotos - RSAT, podendo estas serem instaladas numa máquina com Windows 10, sem problemas!
+### 👉 RECUERDE: Samba4, a pesar de poder administrarse mediante línea de comandos, fue diseñado para ser administrado mediante herramientas remotas de administración de servidores - RSAT, que se pueden instalar en una máquina con Windows 10, ¡sin ningún problema!
 
-## Agora você pode:
+## Ahora puedes:
 
-- unir máquinas Windows ao domínio
-- usar GPOs
-- testar replication (quando criar um DC2)
-- criar usuários / grupos via RSAT
-- configurar sysvol replication (com Rsync ou com o novo samba-gpupdate)
-- adicionar DNS forwarders
-- ativar DFS
-- criar File Server membro
+- unir máquinas Windows al dominio
+- utilizar GPO
+- replicación de prueba (al crear un DC2)
+- crear usuarios/grupos a través de RSAT
+- configurar la replicación sysvol (con Rsync o el nuevo samba-gpupdate)
+- agregar reenviadores DNS
+- habilitar DFS
+- crear servidor de archivos miembro
 - etc.
 
 ---
 
-🎯 THAT'S ALL FOLKS!
+🎯 ¡ESO ES TODO AMIGOS!
 
-👉 Contato: zerolies@disroot.org
-👉 https://t.me/z3r0l135
+👉 Contacto: zerolies@disroot.org
+👉https://t.me/z3r0l135

@@ -1,27 +1,27 @@
-# Controlador de Domínio Primário (Active Directory) rodando Samba4 sob Void Linux Server ;D
+# Void Linux Server에서 Samba4를 실행하는 기본 도메인 컨트롤러(Active Directory) ;D
 
-## 🎯 Objetivo - Subir um Controlador de Domínio Primário no Void Linux (glibc) compilando o Samba4 a partir do código fonte, configurando DNS interno, Kerberos, integração AD, ACLs, serviços e toda a pilha necessária para controlar os clientes da rede.
+## 🎯 목표 - 소스 코드에서 Samba4를 컴파일하고 내부 DNS, Kerberos, AD 통합, ACL, 서비스 및 네트워크 클라이언트를 제어하는 데 필요한 전체 스택을 구성하는 Void Linux(glibc)에 기본 도메인 컨트롤러를 업로드합니다.
 
-### 🔧 ADAPTE o tutorial á SUA realidade, obviamente!
+### 🔧 튜토리얼을 현실에 맞게 조정하세요!
 
-## 📡 Layout de rede local
+## 📡 로컬 네트워크 레이아웃
 
-- Domínio: EDUCATUX.EDU
-- Hostname: pdc01
-- Firewall 192.168.70.254 (DNS/GW)
-- Ip: 192.168.70.253
+- 도메인: EDUCATUX.EDU
+- 호스트 이름: pdc01
+- 방화벽 192.168.70.254(DNS/GW)
+- 아이피: 192.168.70.253
 
 ---
 
-## A instalação padrão do Void Linux não será coberta nesse tutorial.
+## Void Linux의 기본 설치는 이 튜토리얼에서 다루지 않습니다.
 
-## Trocar o Shell padrão do Void, pós instalado
+## 설치 후 Void의 기본 셸을 변경합니다.
 
 ```bash
 chsh -s /bin/bash
 ```
 
-## 🧩 Instalar pacotes de dependências para compilar o Samba4 no Void
+## 🧩 Void에서 Samba4를 컴파일하려면 종속성 패키지를 설치하세요.
 
 ```bash
 xbps-install -S \
@@ -42,9 +42,9 @@ xbps-install -S \
  bind ldns pkg-config vim
 ```
 
-## ⚠️ ATENÇÃO:  O Samba4 compilado inclui o código do kerberos Heimdal, embutido (KDC interno) por default, mas não inclui clientes Kerberos. Nesse caso o repositório disponibiliza pacotes binários do MIT, que podem ser instalados sem qualquer problema ou interferência no kerberos heimdal default, compilado no Controlador de Domínio. Os pacotes são: mit-krb5 mit-krb5-client mit-krb5-devel. PORÉM você NÃO DEVE em hipótese alguma, instalar por repositório o pacote binário do krb5-server, o que causaria serviço concorrente ao kerberos Heimdal, interno do Samba4!
+## ⚠️ 주의: 컴파일된 Samba4에는 기본적으로 내장된(내부 KDC) Heimdal kerberos 코드가 포함되어 있지만 Kerberos 클라이언트는 포함되지 않습니다. 이 경우 리포지토리는 도메인 컨트롤러에서 컴파일된 기본 kerberos heimdal과의 문제나 간섭 없이 설치할 수 있는 MIT의 바이너리 패키지를 제공합니다. 패키지는 mit-krb5 mit-krb5-client mit-krb5-devel입니다. 그러나 어떤 상황에서도 저장소에서 krb5-server 바이너리 패키지를 설치하면 안 됩니다. 그러면 Samba4 내부의 Heimdal kerberos와 서비스 경쟁이 발생할 수 있습니다!
 
-## Os serviços fornecidos pelos clientes do MIT-krb5, ficam em:
+## MIT-krb5 고객이 제공하는 서비스는 다음과 같습니다.
 
 ```bash
 /usr/bin/kinit
@@ -53,7 +53,7 @@ xbps-install -S \
 /usr/bin/kdestroy
 ```
 
-## 🖥️ Setar hostname
+## 🖥️ 세타르 호스트 이름
 
 ```bash
 echo "pdc01" > /etc/hostname
@@ -65,7 +65,7 @@ echo "pdc01" > /etc/hostname
 vim /etc/hosts
 ```
 
-## Conteúdo:
+## 콘텐츠:
 
 ```bash
 127.0.0.1      localhost
@@ -73,15 +73,15 @@ vim /etc/hosts
 192.168.70.253 pdc01.educatux.edu pdc01
 ```
 
-## 🌐 Configurar IP fixo
+## 🌐 고정 IP 구성
 
-### 👉 Usaremos o método padrão do Void, o /etc/dhcpcd.conf
+### 👉 Void의 기본 방법인 /etc/dhcpcd.conf를 사용하겠습니다.
 
 ```bash
 vim /etc/dhcpcd.conf
 ```
 
-## Adicionar ip, gateway e dns:## 🎯 Objetivo
+## IP, 게이트웨이 및 DNS 추가:## 🎯 목적
 
 ```bash
 interface eth0
@@ -90,25 +90,25 @@ static routers=192.168.70.254
 static domain_name_servers=192.168.70.254
 ```
 
-## Reiniciar a interface de rede:
+## 네트워크 인터페이스를 다시 시작합니다.
 
 ```bash
 sv restart dhcpcd
 ```
 
-## 🌐 Setar o DNS temporário (roteador) ANTES de provisionar
+## 🌐 프로비저닝 전 임시 DNS(라우터) 설정
 
 ```bash
 echo "nameserver 192.168.70.254" > /etc/resolv.conf
 ```
 
-## Travar a configuração do resolv.conf
+## resolv.conf 구성 잠금
 
 ```bash
 chattr +i /etc/resolv.conf
 ```
 
-## 🔍 Validar endereço atribuído á interface de rede
+## 🔍 네트워크 인터페이스에 할당된 주소 확인
 
 ```bash
 ip -c addr
@@ -118,7 +118,7 @@ ip -c addr
 ip -br link
 ```
 
-## 📥 Baixar e descompactar o código fonte do Samba4
+## 📥 Samba4 소스 코드 다운로드 및 압축 풀기
 
 ```bash
 wget https://download.samba.org/pub/samba/samba-4.23.4.tar.gz
@@ -128,7 +128,7 @@ wget https://download.samba.org/pub/samba/samba-4.23.4.tar.gz
 tar -xvzf samba-4.23.4.tar.gz
 ```
 
-## Compilar e instalar o código fonte
+## 소스코드 컴파일 및 설치
 
 ```bash
 cd samba-4.23.4
@@ -142,14 +142,14 @@ cd samba-4.23.4
 make -j$(nproc) && make install
 ```
 
-## Comentário:
+## 논평:
 
-- O Void não interfere na instalação, pois Samba é compilado em /opt/samba.
-- O make -j acelera muito a compilação, mesmo assim, vá tomar um café.
-- Após instalar, o Samba4 compilado não tem serviços criados no runit.
-- Criaremos os serviços manualmente.
+- Samba는 /opt/samba에 컴파일되므로 Void는 설치를 방해하지 않습니다.
+- Make -j는 컴파일 속도를 크게 높여줍니다. 어쨌든 가서 커피를 마시세요.
+- 설치 후 컴파일된 Samba4에는 runit에서 생성된 서비스가 없습니다.
+- 서비스를 수동으로 생성하겠습니다.
 
-## 📁 Adicionar Samba4 ao PATH do Sistema e reler o ambiente
+## 📁 Samba4를 시스템 PATH에 추가하고 환경을 다시 읽습니다.
 
 ```bash
 echo 'export PATH=/opt/samba/bin:/opt/samba/sbin:$PATH' >> /etc/profile
@@ -159,19 +159,19 @@ echo 'export PATH=/opt/samba/bin:/opt/samba/sbin:$PATH' >> /etc/profile
 source /etc/profile
 ```
 
-## Testar a inserção do PATH do Samba4 no Sistema Operacional
+## 운영 체제에서 Samba4 PATH 삽입 테스트
 
 ```bash
 samba-tool -V
 ```
 
-## Resultado:
+## 결과:
 
 ```bash
 4.23.4
 ```
 
-🏰 Provisionar o domínio SAMBA4 (Criando o PDC propriamente dito)
+🏰 SAMBA4 도메인 프로비저닝(PDC 자체 생성)
 
 ```bash
 samba-tool domain provision \
@@ -185,7 +185,7 @@ samba-tool domain provision \
  --function-level=2016
 ```
 
-### Samba4 criará:
+### Samba4는 다음을 생성합니다:
 
 ```bash
 /opt/samba/etc/smb.conf
@@ -193,20 +193,20 @@ samba-tool domain provision \
 /opt/samba/var/locks/sysvol
 ```
 
-## Em resumo o Samba4:
+## 요약하면 Samba4:
 
-- Cria a floresta AD, o DC primário, o DNS interno e o DB das contas.
-- Define domínio, realm, nível funcional 2016 e a senha do Administrator.
-- Void não instala nenhum Samba nativo, então não há conflito.
-- Após isso, o DNS passa a ser o próprio PDC, precisando ajustar /etc/resolv.conf para 127.0.0.1.
+- AD 포리스트, 기본 DC, 내부 DNS 및 계정 DB를 생성합니다.
+- 도메인, 영역, 2016 기능 수준 및 관리자 비밀번호를 정의합니다.
+- Void는 기본 Samba를 설치하지 않으므로 충돌이 없습니다.
+- 그 후에는 DNS가 PDC 자체가 되므로 /etc/resolv.conf를 127.0.0.1로 조정해야 합니다.
 
-## ⚙️ Validar o nível funcional 2016 do Active Directory
+## ⚙️ Active Directory 2016 기능 수준 확인
 
 ```bash
 samba-tool domain level show
 ```
 
-## Resultado:
+## 결과:
 
 ```bash
 Domain and forest function level for domain 'DC=educatux,DC=edu'
@@ -215,16 +215,16 @@ Domain function level: (Windows) 2016
 Lowest function level of a DC: (Windows) 2016
 ```
 
-## 🧪 Testar manualmente o serviço AD DC antes de criar o serviço
+## 🧪 서비스를 만들기 전에 AD DC 서비스를 수동으로 테스트하세요.
 
 ```bash
 /opt/samba/sbin/samba -i -M single
 ```
 
-* -i → foreground
-* -M single → modelo single-process (não dispara daemon forking fora do controle do runit)
+* -i → 전경
+* -M 단일 → 단일 프로세스 모델(runit 제어 외부에서 데몬 분기를 트리거하지 않음)
 
-## Se tudo estiver bem, você verá:
+## 모든 것이 정상이면 다음이 표시됩니다.
 
 ```bash
 Completed DNS update check OK
@@ -232,11 +232,11 @@ Completed SPN update check OK
 Registered EDUCATUX<1c> ...
 ```
 
-## CTRL+C para sair
+## 종료하려면 CTRL+C
 
-## 📦 Criar o serviço RUNIT do samba-ad-dc para subir o AD no boot
+## 📦 부팅 시 AD를 업로드하기 위한 samba-ad-dc RUNIT 서비스 생성
 
-## ⚠️ Esta parte é muito importante. Apague restos antigos SE FOR reajuste de Server pré-existente!!
+## ⚠️ 이 부분이 매우 중요합니다. 기존 서버를 재조정하는 경우 오래된 유적을 삭제하세요!!
 
 ```bash
 sv stop samba-ad-dc 2>/dev/null
@@ -248,16 +248,16 @@ rm -rf /etc/sv/*/supervise
 rm -rf /var/service/*/supervise
 ```
 
-## Agora vamos criar os serviços e permissões do samba-ad-dc com logs, para o runit subir no boot do Sistema:
+## 이제 시스템 시작 시 runit이 로드될 수 있도록 로그와 함께 samba-ad-dc 서비스 및 권한을 생성해 보겠습니다.
 
-## Criar a estrutura do serviço antes de tudo
+## 무엇보다 서비스 구조를 만들어라
 
 ```bash
 mkdir -p /etc/sv/samba-ad-dc/log
 mkdir -p /var/log/samba-ad-dc
 ```
 
-## Criar o serviço do run
+## 실행 서비스 만들기
 
 ```bash
 cat > /etc/sv/samba-ad-dc/run << 'EOF'
@@ -267,13 +267,13 @@ exec /opt/samba/sbin/samba -i -M single --debuglevel=3
 EOF
 ```
 
-## Setar a permissão do serviço do run
+## 서비스 실행 권한 설정
 
 ```bash
 chmod +x /etc/sv/samba-ad-dc/run
 ```
 
-## Criar o arquivo do log
+## 로그 파일 만들기
 
 ```bash
 cat > /etc/sv/samba-ad-dc/log/run << 'EOF'
@@ -282,25 +282,25 @@ exec svlogd -tt /var/log/samba-ad-dc
 EOF
 ```
 
-## Setar a permissão do log/run
+## 로그/실행 권한 설정
 
 ```bash
 chmod +x /etc/sv/samba-ad-dc/log/run
 ```
 
-## Habilitar o serviço do samba-ad-dc para subir no boot:
+## 부팅 시 samba-ad-dc 서비스가 실행되도록 활성화합니다.
 
 ```bash
 ln -sf /etc/sv/samba-ad-dc/ /var/service/
 ```
 
-## Validar se está rodando
+## 실행 중인지 확인
 
 ```bash
 sv status samba-ad-dc
 ```
 
-## Você deverá ver algo como:
+## 다음과 같은 내용이 표시됩니다.
 
 ```bash
 run: samba-ad-dc: (pid 28032) 4s; run: log: (pid 28031) 4s
@@ -310,7 +310,7 @@ run: samba-ad-dc: (pid 28032) 4s; run: log: (pid 28031) 4s
 samba-tool processes
 ```
 
-## Result received:
+## 받은 결과:
 
 ```bash
  Service:                          PID
@@ -330,13 +330,13 @@ samba                             1012
 winbind_server                    1019
 ```
 
-## Validar os logs online:
+## 온라인으로 로그 유효성을 검사합니다.
 
 ```bash
 tail -f /var/log/samba-ad-dc/current
 ```
 
-## A saída correta será algo assim:
+## 올바른 출력은 다음과 같습니다.
 
 ```bash
 2025-11-27_04:14:23.73604 Completed DNS update check OK
@@ -351,23 +351,23 @@ tail -f /var/log/samba-ad-dc/current
 2025-11-27_04:14:37.31557 Completed samba_kcc OK
 ```
 
-## 🕒 NTP / Chrony Server
+## 🕒 NTP / Chrony 서버
 
-## O Controlador de domínio precisará ser o Time Server da rede local, pois com discrepância de 5min o Kerberos não autenticará mais o cliente
+## 도메인 컨트롤러는 로컬 네트워크의 시간 서버가 되어야 합니다. 5분의 불일치로 인해 Kerberos는 더 이상 클라이언트를 인증하지 않습니다.
 
-## Instalar o pacote do Chrony Server
+## Chrony 서버 패키지 설치
 
 ```bash
 xbps-install -Syu chrony
 ```
 
-## Editar o arquivo do Server, substituir os repositórios de sincronizações de tempo e liberar as consultas da rede interna
+## 서버 파일 편집, 시간 동기화 저장소 교체, 내부 네트워크 쿼리 해제
 
 ```bash
 vim /etc/chrony.conf
 ```
 
-### Apontar os Servidores de tempo públicos do Brasil
+### 브라질의 공개 시간 서버를 지적하세요
 
 ```bash
 # Comentar a linha do Servidor externo
@@ -383,25 +383,25 @@ server 3.br.pool.ntp.org iburst
 allow 192.168.70.0/24
 ```
 
-## Adicionar o serviço do chronyd ao start do RUNIT
+## RUNIT start에 chronyd 서비스 추가
 
 ```bash
 ln -sf /etc/sv/chronyd/ /var/service/
 ```
 
-## Reiniciar o TimeServer:
+## 타임서버를 다시 시작하세요:
 
 ```bash
 sv restart chronyd
 ```
 
-## Valide os Servers, são cíclicos e aleatórios durante as consulta
+## 서버의 유효성을 검사합니다. 쿼리 중에 주기적이며 무작위입니다.
 
 ```bash
 chronyc sources -v
 ```
 
-## 🔐 Criar o arquivo do Kerberos
+## 🔐 Kerberos 파일 생성
 
 ```bash
 vim /etc/krb5.conf
@@ -428,7 +428,7 @@ vim /etc/krb5.conf
     educatux.edu = EDUCATUX.EDU
 ```
 
-## 🧭 Destravar e rejustar o /etc/resolv.conf APÓS o provisionamento, e apontar para o próprio PDC
+## 🧭 프로비저닝 후 /etc/resolv.conf를 잠금 해제하고 재설정하고 PDC 자체를 가리킵니다.
 
 ```bash
 chattr -i /etc/resolv.conf
@@ -438,7 +438,7 @@ chattr -i /etc/resolv.conf
 vim /etc/resolv.conf
 ```
 
-## Conteúdo:
+## 콘텐츠:
 
 ```bash
 domain educatux.edu
@@ -446,27 +446,27 @@ search educatux.edu
 nameserver 127.0.0.1
 ```
 
-## Travar o arquivo novamente:
+## 파일을 다시 잠급니다.
 
 ```bash
 chattr +i /etc/resolv.conf
 ```
 
-## 🔗 Linkar bibliotecas do Winbind no Sistema
+## 🔗 시스템에서 Winbind 라이브러리 연결
 
-## Validar os paths de libdir:
+## libdir 경로 검증:
 
 ```bash
 /opt/samba/sbin/smbd -b | grep LIBDIR
 ```
 
-## Saída esperada:
+## 예상 출력:
 
 ```bash
 LIBDIR: /opt/samba/lib
 ```
 
-## Criar links entre as bibliotecas. Prefira digitar manualmente ao invés de copiar e colar aqui.
+## 라이브러리 간의 링크를 만듭니다. 여기에 복사하여 붙여넣는 것보다 직접 입력하는 것이 좋습니다.
 
 ```bash
 ln -sf /opt/samba/lib/libnss_winbind.so.2 /usr/lib/
@@ -476,13 +476,13 @@ ln -sf /opt/samba/lib/libnss_winbind.so.2 /usr/lib/
 ln -sf /usr/lib/libnss_winbind.so.2 /usr/lib/libnss_winbind.so
 ```
 
-## Releia a configuração com as novas bibliotecas linkadas
+## 새로 연결된 라이브러리로 구성을 다시 읽습니다.
 
 ```bash
 ldconfig
 ```
 
-## Validar efetividade da troca de tickets do kerberos, adicionando winbind ás duas linhas do nsswhitch (passwd e group):
+## nsswhitch의 두 줄(passwd 및 group)에 winbind를 추가하여 Kerberos 티켓 교환의 효율성을 검증합니다.
 
 ```bash
 vim /etc/nsswitch.conf
@@ -493,9 +493,9 @@ passwd: files winbind
 group:  files winbind
 ```
 
-### O resto do arquivo fica como está
+### 나머지 파일은 그대로 유지됩니다.
 
-## 📝 Validar o smb.conf criado automagicamente pelo provisionamento
+## 📝 프로비저닝을 통해 자동으로 생성된 smb.conf의 유효성을 검사합니다.
 
 ```bash
 cat /opt/samba/etc/smb.conf
@@ -524,13 +524,13 @@ cat /opt/samba/etc/smb.conf
         read only = No
 ```
 
-## 🔍 Agora iremos validar importantes serviços do PDC como DNS, SMB, Winbind e Kerberos
+## 🔍 이제 DNS, SMB, Winbind 및 Kerberos와 같은 중요한 PDC 서비스를 검증하겠습니다.
 
 ```bash
 ps aux | grep samba
 ```
 
-## Resultado recebido:
+## 받은 결과:
 
 ```bash
 root     28030  0.0  0.0   2392  1388 ?        Ss   01:14   0:00 runsv samba-ad-dc
@@ -547,7 +547,7 @@ root     28180  0.0  0.1   6696  2556 pts/0    S+   02:10   0:00 grep samba
 samba-tool user show administrator
 ```
 
-## Resultado recebido:
+## 받은 결과:
 
 ```bash
 dn: CN=Administrator,CN=Users,DC=educatux,DC=edu
@@ -594,7 +594,7 @@ distinguishedName: CN=Administrator,CN=Users,DC=educatux,DC=edu
 wbinfo -u
 ```
 
-## Resultado recebido:
+## 받은 결과:
 
 ```bash
 EDUCATUX\administrator
@@ -606,7 +606,7 @@ EDUCATUX\krbtgt
 wbinfo -g
 ```
 
-## Resultado recebido:
+## 받은 결과:
 
 ```bash
 EDUCATUX\administrator
@@ -636,7 +636,7 @@ EDUCATUX\dnsupdateproxy
 getent group "Domain Admins"
 ```
 
-## Resultado recebido:
+## 받은 결과:
 
 ```bash
 EDUCATUX\domain admins:x:3000004:
@@ -646,7 +646,7 @@ EDUCATUX\domain admins:x:3000004:
 smbclient -L localhost -U Administrator
 ```
 
-## Resultado recebido:
+## 받은 결과:
 
 ```bash
 Password for [EDUCATUX\Administrator]:
@@ -663,7 +663,7 @@ SMB1 disabled -- no workgroup available
 samba-tool dns zonelist localhost -U administrator
 ```
 
-## Resultado recebido:
+## 받은 결과:
 
 ```bash
 Password for [EDUCATUX\administrator]:
@@ -688,7 +688,7 @@ Password for [EDUCATUX\administrator]:
 samba-tool user show administrator
 ```
 
-## Resultado recebido:
+## 받은 결과:
 
 ```bash
 dn: CN=Administrator,CN=Users,DC=educatux,DC=edu
@@ -731,7 +731,7 @@ logonCount: 5
 distinguishedName: CN=Administrator,CN=Users,DC=educatux,DC=edu
 ```
 
-## 🔐 Desabilitar a complexidade de senhas para usuários do domínio (facilitar testes em laboratório - Inseguro para produção!)
+## 🔐 도메인 사용자의 비밀번호 복잡성을 비활성화합니다(실험실 테스트 촉진 - 프로덕션에는 안전하지 않음!)
 
 ```bash
 samba-tool domain passwordsettings set --complexity=off
@@ -741,13 +741,13 @@ samba-tool domain passwordsettings set --min-pwd-age=0
 samba-tool user setexpiry Administrator --noexpiry
 ```
 
-## Reler as configurações do Samba4
+## Samba4 설정 다시 읽기
 
 ```bash
 smbcontrol all reload-config
 ```
 
-## 🧪 Validar troca de tickets do Kerberos
+## 🧪 Kerberos 티켓 교환 확인
 
 ```bash
 kinit Administrator@EDUCATUX.EDU
@@ -757,7 +757,7 @@ kinit Administrator@EDUCATUX.EDU
 klist
 ```
 
-## Resultado recebido:
+## 받은 결과:
 
 ```bash
 Ticket cache: FILE:/tmp/krb5cc_0
@@ -772,7 +772,7 @@ Valid starting       Expires              Service principal
 samba-tool dns query pdc01.educatux.edu educatux.edu @ A -U Administrator
 ```
 
-## Resultado recebido:
+## 받은 결과:
 
 ```bash
 Password for [EDUCATUX\Administrator]:
@@ -793,7 +793,7 @@ Password for [EDUCATUX\Administrator]:
 drill google.com @192.168.70.253
 ```
 
-## Resultado obtido:
+## 얻은 결과:
 
 ```bash
 ;; ->>HEADER<<- opcode: QUERY, rcode: NOERROR, id: 50285
@@ -874,27 +874,27 @@ Checking 0 100 389 pdc01.educatux.edu. against SRV _ldap._tcp.Default-First-Site
 No DNS updates needed
 ```
 
-### ✅ RESUMO FINAL
+### ✅ 최종 요약
 
-## 🎉 Parabéns — você acaba de montar um domínio AD nível 2016 totalmente funcional no Void Linux!
+## 🎉 축하합니다. Void Linux에서 모든 기능을 갖춘 2016 AD 도메인을 설정했습니다!
 
-### 👉 LEMBRE-SE: O Samba4, apesar de poder ser gerenciado por linha de comando, foi projetado para ser gerenciado pelas ferramentas de Gerenciamento de Servidores remotos - RSAT, podendo estas serem instaladas numa máquina com Windows 10, sem problemas!
+### 👉 기억하세요: Samba4는 명령줄로 관리할 수 있음에도 불구하고 Windows 10 시스템에 아무 문제 없이 설치할 수 있는 원격 서버 관리 도구인 RSAT로 관리되도록 설계되었습니다!
 
-## Agora você pode:
+## 이제 다음을 수행할 수 있습니다.
 
-- unir máquinas Windows ao domínio
-- usar GPOs
-- testar replication (quando criar um DC2)
-- criar usuários / grupos via RSAT
-- configurar sysvol replication (com Rsync ou com o novo samba-gpupdate)
-- adicionar DNS forwarders
-- ativar DFS
-- criar File Server membro
-- etc.
+- Windows 시스템을 도메인에 가입
+- GPO 사용
+- 테스트 복제(DC2 생성 시)
+- RSAT를 통해 사용자/그룹 생성
+- sysvol 복제 구성(Rsync 또는 새로운 samba-gpupdate 사용)
+- DNS 전달자 추가
+- DFS 활성화
+- 구성원 파일 서버 생성
+- 등.
 
 ---
 
-🎯 THAT'S ALL FOLKS!
+🎯 그게 전부입니다!
 
-👉 Contato: zerolies@disroot.org
+👉 문의: zerolies@disroot.org
 👉 https://t.me/z3r0l135

@@ -1,26 +1,26 @@
-# Configuração do LightDM para insrção do Linux Mint no domínio
+# Configuration LightDM pour joindre Linux Mint au domaine
 
-## 🎯 Objetivo Ingressar Linux no Domínio Samba4 com Winbind por integração NSS/PAM
-
----
-
-## Pré-requisitos
-
-- Samba4 como controlador de domínio (PDC)
-- Linux com DNS e horário alinhados com o PDC (192.168.70.253)
-- Conectividade com o servidor
+## 🎯 Objectif Rejoindre Linux au domaine Samba4 avec Winbind via l'intégration NSS/PAM
 
 ---
 
-## 🛠️ Etapas
+## Conditions préalables
 
-## 1. Instalar pacotes necessários
+- Samba4 comme contrôleur de domaine (PDC)
+- Linux avec DNS et heure alignée sur PDC (192.168.70.253)
+- Connectivité au serveur
+
+---
+
+## 🛠️ Étapes
+
+## 1. Installez les packages requis
 
 ```bash
 sudo apt update && sudo apt install samba winbind libpam-winbind libnss-winbind krb5-user
 ```
 
-## 2. Configurar /etc/krb5.conf
+## 2. Configurez /etc/krb5.conf
 
 ```bash
 [libdefaults]
@@ -46,7 +46,7 @@ sudo apt update && sudo apt install samba winbind libpam-winbind libnss-winbind 
     educatux.edu = EDUCATUX.EDU
 ```
 
-## 3. Configurar /etc/samba/smb.conf
+## 3. Configurez /etc/samba/smb.conf
 
 ```bash
 [global]
@@ -74,7 +74,7 @@ sudo apt update && sudo apt install samba winbind libpam-winbind libnss-winbind 
    template homedir = /home/%U
 ```
 
-## 4. Configurar /etc/nsswitch.conf
+## 4. Configurez /etc/nsswitch.conf
 
 ```bash
 passwd:         compat winbind
@@ -82,19 +82,19 @@ group:          compat winbind
 shadow:         compat
 ```
 
-## 5. Ingressar no domínio
+## 5. Rejoignez le domaine
 
 ```bash
 sudo net ads join -U Administrator
 ```
 
-## 6. Reboot do Sistema
+## 6. Redémarrage du système
 
 ```bash
 sudo reboot
 ```
 
-## 7. Verificações
+## 7. Chèques
 
 ```bash
 sudo net ads testjoin
@@ -103,39 +103,39 @@ wbinfo -g
 getent passwd usuario
 ```
 
-## 8. Criar diretórios HOME automaticamente
+## 8. Créez automatiquement des répertoires HOME
 
 
-## Edite /etc/pam.d/common-session e adicione:
+## Modifiez /etc/pam.d/common-session et ajoutez :
 
 ```bash
 session required pam_mkhomedir.so skel=/etc/skel umask=0022
 ```
 
-## 9. Reiniciar serviços
+## 9. Redémarrez les services
 
 ```bash
 sudo systemctl restart smbd nmbd winbind
 sudo systemctl enable winbind
 ```
 
-## 10. Sincronização de Hora
+## 10. Synchronisation du temps
 
 ```bash
 sudo timedatectl set-ntp true
 ```
 
-## SE você for usuário de Lightdm, como é o caso do Mint, ajuste pra logar com usuário de rede, ao invés de usuário local apenas.
+## SI vous êtes un utilisateur Lightdm, comme c'est le cas avec Mint, configurez-le pour qu'il se connecte avec un utilisateur réseau, au lieu d'un simple utilisateur local.
 
-## 🛠️ Passo a Passo: Configurar LightDM para aceitar usuários do domínio
+## 🛠️ Étape par étape : configurez LightDM pour accepter les utilisateurs de domaine
 
-## 1. Editar o arquivo de configuração do LightDM
+## 1. Modifiez le fichier de configuration LightDM
 
 ```bash
 sudo vim /etc/lightdm/lightdm.conf
 ```
 
-## Edite as seguintes linhas do arquivo:
+## Modifiez les lignes suivantes dans le fichier :
 
 ```bash
 [Seat:*]
@@ -144,33 +144,33 @@ greeter-hide-users=true
 allow-guest=false
 ```
 
-## Explicações:
+## Explications :
 
-- greeter-show-manual-login=true: Permite digitar o nome de usuário manualmente.
-- greeter-hide-users=true: Esconde a lista local de usuários (útil para ambientes corporativos).
-- allow-guest=false: Impede login de convidados (por segurança).
+- greeter-show-manual-login=true : Vous permet de saisir le nom d'utilisateur manuellement.
+- greeter-hide-users=true : masque la liste locale des utilisateurs (utile pour les environnements d'entreprise).
+- allow-guest=false : empêche la connexion des invités (pour des raisons de sécurité).
 
-## 2. Certifique-se de que PAM está permitindo usuários do domínio
+## 2. Assurez-vous que PAM autorise les utilisateurs du domaine
 
-## Se você usou SSSD ou Winbind, o PAM já deve estar integrado corretamente. Mas valide que o módulo home esteja presente:
+## Si vous avez utilisé SSSD ou Winbind, PAM devrait déjà être correctement intégré. Mais assurez-vous que le module home est présent :
 
 ```bash
 sudo vim /etc/pam.d/common-session
 ```
 
-## Confirme que esta linha existe OU adicione-a:
+## Confirmez que cette ligne existe OU ajoutez-la :
 
 ```bash
 session required pam_mkhomedir.so skel=/etc/skel umask=0022
 ```
 
-## 3. Reiniciar o LightDM
+## 3. Redémarrez LightDM
 
 ```bash
 sudo timedatectl set-ntp true
 ```
 
-## ⚠️ Para Linux MInt baseado em Ubuntu, pode-se desativar o systemd-resolved para controlar o DNS manualmente.
+## ⚠️ Pour Linux MInt basé sur Ubuntu, vous pouvez désactiver la résolution système pour contrôler manuellement le DNS.
 
 ```bash
 systemctl status systemd-resolved
@@ -182,13 +182,13 @@ systemctl disable systemd-resolved.service
 sudo systemctl mask systemd-resolved
 ```
 
-## REMOVENDO O ARQUIVO SEM PERMISSÃO DE EDIÇÃO CRIADO PELO SYSTEMD-RESOLVED:
+## SUPPRESSION DU FICHIER SANS AUTORISATION DE MODIFICATION CRÉÉ PAR SYSTEMD-RESOLVED :
 
 ```bash
 rm -f /etc/resolv.conf
 ```
 
-## Criando um arquivo novo com permissão de edição:
+## Création d'un nouveau fichier avec autorisation de modification :
 
 ```bash
 vim /etc/resolv.conf
@@ -200,13 +200,13 @@ search educatux.edu.
 nameserver 192.168.70.253
 ```
 
-## Bloqueando o arquivo contra edição automática
+## Verrouillage du fichier contre l'édition automatique
 
 ```bash
 sudo chattr +i /etc/resolv.conf
 ```
 
-## Restart do serviço
+## Redémarrage du service
 
 ```bash
 sudo systemctl restart NetworkManager
@@ -214,8 +214,8 @@ sudo systemctl restart NetworkManager
 
 ---
 
-🎯 THAT'S ALL FOLKS!
+🎯 C'EST TOUS LES GENS !
 
-👉 Contato: zerolies@disroot.org
+👉Contact : zerolies@disroot.org
 👉 https://t.me/z3r0l135
 
