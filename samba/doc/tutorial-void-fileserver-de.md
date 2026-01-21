@@ -185,6 +185,7 @@ vim /opt/samba/etc/smb.conf
    workgroup = EDUCATUX
    security = ads
    realm = EDUCATUX.EDU
+   netbios name = fileserver
    encrypt passwords = yes
    # point to the services, the active interfaces
    interfaces = eth0
@@ -210,9 +211,6 @@ vim /opt/samba/etc/smb.conf
    path = /srv/samba/public
    browsable = yes
    writable = yes
-   guest ok = no
-   create mask = 0660
-   directory mask = 0770
 ``` 
 
 ## Erstellen Sie die Protokolldatei
@@ -224,9 +222,9 @@ mkdir /opt/samba/var
 ## 📂 Erstellen Sie den Freigabepfad
 
 ```bash
-sudo mkdir -p /srv/samba/public
-sudo chown -R root:root /srv/samba/public
-sudo chmod -R 0770 /srv/samba/public
+sudo mkdir -p /srv/samba/arquivos
+sudo chown -R root:"Domain Admins" /srv/samba/arquivos
+sudo chmod -R 0770 /srv/samba/arquivos
 ```
 
 ## Laden Sie die Samba4-Konfiguration neu

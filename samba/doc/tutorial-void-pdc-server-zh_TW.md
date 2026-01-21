@@ -1,27 +1,27 @@
-# Contrôleur de domaine principal (Active Directory) exécutant Samba4 sous Void Linux Server ;D
+# 在 Void Linux Server 下運行 Samba4 的主域控制器（Active Directory）；D
 
-## 🎯 Objectif - Télécharger un contrôleur de domaine principal sur Void Linux (glibc) compilant Samba4 à partir du code source, configurant le DNS interne, Kerberos, l'intégration AD, les ACL, les services et toute la pile nécessaire au contrôle des clients réseau.
+## 🎯 目標 - 在 Void Linux (glibc) 上上傳主域控制器，從源代碼編譯 Samba4，配置內部 DNS、Kerberos、AD 集成、ACL、服務以及控製網絡客戶端所需的整個堆棧。
 
-### 🔧 ADAPTEZ le tutoriel à VOTRE réalité, évidemment !
+### 🔧 顯然，請根據您的實際情況調整教程！
 
-## 📡 Mise en page de réseau local
+## 📡 重新佈局本地化
 
-- Domaine : EDUCATUX.EDU
-- Nom d'hôte : pdc01
-- Pare-feu 192.168.70.254 (DNS/GW)
-- IP : 192.168.70.253
+- 域名：EDUCATUX.EDU
+- 主機名：pdc01
+- 防火牆 192.168.70.254（DNS/GW）
+- ip: 192.168.70.253
 
 ---
 
-## L'installation par défaut de Void Linux ne sera pas abordée dans ce tutoriel.
+## 本教程不涉及 Void Linux 的默認安裝。
 
-## Changer le shell par défaut de Void, après l'installation
+## 安裝後更改Void的默認shell
 
 ```bash
 chsh -s /bin/bash
 ```
 
-## 🧩 Installez les packages de dépendances pour compiler Samba4 sur Void
+## 🧩 在Void上安裝編譯Samba4的依賴包
 
 ```bash
 xbps-install -S \
@@ -42,9 +42,9 @@ xbps-install -S \
  bind ldns pkg-config vim
 ```
 
-## ⚠️ ATTENTION : Le Samba4 compilé inclut le code Heimdal Kerberos, intégré (KDC interne) par défaut, mais n'inclut pas les clients Kerberos. Dans ce cas, le référentiel fournit des packages binaires du MIT, qui peuvent être installés sans aucun problème ni interférence avec le kerberos heimdal par défaut, compilé sur le contrôleur de domaine. Les packages sont : mit-krb5 mit-krb5-client mit-krb5-devel. CEPENDANT, vous NE DEVEZ en aucun cas installer le paquet binaire krb5-server depuis le dépôt, ce qui provoquerait un service concurrent avec les kerberos Heimdal, internes à Samba4 !
+## ⚠️ 注意：編譯後的 Samba4 包含默認內置（內部 KDC）的 Heimdal kerberos 代碼，但不包含 Kerberos 客戶端。在這種情況下，存儲庫提供了來自 MIT 的二進制包，安裝這些包不會出現任何問題，也不會干擾在域控制器上編譯的默認 kerberos heimdal。這些軟件包是：mit-krb5 mit-krb5-client mit-krb5-devel。但是，在任何情況下都不得從存儲庫安裝 krb5-server 二進制包，這會導致與 Samba4 內部的 Heimdal kerberos 競爭服務！
 
-## Les services fournis par les clients du MIT-krb5 sont les suivants :
+## MIT-krb5 客戶提供的服務位於：
 
 ```bash
 /usr/bin/kinit
@@ -53,7 +53,7 @@ xbps-install -S \
 /usr/bin/kdestroy
 ```
 
-## 🖥️ Nom d'hôte Setar
+## 🖥️ Setar 主機名
 
 ```bash
 echo "pdc01" > /etc/hostname
@@ -65,7 +65,7 @@ echo "pdc01" > /etc/hostname
 vim /etc/hosts
 ```
 
-## Contenu:
+## 內容：
 
 ```bash
 127.0.0.1      localhost
@@ -73,15 +73,15 @@ vim /etc/hosts
 192.168.70.253 pdc01.educatux.edu pdc01
 ```
 
-## 🌐 Configurer l'IP fixe
+## 🌐配置固定IP
 
-### 👉 Nous utiliserons la méthode par défaut de Void, /etc/dhcpcd.conf
+### 👉 我們將使用 Void 的默認方法 /etc/dhcpcd.conf
 
 ```bash
 vim /etc/dhcpcd.conf
 ```
 
-## Ajouter une IP, une passerelle et un DNS :## 🎯 Objectif
+## 添加ip、網關和dns：## 🎯 目的
 
 ```bash
 interface eth0
@@ -90,25 +90,25 @@ static routers=192.168.70.254
 static domain_name_servers=192.168.70.254
 ```
 
-## Redémarrez l'interface réseau :
+## 重新啟動網絡接口：
 
 ```bash
 sv restart dhcpcd
 ```
 
-## 🌐 Définir un DNS temporaire (routeur) AVANT le provisionnement
+## 🌐 在配置之前設置臨時 DNS（路由器）
 
 ```bash
 echo "nameserver 192.168.70.254" > /etc/resolv.conf
 ```
 
-## Verrouiller la configuration de resolv.conf
+## 鎖定resolv.conf配置
 
 ```bash
 chattr +i /etc/resolv.conf
 ```
 
-## 🔍 Valider l'adresse attribuée à l'interface réseau
+## 🔍 驗證分配給網絡接口的地址
 
 ```bash
 ip -c addr
@@ -118,7 +118,7 @@ ip -c addr
 ip -br link
 ```
 
-## 📥 Téléchargez et décompressez le code source de Samba4
+## 📥 下載並解壓Samba4源代碼
 
 ```bash
 wget https://download.samba.org/pub/samba/samba-4.23.4.tar.gz
@@ -128,7 +128,7 @@ wget https://download.samba.org/pub/samba/samba-4.23.4.tar.gz
 tar -xvzf samba-4.23.4.tar.gz
 ```
 
-## Compiler et installer le code source
+## 編譯並安裝源碼
 
 ```bash
 cd samba-4.23.4
@@ -142,14 +142,14 @@ cd samba-4.23.4
 make -j$(nproc) && make install
 ```
 
-## Commentaire:
+## 評論：
 
-- Void n'interfère pas avec l'installation, car Samba est compilé dans /opt/samba.
-- Make -j accélère beaucoup la compilation, de toute façon, va prendre un café.
-- Après l'installation, le Samba4 compilé n'a aucun service créé dans le runit.
-- Nous allons créer les services manuellement.
+- Void 不會干擾安裝，因為 Samba 是在 /opt/samba 中編譯的。
+- make -j 編譯速度加快很多，不管怎樣，去喝杯咖啡吧。
+- 安裝後，編譯後的Samba4在runit中沒有創建任何服務。
+- 我們將手動創建服務。
 
-## 📁 Ajoutez Samba4 au PATH Système et relisez l'environnement
+## 📁 將 Samba4 添加到系統 PATH 並重新讀取環境
 
 ```bash
 echo 'export PATH=/opt/samba/bin:/opt/samba/sbin:$PATH' >> /etc/profile
@@ -159,19 +159,19 @@ echo 'export PATH=/opt/samba/bin:/opt/samba/sbin:$PATH' >> /etc/profile
 source /etc/profile
 ```
 
-## Tester l'insertion du Samba4 PATH dans le système d'exploitation
+## 測試操作系統中 Samba4 PATH 的插入
 
 ```bash
 samba-tool -V
 ```
 
-## Résultat:
+## 結果：
 
 ```bash
 4.23.4
 ```
 
-🏰 Provisionner le domaine SAMBA4 (Création du PDC lui-même)
+🏰 配置 SAMBA4 域（創建 PDC 本身）
 
 ```bash
 samba-tool domain provision \
@@ -185,7 +185,7 @@ samba-tool domain provision \
  --function-level=2016
 ```
 
-### Samba4 créera :
+### Samba4 將創建：
 
 ```bash
 /opt/samba/etc/smb.conf
@@ -193,20 +193,20 @@ samba-tool domain provision \
 /opt/samba/var/locks/sysvol
 ```
 
-## En résumé Samba4 :
+## 總結一下 Samba4：
 
-- Crée la forêt AD, le contrôleur de domaine principal, le DNS interne et la base de données des comptes.
-- Définit le domaine, le domaine, le niveau fonctionnel 2016 et le mot de passe administrateur.
-- Void n'installe aucun Samba natif, il n'y a donc pas de conflit.
-- Après cela, le DNS devient le PDC lui-même, devant ajuster /etc/resolv.conf à 127.0.0.1.
+- 創建 AD 林、主 DC、內部 DNS 和帳戶數據庫。
+- 定義域、範圍、2016 功能級別和管理員密碼。
+- Void 不安裝任何本機 Samba，因此不存在衝突。
+- 此後，DNS 就成為 PDC 本身，需要將 /etc/resolv.conf 調整為 127.0.0.1。
 
-## ⚙️ Valider le niveau fonctionnel d'Active Directory 2016
+## ⚙️ 驗證 Active Directory 2016 功能級別
 
 ```bash
 samba-tool domain level show
 ```
 
-## Résultat:
+## 結果：
 
 ```bash
 Domain and forest function level for domain 'DC=educatux,DC=edu'
@@ -215,16 +215,16 @@ Domain function level: (Windows) 2016
 Lowest function level of a DC: (Windows) 2016
 ```
 
-## 🧪 Testez manuellement le service AD DC avant de créer le service
+## 🧪 創建服務之前手動測試 AD DC 服務
 
 ```bash
 /opt/samba/sbin/samba -i -M single
 ```
 
-* -i → premier plan
-* -M modèle unique → modèle à processus unique (ne déclenche pas de fork de démon en dehors du contrôle runit)
+* -i → 前景
+* -M single → 單進程模型（不會觸發 runit 控制之外的守護進程分叉）
 
-## Si tout va bien, vous verrez :
+## 如果一切正常，您將看到：
 
 ```bash
 Completed DNS update check OK
@@ -232,11 +232,11 @@ Completed SPN update check OK
 Registered EDUCATUX<1c> ...
 ```
 
-## CTRL+C pour quitter
+## CTRL+C 退出
 
-## 📦 Créez le service RUNIT samba-ad-dc pour télécharger AD au démarrage
+## 📦 創建 samba-ad-dc RUNIT 服務以在啟動時上傳 AD
 
-## ⚠️ Cette partie est très importante. Supprimez les anciens restes SI RÉAJUSTEZ un serveur préexistant !!
+## ⚠️這部分非常重要。如果重新調整預先存在的服務器，請刪除舊的殘留物！
 
 ```bash
 sv stop samba-ad-dc 2>/dev/null
@@ -248,16 +248,16 @@ rm -rf /etc/sv/*/supervise
 rm -rf /var/service/*/supervise
 ```
 
-## Créons maintenant les services et autorisations samba-ad-dc avec les journaux, afin que runit puisse être chargé au démarrage du système :
+## 現在讓我們創建帶有日誌的 samba-ad-dc 服務和權限，以便在系統啟動時加載 runit：
 
-## Créer avant tout la structure du service
+## 首先創建服務結構
 
 ```bash
 mkdir -p /etc/sv/samba-ad-dc/log
 mkdir -p /var/log/samba-ad-dc
 ```
 
-## Créer le service d'exécution
+## 創建運行服務
 
 ```bash
 cat > /etc/sv/samba-ad-dc/run << 'EOF'
@@ -267,13 +267,13 @@ exec /opt/samba/sbin/samba -i -M single --debuglevel=3
 EOF
 ```
 
-## Définir l'autorisation d'exécution du service
+## 設置運行服務權限
 
 ```bash
 chmod +x /etc/sv/samba-ad-dc/run
 ```
 
-## Créer le fichier journal
+## 創建日誌文件
 
 ```bash
 cat > /etc/sv/samba-ad-dc/log/run << 'EOF'
@@ -282,25 +282,25 @@ exec svlogd -tt /var/log/samba-ad-dc
 EOF
 ```
 
-## Définir l'autorisation de journalisation/exécution
+## 設置日誌/運行權限
 
 ```bash
 chmod +x /etc/sv/samba-ad-dc/log/run
 ```
 
-## Activez le service samba-ad-dc pour qu'il s'exécute au démarrage :
+## 啟用 samba-ad-dc 服務在啟動時運行：
 
 ```bash
 ln -sf /etc/sv/samba-ad-dc/ /var/service/
 ```
 
-## Validez s'il est en cours d'exécution
+## 驗證是否正在運行
 
 ```bash
 sv status samba-ad-dc
 ```
 
-## Vous devriez voir quelque chose comme :
+## 您應該看到類似以下內容：
 
 ```bash
 run: samba-ad-dc: (pid 28032) 4s; run: log: (pid 28031) 4s
@@ -310,7 +310,7 @@ run: samba-ad-dc: (pid 28032) 4s; run: log: (pid 28031) 4s
 samba-tool processes
 ```
 
-## Résultat reçu :
+## 收到結果：
 
 ```bash
  Service:                          PID
@@ -330,13 +330,13 @@ samba                             1012
 winbind_server                    1019
 ```
 
-## Validez les journaux en ligne :
+## 在線驗證日誌：
 
 ```bash
 tail -f /var/log/samba-ad-dc/current
 ```
 
-## Le résultat correct ressemblera à ceci :
+## 正確的輸出將是這樣的：
 
 ```bash
 2025-11-27_04:14:23.73604 Completed DNS update check OK
@@ -351,23 +351,23 @@ tail -f /var/log/samba-ad-dc/current
 2025-11-27_04:14:37.31557 Completed samba_kcc OK
 ```
 
-## 🕒 Serveur NTP/Chrony
+## 🕒 NTP/Chrony 服務器
 
-## Le contrôleur de domaine devra être le serveur de temps du réseau local, car avec un écart de 5 minutes, Kerberos n'authentifiera plus le client
+## 域控制器需要是本地網絡的時間服務器，因為相差 5 分鐘，Kerberos 將不再對客戶端進行身份驗證
 
-## Installez le package Chrony Server
+## 安裝 Chrony 服務器包
 
 ```bash
 xbps-install -Syu chrony
 ```
 
-## Modifiez le fichier serveur, remplacez les référentiels de synchronisation de l'heure et libérez les requêtes réseau internes
+## 編輯Server文件，替換時間同步存儲庫並發佈內網查詢
 
 ```bash
 vim /etc/chrony.conf
 ```
 
-### Signalez les serveurs de temps publics au Brésil
+### 指出 巴西 的公共時間服務器
 
 ```bash
 # Comentar a linha do Servidor externo
@@ -383,25 +383,25 @@ server 3.br.pool.ntp.org iburst
 allow 192.168.70.0/24
 ```
 
-## Ajouter le service chronyd au démarrage de RUNIT
+## 將 chronyd 服務添加到 RUNIT 啟動
 
 ```bash
 ln -sf /etc/sv/chronyd/ /var/service/
 ```
 
-## Redémarrez TimeServer :
+## 重新啟動時間服務器：
 
 ```bash
 sv restart chronyd
 ```
 
-## Validez les Serveurs, ils sont cycliques et aléatoires lors des requêtes
+## 驗證服務器，它們在查詢期間是循環且隨機的
 
 ```bash
 chronyc sources -v
 ```
 
-## 🔐 Créer un fichier Kerberos
+## 🔐 創建 Kerberos 文件
 
 ```bash
 vim /etc/krb5.conf
@@ -428,7 +428,7 @@ vim /etc/krb5.conf
     educatux.edu = EDUCATUX.EDU
 ```
 
-## 🧭 Déverrouillez et réinitialisez /etc/resolv.conf APRÈS le provisionnement, et pointez vers le PDC lui-même
+## 🧭 配置後解鎖並重置 /etc/resolv.conf，並指向 PDC 本身
 
 ```bash
 chattr -i /etc/resolv.conf
@@ -438,7 +438,7 @@ chattr -i /etc/resolv.conf
 vim /etc/resolv.conf
 ```
 
-## Contenu:
+## 內容：
 
 ```bash
 domain educatux.edu
@@ -446,27 +446,27 @@ search educatux.edu
 nameserver 127.0.0.1
 ```
 
-## Verrouillez à nouveau le fichier :
+## 再次鎖定文件：
 
 ```bash
 chattr +i /etc/resolv.conf
 ```
 
-## 🔗 Lier les bibliothèques Winbind sur le système
+## 🔗 鏈接系統上的 Winbind 庫
 
-## Validez les chemins libdir :
+## 驗證 libdir 路徑：
 
 ```bash
 /opt/samba/sbin/smbd -b | grep LIBDIR
 ```
 
-## Résultat attendu :
+## 預期輸出：
 
 ```bash
 LIBDIR: /opt/samba/lib
 ```
 
-## Créer des liens entre les bibliothèques. Préférez taper manuellement plutôt que de copier et coller ici.
+## 創建庫之間的鏈接。更喜歡手動輸入而不是在此處複製和粘貼。
 
 ```bash
 ln -sf /opt/samba/lib/libnss_winbind.so.2 /usr/lib/
@@ -476,13 +476,13 @@ ln -sf /opt/samba/lib/libnss_winbind.so.2 /usr/lib/
 ln -sf /usr/lib/libnss_winbind.so.2 /usr/lib/libnss_winbind.so
 ```
 
-## Relisez la configuration avec les nouvelles bibliothèques liées
+## 使用新的鏈接庫重新讀取配置
 
 ```bash
 ldconfig
 ```
 
-## Validez l'efficacité de l'échange de tickets Kerberos, en ajoutant winbind aux deux lignes de nsswhitch (passwd et group) :
+## 驗證 Kerberos 票證交換的有效性，將 winbind 添加到 nsswhitch 的兩行（passwd 和 group）：
 
 ```bash
 vim /etc/nsswitch.conf
@@ -493,9 +493,9 @@ passwd: files winbind
 group:  files winbind
 ```
 
-### Le reste du fichier reste tel quel
+### 文件的其餘部分保持原樣
 
-## 📝 Validez le smb.conf créé automatiquement par provisioning
+## 📝 驗證通過配置自動創建的 smb.conf
 
 ```bash
 cat /opt/samba/etc/smb.conf
@@ -524,13 +524,13 @@ cat /opt/samba/etc/smb.conf
         read only = No
 ```
 
-## 🔍 Nous allons maintenant valider les services PDC importants tels que DNS, SMB, Winbind et Kerberos
+## 🔍 現在我們將驗證重要的 PDC 服務，例如 DNS、SMB、Winbind 和 Kerberos
 
 ```bash
 ps aux | grep samba
 ```
 
-## Résultat reçu :
+## 收到結果：
 
 ```bash
 root     28030  0.0  0.0   2392  1388 ?        Ss   01:14   0:00 runsv samba-ad-dc
@@ -547,7 +547,7 @@ root     28180  0.0  0.1   6696  2556 pts/0    S+   02:10   0:00 grep samba
 samba-tool user show administrator
 ```
 
-## Résultat reçu :
+## 收到結果：
 
 ```bash
 dn: CN=Administrator,CN=Users,DC=educatux,DC=edu
@@ -594,7 +594,7 @@ distinguishedName: CN=Administrator,CN=Users,DC=educatux,DC=edu
 wbinfo -u
 ```
 
-## Résultat reçu :
+## 收到結果：
 
 ```bash
 EDUCATUX\administrator
@@ -606,7 +606,7 @@ EDUCATUX\krbtgt
 wbinfo -g
 ```
 
-## Résultat reçu :
+## 收到結果：
 
 ```bash
 EDUCATUX\administrator
@@ -636,7 +636,7 @@ EDUCATUX\dnsupdateproxy
 getent group "Domain Admins"
 ```
 
-## Résultat reçu :
+## 收到結果：
 
 ```bash
 EDUCATUX\domain admins:x:3000004:
@@ -646,7 +646,7 @@ EDUCATUX\domain admins:x:3000004:
 smbclient -L localhost -U Administrator
 ```
 
-## Résultat reçu :
+## 收到結果：
 
 ```bash
 Password for [EDUCATUX\Administrator]:
@@ -663,7 +663,7 @@ SMB1 disabled -- no workgroup available
 samba-tool dns zonelist localhost -U administrator
 ```
 
-## Résultat reçu :
+## 收到結果：
 
 ```bash
 Password for [EDUCATUX\administrator]:
@@ -688,7 +688,7 @@ Password for [EDUCATUX\administrator]:
 samba-tool user show administrator
 ```
 
-## Résultat reçu :
+## 收到結果：
 
 ```bash
 dn: CN=Administrator,CN=Users,DC=educatux,DC=edu
@@ -731,7 +731,7 @@ logonCount: 5
 distinguishedName: CN=Administrator,CN=Users,DC=educatux,DC=edu
 ```
 
-## 🔐 Désactivez la complexité des mots de passe pour les utilisateurs du domaine (facilitez les tests en laboratoire - dangereux pour la production !)
+## 🔐 禁用域用戶的密碼複雜性（促進實驗室測試 - 生產不安全！）
 
 ```bash
 samba-tool domain passwordsettings set --complexity=off
@@ -741,13 +741,13 @@ samba-tool domain passwordsettings set --min-pwd-age=0
 samba-tool user setexpiry Administrator --noexpiry
 ```
 
-## Relisez les paramètres de Samba4
+## 重新讀取 Samba4 設置
 
 ```bash
 smbcontrol all reload-config
 ```
 
-## 🧪 Valider l'échange de billets Kerberos
+## 🧪 驗證 Kerberos 票證交換
 
 ```bash
 kinit Administrator@EDUCATUX.EDU
@@ -757,7 +757,7 @@ kinit Administrator@EDUCATUX.EDU
 klist
 ```
 
-## Résultat reçu :
+## 收到結果：
 
 ```bash
 Ticket cache: FILE:/tmp/krb5cc_0
@@ -772,7 +772,7 @@ Valid starting       Expires              Service principal
 samba-tool dns query pdc01.educatux.edu educatux.edu @ A -U Administrator
 ```
 
-## Résultat reçu :
+## 收到結果：
 
 ```bash
 Password for [EDUCATUX\Administrator]:
@@ -793,7 +793,7 @@ Password for [EDUCATUX\Administrator]:
 drill google.com @192.168.70.253
 ```
 
-## Résultat obtenu :
+## 得到的結果：
 
 ```bash
 ;; ->>HEADER<<- opcode: QUERY, rcode: NOERROR, id: 50285
@@ -874,27 +874,27 @@ Checking 0 100 389 pdc01.educatux.edu. against SRV _ldap._tcp.Default-First-Site
 No DNS updates needed
 ```
 
-### ✅ RÉSUMÉ FINAL
+### ✅ 最終總結
 
-## 🎉 Félicitations, vous venez de configurer un domaine AD 2016 entièrement fonctionnel sur Void Linux !
+## 🎉 恭喜您 — 您剛剛在 Void Linux 上設置了一個功能齊全的 2016 AD 域！
 
-### 👉 RAPPELEZ-VOUS : Samba4, bien qu'il puisse être géré par ligne de commande, a été conçu pour être géré par des outils de gestion de serveur à distance - RSAT, qui peuvent être installés sur une machine Windows 10, sans aucun problème !
+### 👉 請記住：Samba4 儘管能夠通過命令行進行管理，但其設計目的是通過遠程服務器管理工具 - RSAT 進行管理，該工具可以安裝在 Windows 10 計算機上，沒有任何問題！
 
-## Vous pouvez désormais :
+## 現在您可以：
 
-- joindre des machines Windows au domaine
-- utiliser des GPO
-- tester la réplication (lors de la création d'un DC2)
-- créer des utilisateurs/groupes via RSAT
-- configurer la réplication sysvol (avec Rsync ou le nouveau samba-gpupdate)
-- ajouter des redirecteurs DNS
-- activer DFS
-- créer un serveur de fichiers membre
-- etc.
+- 將 Windows 計算機加入域
+- 使用 GPO
+- 測試複製（創建 DC2 時）
+- 通過 RSAT 創建用戶/組
+- 配置 sysvol 複製（使用 Rsync 或新的 samba-gpupdate）
+- 添加 DNS 轉發器
+- 啟用DFS
+- 創建成員文件服務器
+- ETC。
 
 ---
 
-🎯 C'EST TOUS LES GENS !
+🎯 這就是大家！
 
-👉Contact : zerolies@disroot.org
+👉聯繫方式：zerolies@disroot.org
 👉 https://t.me/z3r0l135

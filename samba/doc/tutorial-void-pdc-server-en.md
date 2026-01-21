@@ -4,7 +4,7 @@
 
 ### 🔧 ADAPT the tutorial to YOUR reality, obviously!
 
-## 📡 Local network layout
+## 📡 Layout de rede local
 
 - Domain: EDUCATUX.EDU
 - Hostname: pdc01
@@ -25,7 +25,7 @@ chsh -s /bin/bash
 
 ```bash
 xbps-install -S \
- net-tools rsync acl attr attr-devel autoconf automake libtool \
+ net-tools ldns bind-utils rsync acl attr attr-devel autoconf automake libtool \
  binutils bison gcc make ccache chrpath curl \
  docbook-xml docbook-xsl flex gdb git htop \
  mit-krb5 mit-krb5-client mit-krb5-devel \
@@ -353,7 +353,7 @@ tail -f /var/log/samba-ad-dc/current
 
 ## 🕒 NTP / Chrony Server
 
-## The Domain Controller will need to be the Time Server of the local network, as with a discrepancy of 5 minutes, Kerberos will no longer authenticate the client
+## The Domain Controller will need to be the Time Server of the local network, because with a discrepancy of 5 minutes, Kerberos will no longer authenticate the client
 
 ## Install the Chrony Server package
 

@@ -4,7 +4,7 @@
 
 ### 🔧ADATTA il tutorial alla TUA realtà, ovviamente!
 
-## 📡 Layout della rete locale
+## 📡 Layout de rede local
 
 - Dominio: EDUCATUX.EDU
 - Nome host: pdc01
@@ -25,7 +25,7 @@ chsh -s /bin/bash
 
 ```bash
 xbps-install -S \
- net-tools rsync acl attr attr-devel autoconf automake libtool \
+ net-tools ldns bind-utils rsync acl attr attr-devel autoconf automake libtool \
  binutils bison gcc make ccache chrpath curl \
  docbook-xml docbook-xsl flex gdb git htop \
  mit-krb5 mit-krb5-client mit-krb5-devel \
@@ -236,7 +236,7 @@ Registered EDUCATUX<1c> ...
 
 ## 📦 Crea il servizio RUNIT samba-ad-dc per caricare AD all'avvio
 
-## ⚠️ Questa parte è molto importante. Elimina i vecchi resti SE RIADEGUATE un Server preesistente!!
+## ⚠️ Questa parte è molto importante. Cancella i vecchi resti SE RIADEGUATE un Server preesistente!!
 
 ```bash
 sv stop samba-ad-dc 2>/dev/null
@@ -353,7 +353,7 @@ tail -f /var/log/samba-ad-dc/current
 
 ## 🕒Server NTP/Crony
 
-## Il Domain Controller dovrà essere il Time Server della rete locale, poiché con una discrepanza di 5 minuti Kerberos non autenticherà più il client
+## Il Domain Controller dovrà essere il Time Server della rete locale, perché con una discrepanza di 5 minuti Kerberos non autenticherà più il client
 
 ## Installare il pacchetto Chrony Server
 
@@ -482,7 +482,7 @@ ln -sf /usr/lib/libnss_winbind.so.2 /usr/lib/libnss_winbind.so
 ldconfig
 ```
 
-## Convalidare l'efficacia dello scambio ticket Kerberos, aggiungendo winbind alle due righe di nsswhitch (passwd e group):
+## Convalidare l'efficacia dello scambio di ticket Kerberos, aggiungendo winbind alle due righe di nsswhitch (passwd e group):
 
 ```bash
 vim /etc/nsswitch.conf

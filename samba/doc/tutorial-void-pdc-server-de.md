@@ -4,7 +4,7 @@
 
 ### 🔧 PASSEN Sie das Tutorial natürlich an IHRE Realität an!
 
-## 📡 Lokales Netzwerklayout
+## 📡 Layout de rede local
 
 - Domain: EDUCATUX.EDU
 - Hostname: pdc01
@@ -25,7 +25,7 @@ chsh -s /bin/bash
 
 ```bash
 xbps-install -S \
- net-tools rsync acl attr attr-devel autoconf automake libtool \
+ net-tools ldns bind-utils rsync acl attr attr-devel autoconf automake libtool \
  binutils bison gcc make ccache chrpath curl \
  docbook-xml docbook-xsl flex gdb git htop \
  mit-krb5 mit-krb5-client mit-krb5-devel \
@@ -236,7 +236,7 @@ Registered EDUCATUX<1c> ...
 
 ## 📦 Erstellen Sie den RUNIT-Dienst samba-ad-dc, um AD beim Booten hochzuladen
 
-## ⚠️ Dieser Teil ist sehr wichtig. Löschen Sie alte Reste, wenn Sie einen bereits vorhandenen Server neu anpassen!!
+## ⚠️ Dieser Teil ist sehr wichtig. Alte Überreste löschen, WENN ein bereits vorhandener Server neu angepasst wird!!
 
 ```bash
 sv stop samba-ad-dc 2>/dev/null
@@ -248,7 +248,7 @@ rm -rf /etc/sv/*/supervise
 rm -rf /var/service/*/supervise
 ```
 
-## Jetzt erstellen wir die Samba-AD-DC-Dienste und -Berechtigungen mit Protokollen, damit Runit beim Systemstart geladen werden kann:
+## Jetzt erstellen wir die Samba-ad-dc-Dienste und -Berechtigungen mit Protokollen, damit runit beim Systemstart geladen werden kann:
 
 ## Erstellen Sie zunächst die Servicestruktur
 
@@ -476,7 +476,7 @@ ln -sf /opt/samba/lib/libnss_winbind.so.2 /usr/lib/
 ln -sf /usr/lib/libnss_winbind.so.2 /usr/lib/libnss_winbind.so
 ```
 
-## Lesen Sie die Konfiguration mit den neuen verknüpften Bibliotheken erneut
+## Lesen Sie die Konfiguration erneut mit den neuen verknüpften Bibliotheken
 
 ```bash
 ldconfig

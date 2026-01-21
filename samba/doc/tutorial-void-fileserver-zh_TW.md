@@ -1,31 +1,31 @@
 
-# File Server running Samba4 on Void Linux Server ;D
+# 在 Void Linux 服務器上運行 Samba4 的文件服務器；D
 
-## 🎯 Goal – Deploy a File Server on Void Linux (glibc) by compiling Samba4 from source, AD integration, ACLs, services and the entire stack required for a File Server to serve network clients.
+## 🎯 目標 – 通過從源代碼編譯 Samba4、AD 集成、ACL、服務以及文件服務器為網絡客戶端提供服務所需的整個堆棧，在 Void Linux (glibc) 上部署文件服務器。
 
-## 🔧 Networking lab with QEMU/Virtmanager and Proxmox. Adjust the tutorial to match your own environment.
+## 🔧 使用 QEMU/Virtmanager 和 Proxmox 的網絡實驗室。調整教程以適合您自己的環境。
 
 ---
 
-## 📡 Local network layout
+## 📡 本地網絡佈局
 
-- Domain: EDUCATUX.EDU
+- 域名：EDUCATUX.EDU
 
-- Hostname: fileserver
+- 主機名：文件服務器
 
-- Firewall 192.168.70.254 (DNS/GW)
+- 防火牆 192.168.70.254（DNS/GW）
 
-- IP: 192.168.70.251
+- IP：192.168.70.251
 
-## Install Void Linux
+## 安裝Void Linux
 
-## Change the default shell on Void
+## 更改 Void 上的默認 shell
 
 ```bash
 chsh -s /bin/bash
 ```
 
-## 🧩 Install dependency packages to compile Samba4 on Void
+## 🧩 在Void上安裝編譯Samba4的依賴包
 
 ```bash
 xbps-install -S \
@@ -46,7 +46,7 @@ xbps-install -S \
  bind ldns pkg-config vim
 ```
 
-## 🖥️ Set hostname
+## 🖥️ 設置主機名
 
 ```bash
 echo "fileserver" > /etc/hostname
@@ -58,7 +58,7 @@ echo "fileserver" > /etc/hostname
 vim /etc/hosts
 ```
 
-## Content:
+## 內容：
 
 ```bash
 127.0.0.1      localhost
@@ -66,15 +66,15 @@ vim /etc/hosts
 192.168.70.251 fileserver.educatux.edu fileserver
 ```
 
-## 🌐 Configure static IP
+## 🌐配置靜態IP
 
-## 👉 We will use the standard Void method, /etc/dhcpcd.conf
+## 👉我們將使用標準的Void方法，/etc/dhcpcd.conf
 
 ```bash
 vim /etc/dhcpcd.conf
 ```
 
-## Add IP, gateway (Router) and DNS (AD):
+## 添加IP、網關（路由器）和DNS（AD）：
 
 ```bash
 interface eth0
@@ -83,19 +83,19 @@ static routers=192.168.70.254
 static domain_name_servers=192.168.70.253
 ```
 
-## Restart network interface:
+## 重新啟動網絡接口：
 
 ```bash
 sv restart dhcpcd
 ```
 
-## 🧭 Set DNS address - Point to the PDC
+## 🧭 設置 DNS 地址 - 指向 PDC
 
 ```bash
 vim /etc/resolv.conf
 ```
 
-## Content:
+## 內容：
 
 ```bash
 domain educatux.edu
@@ -103,20 +103,20 @@ search educatux.edu
 nameserver 192.168.70.253
 ```
 
-## Lock resolv.conf
+## 鎖定resolv.conf
 
 ```bash
 chattr +i /etc/resolv.conf
 ```
 
-## 🔍 Validate the network interface address
+## 🔍 驗證網絡接口地址
 
 ```bash
 ip -c addr
 ip -br link
 ```
 
-## 📥 Download and extract Samba4 source code
+## 📥 下載並解壓Samba4源代碼
 
 ```bash
 wget https://download.samba.org/pub/samba/samba-4.23.4.tar.gz
@@ -126,7 +126,7 @@ wget https://download.samba.org/pub/samba/samba-4.23.4.tar.gz
 tar -xvzf samba-4.23.4.tar.gz
 ```
 
-## Compile and install from source
+## 從源代碼編譯並安裝
 
 ```bash
 cd samba-4.23.4
@@ -140,17 +140,17 @@ cd samba-4.23.4
 make -j$(nproc) && make install
 ```
 
-## Notes:
+## 筆記：
 
-- Void does not interfere because Samba is compiled into /opt/samba.
+- void 不會干擾，因為 Samba 被編譯到 /opt/samba 中。
 
-- make -j greatly speeds up compilation—still, go grab a coffee.
+- make -j 大大加快了編譯速度——不過，去喝杯咖啡吧。
 
-- After installation, compiled Samba4 does not have any runit services.
+- 安裝後，編譯後的Samba4沒有任何runit服務。
 
-- We will create the services manually.
+- 我們將手動創建服務。
 
-## 📁 Add Samba4 to system PATH and reload environment
+## 📁 將 Samba4 添加到系統 PATH 並重新加載環境
 
 ```bash
 echo 'export PATH=/opt/samba/bin:/opt/samba/sbin:$PATH' >> /etc/profile
@@ -160,21 +160,21 @@ echo 'export PATH=/opt/samba/bin:/opt/samba/sbin:$PATH' >> /etc/profile
 source /etc/profile
 ```
 
-## Test Samba4 PATH insertion into the OS
+## 測試 Samba4 PATH 插入操作系統
 
 ```bash
 samba-tool -V
 ```
 
-## Output:
+## 輸出：
 
 ```bash
 4.23.4
 ```
 
-## ⚠️ Warning: DO NOT use the provisioning command on the File Server!
+## ⚠️警告：請勿在文件服務器上使用配置命令！
 
-## 📝 Create the smb.conf file
+## 📝 創建 smb.conf 文件
 
 ```bash
 vim /opt/samba/etc/smb.conf
@@ -213,13 +213,13 @@ vim /opt/samba/etc/smb.conf
    writable = yes
 ``` 
 
-## Create the log file
+## 創建日誌文件
 
 ```bash
 mkdir /opt/samba/var
 ```
 
-## 📂 Create the sharing path
+## 📂 創建共享路徑
 
 ```bash
 sudo mkdir -p /srv/samba/arquivos
@@ -227,29 +227,29 @@ sudo chown -R root:"Domain Admins" /srv/samba/arquivos
 sudo chmod -R 0770 /srv/samba/arquivos
 ```
 
-## Reload Samba4 config
+## 重新加載 Samba4 配置
 
 ```bash
 smbcontrol all reload-config
 ```
 
-## 🕒 NTP / Chrony Server
+## 🕒 NTP/Chrony 服務器
 
-## The Domain Controller must be the local Time Server, because with a 5-minute drift Kerberos will no longer authenticate clients.
+## 域控制器必須是本地時間服務器，因為漂移 5 分鐘後，Kerberos 將不再對客戶端進行身份驗證。
 
-## Install Chrony
+## 安裝 Chrony
 
 ```bash
 xbps-install -Syu chrony
 ```
 
-## Edit config and allow internal network
+## 編輯配置並允許內部網絡
 
 ```bash
 vim /etc/chrony.conf
 ```
 
-## Set Domain Control at the time servers:
+## 在時間服務器上設置域控制：
 
 ```bash
 # Comment the external line
@@ -259,31 +259,31 @@ vim /etc/chrony.conf
 server 192.168.70.253 iburst
 ```
 
-## Enable chronyd in runit
+## 在runit中啟用chronyd
 
 ```bash
 ln -sf /etc/sv/chronyd/ /var/service/
 ```
 
-## Restart service:
+## 重啟服務：
 
 ```bash
 sv restart chronyd
 ```
 
-## Validate servers:
+## 驗證服務器：
 
 ```bash
 chronyc sources -v
 ```
 
-## 🔐  Create the Kerberos file - Point to the PDC
+## 🔐 創建 Kerberos 文件 - 指向 PDC
 
 ```bash
 vim /etc/krb5.conf
 ```
 
-## containing
+## 含有
 
 ```bash
 [libdefaults]
@@ -306,7 +306,7 @@ vim /etc/krb5.conf
     educatux.edu = EDUCATUX.EDU
 ```
 
-## Kerberos test
+## Kerberos測試
 
 ```bash
 kinit Administrator
@@ -316,7 +316,7 @@ kinit Administrator
 klist
 ```
 
-## Result obtained
+## 得到的結果
 
 ```bash
 Ticket cache: FILE:/tmp/krb5cc_0
@@ -327,21 +327,21 @@ Valid starting       Expires              Service principal
 	renew until 12/12/2025 09:43:36
 ```
 
-## 🔗 Link Winbind libraries to the system
+## 🔗 將 Winbind 庫鏈接到系統
 
-## Validate libdir path:
+## 驗證 libdir 路徑：
 
 ```bash
 /opt/samba/sbin/smbd -b | grep LIBDIR
 ```
 
-## Expected:
+## 預期的：
 
 ```bash
 LIBDIR: /opt/samba/lib
 ```
 
-## Create library links (prefer typing manually):
+## 創建庫鏈接（最好手動輸入）：
 
 ```bash
 ln -sf /opt/samba/lib/libnss_winbind.so.2 /usr/lib/
@@ -351,13 +351,13 @@ ln -sf /opt/samba/lib/libnss_winbind.so.2 /usr/lib/
 ln -sf /usr/lib/libnss_winbind.so.2 /usr/lib/libnss_winbind.so
 ```
 
-## Reload library cache:
+## 重新加載庫緩存：
 
 ```bash
 ldconfig
 ```
 
-## Update nsswitch for Kerberos ticket exchange (add winbind):
+## 更新 nsswitch 以進行 Kerberos 票證交換（添加 winbind）：
 
 ```bash
 vim /etc/nsswitch.conf
@@ -368,15 +368,15 @@ passwd: files winbind
 group:  files winbind
 ```
 
-## Leave the rest untouched
+## 其餘部分保持不變
 
-## Join the domain
+## 加入域
 
 ```bash
 net ads join -U Administrator
 ```
 
-## Result obtained
+## 得到的結果
 
 ```bash
 Password for [EDUCATUX\Administrator]:
@@ -384,26 +384,26 @@ Using short domain name -- EDUCATUX
 Joined 'VOIDFILES' to dns domain 'educatux.edu'
 ```
 
-## 📦 Create the RUNIT services for smbd, winbindd, and optionally nmbd
+## 📦 為 smbd、winbindd 和可選的 nmbd 創建 RUNIT 服務
 
-### Void Linux uses runit as the init system, and its native logger is svlogd, included in the runit base package. No additional packages are required.
+### Void Linux使用runit作為init系統，其原生記錄器是svlogd，包含在runit基礎包中。不需要額外的包。
 
-## SMBD — Service and Logging
+## SMBD——服務和日誌記錄
 
-## Create service and log directories
+## 創建服務和日誌目錄
 
 ```bash
 mkdir -p /etc/sv/smbd/log
 mkdir -p /var/log/smbd
 ```
 
-## Create /etc/sv/smbd/run
+## 創建/etc/sv/smbd/run
 
 ```bash
 vim /etc/sv/smbd/run
 ```
 
-## Content
+## 內容
 
 ```bash
 #!/bin/sh
@@ -411,38 +411,38 @@ exec 2>&1
 exec /opt/samba/sbin/smbd --foreground --no-process-group
 ```
 
-## Permission
+## 允許
 
 ```bash
 chmod +x /etc/sv/smbd/run
 ```
 
-## Create /etc/sv/smbd/log/run
+## 創建/etc/sv/smbd/log/run
 
 ```bash
 vim /etc/sv/smbd/log/run
 ```
 
-## Content
+## 內容
 
 ```bash
 #!/bin/sh
 exec svlogd -tt /var/log/smbd
 ```
 
-## Permission
+## 允許
 
 ```bash
 chmod +x /etc/sv/smbd/log/run
 ```
 
-## Debug (optional)
+## 調試（可選）
 
 ```bash
 /opt/samba/sbin/smbd -i
 ```
 
-## Result obtained
+## 得到的結果
 
 ```bash
 smbd version 4.23.4 started.
@@ -450,22 +450,22 @@ Copyright Andrew Tridgell and the Samba Team 1992-2025
 daemon 'smbd' : Starting process ...
 ```
 
-## WINBINDD — Service and Logging
+## WINBIDD — 服務和日誌記錄
 
-## Create service and log directories
+## 創建服務和日誌目錄
 
 ```bash
 mkdir -p /etc/sv/winbindd/log
 mkdir -p /var/log/winbindd
 ```
 
-## Create /etc/sv/winbindd/run
+## 創建 /etc/sv/winbindd/run
 
 ```bash
 vim /etc/sv/winbindd/run
 ```
 
-## Content
+## 內容
 
 ```bash
 #!/bin/sh
@@ -473,19 +473,19 @@ exec 2>&1
 exec /opt/samba/sbin/winbindd --foreground --no-process-group
 ```
 
-## Permission
+## 允許
 
 ```bash
 chmod +x /etc/sv/winbindd/run
 ```
 
-## Create /etc/sv/winbindd/log/run
+## 創建 /etc/sv/winbindd/log/run
 
 ```bash
 vim /etc/sv/winbindd/log/run
 ```
 
-## Content
+## 內容
 
 ```bash
 #!/bin/sh
@@ -493,19 +493,19 @@ exec 2>&1
 exec /opt/samba/sbin/winbindd --foreground --no-process-group
 ```
 
-## Permission
+## 允許
 
 ```bash
 chmod +x /etc/sv/winbindd/log/run
 ```
 
-## Debug (optional)
+## 調試（可選）
 
 ```bash
 /opt/samba/sbin/winbindd -i
 ```
 
-## Result obtained
+## 得到的結果
 
 ```bash
 winbindd version 4.23.4 started.
@@ -513,24 +513,24 @@ Copyright Andrew Tridgell and the Samba Team 1992-2025
 daemon 'winbindd' : Starting process ...
 ```
 
-## NMBD — Service and Logging (optional)
+## NMBD — 服務和日誌記錄（可選）
 
-### Only enable if your environment requires NetBIOS/SMB1 browsing.
+### 僅當您的環境需要 NetBIOS/SMB1 瀏覽時才啟用。
 
-## Create service and log directories
+## 創建服務和日誌目錄
 
 ```bash
 mkdir -p /etc/sv/nmbd/log
 mkdir -p /var/log/nmbd
 ```
 
-## Create /etc/sv/nmbd/run
+## 創建/etc/sv/nmbd/run
 
 ```bash
 vim /etc/sv/nmbd/run
 ```
 
-## Content
+## 內容
 
 ```bash
 #!/bin/sh
@@ -538,57 +538,57 @@ exec 2>&1
 exec /opt/samba/sbin/nmbd --foreground --no-process-group
 ```
 
-## Permission
+## 允許
 
 ```bash
 chmod +x /etc/sv/nmbd/run
 ```
 
-## Create /etc/sv/nmbd/log/run
+## 創建/etc/sv/nmbd/log/run
 
 ```bash
 vim /etc/sv/nmbd/log/run
 ```
  
-## Content
+## 內容
 
 ```bash
 #!/bin/sh
 exec svlogd -tt /var/log/nmbd
 ```
 
-## Permission
+## 允許
 
 ```bash
 chmod +x /etc/sv/nmbd/log/run
 ```
 
-## Enable Services
+## 啟用服務
 
 ```bash
 ln -sf /etc/sv/smbd /var/service/
 ln -sf /etc/sv/winbindd /var/service/
 ```
 
-## Optional - enable only if using NetBIOS:
+## 可選 - 僅在使用 NetBIOS 時啟用：
 
 ```bash
 ln -sf /etc/sv/nmbd /var/service/
 ```
 
-## Validate Services
+## 驗證服務
 
 ```bash
 sv status smbd winbindd nmbd
 ```
 
-## 🧪 Validate integration
+## 🧪 驗證集成
 
 ```bash
 net ads testjoin
 ```
 
-## Result obtained
+## 得到的結果
 
 ```bash
 Join is OK
@@ -598,7 +598,7 @@ Join is OK
 wbinfo -u
 ```
 
-## Result obtained
+## 得到的結果
 
 ```bash
 guest
@@ -606,29 +606,29 @@ krbtgt
 administrator```
 
 ```bash
-wbinfo -g
+wbinfo-g
 ```
 
 ## Result obtained
 
 ```bash
-enterprise read-only domain controllers
-protected users
-domain controllers
-domain guests
-read-only domain controllers
-schema admins
-dnsupdateproxy
-domain admins
-group policy creator owners
-ras and ias servers
-dnsadmins
-allowed rodc password replication group
-enterprise admins
-cert publishers
-domain users
-denied rodc password replication group
-domain computers
+企業只讀域控制器
+受保護的用戶
+域控制器
+域來賓
+只讀域控制器
+架構管理員
+域名更新代理
+域管理員
+組策略創建者所有者
+RAS 和 IAS 服務器
+域名管理員
+允許的 rodc 密碼複製組
+企業管理員
+證書發布者
+域用戶
+拒絕 rodc 密碼複製組
+域計算機
 ```
 
 ```bash
@@ -638,7 +638,7 @@ wbinfo --ping-dc
 ## Result obtained
 
 ```bash
-checking the NETLOGON for domain[EDUCATUX] dc connection to "voiddc.educatux.edu" succeeded
+檢查 NETLOGON 的域 [EDUCATUX] dc 連接到“voiddc.educatux.edu”成功
 ```
 
 ## ✅ FINAL SUMMARY

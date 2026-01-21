@@ -1,31 +1,31 @@
 
-# File Server running Samba4 on Void Linux Server ;D
+# Servidor de arquivos rodando Samba4 no Void Linux Server ;D
 
-## 🎯 Goal – Deploy a File Server on Void Linux (glibc) by compiling Samba4 from source, AD integration, ACLs, services and the entire stack required for a File Server to serve network clients.
+## 🎯 Objetivo – Implantar um servidor de arquivos no Void Linux (glibc) compilando Samba4 a partir da fonte, integração AD, ACLs, serviços e toda a pilha necessária para um servidor de arquivos atender clientes de rede.
 
-## 🔧 Networking lab with QEMU/Virtmanager and Proxmox. Adjust the tutorial to match your own environment.
+## 🔧 Laboratório de networking com QEMU/Virtmanager e Proxmox. Ajuste o tutorial para corresponder ao seu próprio ambiente.
 
 ---
 
-## 📡 Local network layout
+## 📡 Layout de rede local
 
-- Domain: EDUCATUX.EDU
+- Domínio: EDUCATUX.EDU
 
-- Hostname: fileserver
+- Nome do host: servidor de arquivos
 
 - Firewall 192.168.70.254 (DNS/GW)
 
 - IP: 192.168.70.251
 
-## Install Void Linux
+## Instale o Void Linux
 
-## Change the default shell on Void
+## Altere o shell padrão no Void
 
 ```bash
 chsh -s /bin/bash
 ```
 
-## 🧩 Install dependency packages to compile Samba4 on Void
+## 🧩 Instale pacotes de dependência para compilar o Samba4 no Void
 
 ```bash
 xbps-install -S \
@@ -46,7 +46,7 @@ xbps-install -S \
  bind ldns pkg-config vim
 ```
 
-## 🖥️ Set hostname
+## 🖥️ Definir nome do host
 
 ```bash
 echo "fileserver" > /etc/hostname
@@ -58,7 +58,7 @@ echo "fileserver" > /etc/hostname
 vim /etc/hosts
 ```
 
-## Content:
+## Contente:
 
 ```bash
 127.0.0.1      localhost
@@ -66,15 +66,15 @@ vim /etc/hosts
 192.168.70.251 fileserver.educatux.edu fileserver
 ```
 
-## 🌐 Configure static IP
+## 🌐 Configurar IP estático
 
-## 👉 We will use the standard Void method, /etc/dhcpcd.conf
+## 👉 Usaremos o método Void padrão, /etc/dhcpcd.conf
 
 ```bash
 vim /etc/dhcpcd.conf
 ```
 
-## Add IP, gateway (Router) and DNS (AD):
+## Adicione IP, gateway (Roteador) e DNS (AD):
 
 ```bash
 interface eth0
@@ -83,19 +83,19 @@ static routers=192.168.70.254
 static domain_name_servers=192.168.70.253
 ```
 
-## Restart network interface:
+## Reinicie a interface de rede:
 
 ```bash
 sv restart dhcpcd
 ```
 
-## 🧭 Set DNS address - Point to the PDC
+## 🧭 Definir endereço DNS - Aponte para o PDC
 
 ```bash
 vim /etc/resolv.conf
 ```
 
-## Content:
+## Contente:
 
 ```bash
 domain educatux.edu
@@ -103,20 +103,20 @@ search educatux.edu
 nameserver 192.168.70.253
 ```
 
-## Lock resolv.conf
+## Bloquear resolv.conf
 
 ```bash
 chattr +i /etc/resolv.conf
 ```
 
-## 🔍 Validate the network interface address
+## 🔍 Valide o endereço da interface de rede
 
 ```bash
 ip -c addr
 ip -br link
 ```
 
-## 📥 Download and extract Samba4 source code
+## 📥 Baixe e extraia o código-fonte do Samba4
 
 ```bash
 wget https://download.samba.org/pub/samba/samba-4.23.4.tar.gz
@@ -126,7 +126,7 @@ wget https://download.samba.org/pub/samba/samba-4.23.4.tar.gz
 tar -xvzf samba-4.23.4.tar.gz
 ```
 
-## Compile and install from source
+## Compilar e instalar a partir do código-fonte
 
 ```bash
 cd samba-4.23.4
@@ -140,17 +140,17 @@ cd samba-4.23.4
 make -j$(nproc) && make install
 ```
 
-## Notes:
+## Notas:
 
-- Void does not interfere because Samba is compiled into /opt/samba.
+- Void não interfere porque o Samba é compilado em /opt/samba.
 
-- make -j greatly speeds up compilation—still, go grab a coffee.
+- make -j acelera bastante a compilação - ainda assim, vá tomar um café.
 
-- After installation, compiled Samba4 does not have any runit services.
+- Após a instalação, o Samba4 compilado não possui nenhum serviço runit.
 
-- We will create the services manually.
+- Criaremos os serviços manualmente.
 
-## 📁 Add Samba4 to system PATH and reload environment
+## 📁 Adicione Samba4 ao PATH do sistema e recarregue o ambiente
 
 ```bash
 echo 'export PATH=/opt/samba/bin:/opt/samba/sbin:$PATH' >> /etc/profile
@@ -160,21 +160,21 @@ echo 'export PATH=/opt/samba/bin:/opt/samba/sbin:$PATH' >> /etc/profile
 source /etc/profile
 ```
 
-## Test Samba4 PATH insertion into the OS
+## Teste a inserção do Samba4 PATH no sistema operacional
 
 ```bash
 samba-tool -V
 ```
 
-## Output:
+## Saída:
 
 ```bash
 4.23.4
 ```
 
-## ⚠️ Warning: DO NOT use the provisioning command on the File Server!
+## ⚠️ Aviso: NÃO use o comando de provisionamento no Servidor de Arquivos!
 
-## 📝 Create the smb.conf file
+## 📝 Crie o arquivo smb.conf
 
 ```bash
 vim /opt/samba/etc/smb.conf
@@ -213,13 +213,13 @@ vim /opt/samba/etc/smb.conf
    writable = yes
 ``` 
 
-## Create the log file
+## Crie o arquivo de log
 
 ```bash
 mkdir /opt/samba/var
 ```
 
-## 📂 Create the sharing path
+## 📂 Crie o caminho de compartilhamento
 
 ```bash
 sudo mkdir -p /srv/samba/arquivos
@@ -227,29 +227,29 @@ sudo chown -R root:"Domain Admins" /srv/samba/arquivos
 sudo chmod -R 0770 /srv/samba/arquivos
 ```
 
-## Reload Samba4 config
+## Recarregar configuração do Samba4
 
 ```bash
 smbcontrol all reload-config
 ```
 
-## 🕒 NTP / Chrony Server
+## 🕒 Servidor NTP / Chrony
 
-## The Domain Controller must be the local Time Server, because with a 5-minute drift Kerberos will no longer authenticate clients.
+## O controlador de domínio deve ser o servidor de horário local, pois com um desvio de 5 minutos o Kerberos não autenticará mais os clientes.
 
-## Install Chrony
+## Instale o Chrony
 
 ```bash
 xbps-install -Syu chrony
 ```
 
-## Edit config and allow internal network
+## Edite a configuração e permita a rede interna
 
 ```bash
 vim /etc/chrony.conf
 ```
 
-## Set Domain Control at the time servers:
+## Defina o controle de domínio nos servidores de horário:
 
 ```bash
 # Comment the external line
@@ -259,31 +259,31 @@ vim /etc/chrony.conf
 server 192.168.70.253 iburst
 ```
 
-## Enable chronyd in runit
+## Habilite o chronyd no runit
 
 ```bash
 ln -sf /etc/sv/chronyd/ /var/service/
 ```
 
-## Restart service:
+## Reinicie o serviço:
 
 ```bash
 sv restart chronyd
 ```
 
-## Validate servers:
+## Validar servidores:
 
 ```bash
 chronyc sources -v
 ```
 
-## 🔐  Create the Kerberos file - Point to the PDC
+## 🔐 Crie o arquivo Kerberos - Aponte para o PDC
 
 ```bash
 vim /etc/krb5.conf
 ```
 
-## containing
+## contendo
 
 ```bash
 [libdefaults]
@@ -306,7 +306,7 @@ vim /etc/krb5.conf
     educatux.edu = EDUCATUX.EDU
 ```
 
-## Kerberos test
+## Teste Kerberos
 
 ```bash
 kinit Administrator
@@ -316,7 +316,7 @@ kinit Administrator
 klist
 ```
 
-## Result obtained
+## Resultado obtido
 
 ```bash
 Ticket cache: FILE:/tmp/krb5cc_0
@@ -327,21 +327,21 @@ Valid starting       Expires              Service principal
 	renew until 12/12/2025 09:43:36
 ```
 
-## 🔗 Link Winbind libraries to the system
+## 🔗 Vincule bibliotecas Winbind ao sistema
 
-## Validate libdir path:
+## Valide o caminho do libdir:
 
 ```bash
 /opt/samba/sbin/smbd -b | grep LIBDIR
 ```
 
-## Expected:
+## Esperado:
 
 ```bash
 LIBDIR: /opt/samba/lib
 ```
 
-## Create library links (prefer typing manually):
+## Crie links de biblioteca (prefira digitar manualmente):
 
 ```bash
 ln -sf /opt/samba/lib/libnss_winbind.so.2 /usr/lib/
@@ -351,13 +351,13 @@ ln -sf /opt/samba/lib/libnss_winbind.so.2 /usr/lib/
 ln -sf /usr/lib/libnss_winbind.so.2 /usr/lib/libnss_winbind.so
 ```
 
-## Reload library cache:
+## Recarregue o cache da biblioteca:
 
 ```bash
 ldconfig
 ```
 
-## Update nsswitch for Kerberos ticket exchange (add winbind):
+## Atualize o nsswitch para troca de tickets Kerberos (adicione winbind):
 
 ```bash
 vim /etc/nsswitch.conf
@@ -368,15 +368,15 @@ passwd: files winbind
 group:  files winbind
 ```
 
-## Leave the rest untouched
+## Deixe o resto intocado
 
-## Join the domain
+## Junte-se ao domínio
 
 ```bash
 net ads join -U Administrator
 ```
 
-## Result obtained
+## Resultado obtido
 
 ```bash
 Password for [EDUCATUX\Administrator]:
@@ -384,26 +384,26 @@ Using short domain name -- EDUCATUX
 Joined 'VOIDFILES' to dns domain 'educatux.edu'
 ```
 
-## 📦 Create the RUNIT services for smbd, winbindd, and optionally nmbd
+## 📦 Crie os serviços RUNIT para smbd, winbindd e opcionalmente nmbd
 
-### Void Linux uses runit as the init system, and its native logger is svlogd, included in the runit base package. No additional packages are required.
+### Void Linux usa runit como sistema init, e seu logger nativo é svlogd, incluído no pacote base runit. Nenhum pacote adicional é necessário.
 
-## SMBD — Service and Logging
+## SMBD — Serviço e registro
 
-## Create service and log directories
+## Crie diretórios de serviço e log
 
 ```bash
 mkdir -p /etc/sv/smbd/log
 mkdir -p /var/log/smbd
 ```
 
-## Create /etc/sv/smbd/run
+## Crie /etc/sv/smbd/run
 
 ```bash
 vim /etc/sv/smbd/run
 ```
 
-## Content
+## Contente
 
 ```bash
 #!/bin/sh
@@ -411,38 +411,38 @@ exec 2>&1
 exec /opt/samba/sbin/smbd --foreground --no-process-group
 ```
 
-## Permission
+## Permissão
 
 ```bash
 chmod +x /etc/sv/smbd/run
 ```
 
-## Create /etc/sv/smbd/log/run
+## Crie /etc/sv/smbd/log/run
 
 ```bash
 vim /etc/sv/smbd/log/run
 ```
 
-## Content
+## Contente
 
 ```bash
 #!/bin/sh
 exec svlogd -tt /var/log/smbd
 ```
 
-## Permission
+## Permissão
 
 ```bash
 chmod +x /etc/sv/smbd/log/run
 ```
 
-## Debug (optional)
+## Depurar (opcional)
 
 ```bash
 /opt/samba/sbin/smbd -i
 ```
 
-## Result obtained
+## Resultado obtido
 
 ```bash
 smbd version 4.23.4 started.
@@ -450,22 +450,22 @@ Copyright Andrew Tridgell and the Samba Team 1992-2025
 daemon 'smbd' : Starting process ...
 ```
 
-## WINBINDD — Service and Logging
+## WINBINDD — Serviço e registro
 
-## Create service and log directories
+## Crie diretórios de serviço e log
 
 ```bash
 mkdir -p /etc/sv/winbindd/log
 mkdir -p /var/log/winbindd
 ```
 
-## Create /etc/sv/winbindd/run
+## Crie /etc/sv/winbindd/run
 
 ```bash
 vim /etc/sv/winbindd/run
 ```
 
-## Content
+## Contente
 
 ```bash
 #!/bin/sh
@@ -473,19 +473,19 @@ exec 2>&1
 exec /opt/samba/sbin/winbindd --foreground --no-process-group
 ```
 
-## Permission
+## Permissão
 
 ```bash
 chmod +x /etc/sv/winbindd/run
 ```
 
-## Create /etc/sv/winbindd/log/run
+## Crie /etc/sv/winbindd/log/run
 
 ```bash
 vim /etc/sv/winbindd/log/run
 ```
 
-## Content
+## Contente
 
 ```bash
 #!/bin/sh
@@ -493,19 +493,19 @@ exec 2>&1
 exec /opt/samba/sbin/winbindd --foreground --no-process-group
 ```
 
-## Permission
+## Permissão
 
 ```bash
 chmod +x /etc/sv/winbindd/log/run
 ```
 
-## Debug (optional)
+## Depurar (opcional)
 
 ```bash
 /opt/samba/sbin/winbindd -i
 ```
 
-## Result obtained
+## Resultado obtido
 
 ```bash
 winbindd version 4.23.4 started.
@@ -513,24 +513,24 @@ Copyright Andrew Tridgell and the Samba Team 1992-2025
 daemon 'winbindd' : Starting process ...
 ```
 
-## NMBD — Service and Logging (optional)
+## NMBD — Serviço e registro (opcional)
 
-### Only enable if your environment requires NetBIOS/SMB1 browsing.
+### Ative apenas se o seu ambiente exigir navegação NetBIOS/SMB1.
 
-## Create service and log directories
+## Crie diretórios de serviço e log
 
 ```bash
 mkdir -p /etc/sv/nmbd/log
 mkdir -p /var/log/nmbd
 ```
 
-## Create /etc/sv/nmbd/run
+## Crie /etc/sv/nmbd/run
 
 ```bash
 vim /etc/sv/nmbd/run
 ```
 
-## Content
+## Contente
 
 ```bash
 #!/bin/sh
@@ -538,57 +538,57 @@ exec 2>&1
 exec /opt/samba/sbin/nmbd --foreground --no-process-group
 ```
 
-## Permission
+## Permissão
 
 ```bash
 chmod +x /etc/sv/nmbd/run
 ```
 
-## Create /etc/sv/nmbd/log/run
+## Crie /etc/sv/nmbd/log/run
 
 ```bash
 vim /etc/sv/nmbd/log/run
 ```
  
-## Content
+## Contente
 
 ```bash
 #!/bin/sh
 exec svlogd -tt /var/log/nmbd
 ```
 
-## Permission
+## Permissão
 
 ```bash
 chmod +x /etc/sv/nmbd/log/run
 ```
 
-## Enable Services
+## Habilitar serviços
 
 ```bash
 ln -sf /etc/sv/smbd /var/service/
 ln -sf /etc/sv/winbindd /var/service/
 ```
 
-## Optional - enable only if using NetBIOS:
+## Opcional - habilite somente se estiver usando NetBIOS:
 
 ```bash
 ln -sf /etc/sv/nmbd /var/service/
 ```
 
-## Validate Services
+## Validar serviços
 
 ```bash
 sv status smbd winbindd nmbd
 ```
 
-## 🧪 Validate integration
+## 🧪 Validar integração
 
 ```bash
 net ads testjoin
 ```
 
-## Result obtained
+## Resultado obtido
 
 ```bash
 Join is OK
@@ -598,7 +598,7 @@ Join is OK
 wbinfo -u
 ```
 
-## Result obtained
+## Resultado obtido
 
 ```bash
 guest
@@ -612,23 +612,23 @@ wbinfo -g
 ## Result obtained
 
 ```bash
-enterprise read-only domain controllers
-protected users
-domain controllers
-domain guests
-read-only domain controllers
-schema admins
+controladores de domínio corporativos somente leitura
+usuários protegidos
+controladores de domínio
+convidados do domínio
+controladores de domínio somente leitura
+administradores de esquema
 dnsupdateproxy
-domain admins
-group policy creator owners
-ras and ias servers
-dnsadmins
-allowed rodc password replication group
-enterprise admins
-cert publishers
-domain users
-denied rodc password replication group
-domain computers
+administradores de domínio
+proprietários do criador da política de grupo
+servidores ras e ias
+administradores de DNS
+grupo de replicação de senha rodc permitido
+administradores corporativos
+editores certificados
+usuários de domínio
+grupo de replicação de senha rodc negada
+computadores de domínio
 ```
 
 ```bash
@@ -638,7 +638,7 @@ wbinfo --ping-dc
 ## Result obtained
 
 ```bash
-checking the NETLOGON for domain[EDUCATUX] dc connection to "voiddc.educatux.edu" succeeded
+verificação do NETLOGON para domínio [EDUCATUX] conexão dc com "voiddc.educatux.edu" bem-sucedida
 ```
 
 ## ✅ FINAL SUMMARY

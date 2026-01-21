@@ -4,7 +4,7 @@
 
 ### 🔧 もちろん、チュートリアルをあなたの現実に合わせてください!
 
-## 📡 ローカルネットワークのレイアウト
+## 📡 ローカルのレイアウト
 
 - ドメイン: EDUCATUX.EDU
 - ホスト名: pdc01
@@ -25,7 +25,7 @@ chsh -s /bin/bash
 
 ```bash
 xbps-install -S \
- net-tools rsync acl attr attr-devel autoconf automake libtool \
+ net-tools ldns bind-utils rsync acl attr attr-devel autoconf automake libtool \
  binutils bison gcc make ccache chrpath curl \
  docbook-xml docbook-xsl flex gdb git htop \
  mit-krb5 mit-krb5-client mit-krb5-devel \
@@ -118,7 +118,7 @@ ip -c addr
 ip -br link
 ```
 
-## 📥 Samba4 ソースコードをダウンロードして解凍します
+## 📥 Samba4 ソースコードをダウンロードして解凍します。
 
 ```bash
 wget https://download.samba.org/pub/samba/samba-4.23.4.tar.gz
@@ -267,7 +267,7 @@ exec /opt/samba/sbin/samba -i -M single --debuglevel=3
 EOF
 ```
 
-## サービス実行権限を設定する
+## サービスの実行権限を設定する
 
 ```bash
 chmod +x /etc/sv/samba-ad-dc/run
