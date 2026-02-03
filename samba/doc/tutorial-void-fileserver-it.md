@@ -150,7 +150,7 @@ make -j$(nproc) && make install
 
 - Creeremo i servizi manualmente.
 
-## 📁 Aggiungi Samba4 al PATH di sistema e ricarica l'ambiente
+## 📁 Aggiungi Samba4 al PATH del sistema e ricarica l'ambiente
 
 ```bash
 echo 'export PATH=/opt/samba/bin:/opt/samba/sbin:$PATH' >> /etc/profile
@@ -185,6 +185,7 @@ vim /opt/samba/etc/smb.conf
    workgroup = EDUCATUX
    security = ads
    realm = EDUCATUX.EDU
+   netbios name = fileserver
    encrypt passwords = yes
    # point to the services, the active interfaces
    interfaces = eth0
@@ -210,9 +211,6 @@ vim /opt/samba/etc/smb.conf
    path = /srv/samba/public
    browsable = yes
    writable = yes
-   guest ok = no
-   create mask = 0660
-   directory mask = 0770
 ``` 
 
 ## Creare il file di registro
@@ -224,9 +222,9 @@ mkdir /opt/samba/var
 ## 📂Crea il percorso di condivisione
 
 ```bash
-sudo mkdir -p /srv/samba/public
-sudo chown -R root:root /srv/samba/public
-sudo chmod -R 0770 /srv/samba/public
+sudo mkdir -p /srv/samba/arquivos
+sudo chown -R root:"Domain Admins" /srv/samba/arquivos
+sudo chmod -R 0770 /srv/samba/arquivos
 ```
 
 ## Ricarica la configurazione di Samba4
@@ -267,7 +265,7 @@ server 192.168.70.253 iburst
 ln -sf /etc/sv/chronyd/ /var/service/
 ```
 
-## Riavviare il servizio:
+## Riavvia il servizio:
 
 ```bash
 sv restart chronyd
@@ -572,7 +570,7 @@ ln -sf /etc/sv/smbd /var/service/
 ln -sf /etc/sv/winbindd /var/service/
 ```
 
-## Facoltativo: abilitalo solo se utilizzi NetBIOS:
+## Facoltativo: abilita solo se utilizzi NetBIOS:
 
 ```bash
 ln -sf /etc/sv/nmbd /var/service/

@@ -4,7 +4,7 @@
 
 ### 🔧 튜토리얼을 현실에 맞게 조정하세요!
 
-## 📡 로컬 네트워크 레이아웃
+## 📡 로컬 재정의 레이아웃
 
 - 도메인: EDUCATUX.EDU
 - 호스트 이름: pdc01
@@ -25,7 +25,7 @@ chsh -s /bin/bash
 
 ```bash
 xbps-install -S \
- net-tools rsync acl attr attr-devel autoconf automake libtool \
+ net-tools ldns bind-utils rsync acl attr attr-devel autoconf automake libtool \
  binutils bison gcc make ccache chrpath curl \
  docbook-xml docbook-xsl flex gdb git htop \
  mit-krb5 mit-krb5-client mit-krb5-devel \
@@ -198,7 +198,7 @@ samba-tool domain provision \
 - AD 포리스트, 기본 DC, 내부 DNS 및 계정 DB를 생성합니다.
 - 도메인, 영역, 2016 기능 수준 및 관리자 비밀번호를 정의합니다.
 - Void는 기본 Samba를 설치하지 않으므로 충돌이 없습니다.
-- 그 후에는 DNS가 PDC 자체가 되므로 /etc/resolv.conf를 127.0.0.1로 조정해야 합니다.
+- 그 후에는 DNS가 PDC 자체가 되며 /etc/resolv.conf를 127.0.0.1로 조정해야 합니다.
 
 ## ⚙️ Active Directory 2016 기능 수준 확인
 
@@ -353,7 +353,7 @@ tail -f /var/log/samba-ad-dc/current
 
 ## 🕒 NTP / Chrony 서버
 
-## 도메인 컨트롤러는 로컬 네트워크의 시간 서버가 되어야 합니다. 5분의 불일치로 인해 Kerberos는 더 이상 클라이언트를 인증하지 않습니다.
+## 도메인 컨트롤러는 로컬 네트워크의 시간 서버가 되어야 합니다. 5분의 불일치로 인해 Kerberos는 더 이상 클라이언트를 인증하지 않기 때문입니다.
 
 ## Chrony 서버 패키지 설치
 

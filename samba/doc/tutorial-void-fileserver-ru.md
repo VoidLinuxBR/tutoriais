@@ -89,7 +89,7 @@ static domain_name_servers=192.168.70.253
 sv restart dhcpcd
 ```
 
-## 🧭 Установить DNS-адрес — укажите PDC.
+## 🧭 Установить адрес DNS — укажите PDC.
 
 ```bash
 vim /etc/resolv.conf
@@ -185,6 +185,7 @@ vim /opt/samba/etc/smb.conf
    workgroup = EDUCATUX
    security = ads
    realm = EDUCATUX.EDU
+   netbios name = fileserver
    encrypt passwords = yes
    # point to the services, the active interfaces
    interfaces = eth0
@@ -210,9 +211,6 @@ vim /opt/samba/etc/smb.conf
    path = /srv/samba/public
    browsable = yes
    writable = yes
-   guest ok = no
-   create mask = 0660
-   directory mask = 0770
 ``` 
 
 ## Создайте файл журнала
@@ -224,9 +222,9 @@ mkdir /opt/samba/var
 ## 📂 Создайте путь обмена
 
 ```bash
-sudo mkdir -p /srv/samba/public
-sudo chown -R root:root /srv/samba/public
-sudo chmod -R 0770 /srv/samba/public
+sudo mkdir -p /srv/samba/arquivos
+sudo chown -R root:"Domain Admins" /srv/samba/arquivos
+sudo chmod -R 0770 /srv/samba/arquivos
 ```
 
 ## Перезагрузить конфигурацию Samba4.

@@ -25,7 +25,7 @@ chsh -s /bin/bash
 
 ```bash
 xbps-install -S \
- net-tools rsync acl attr attr-devel autoconf automake libtool \
+ net-tools ldns bind-utils rsync acl attr attr-devel autoconf automake libtool \
  binutils bison gcc make ccache chrpath curl \
  docbook-xml docbook-xsl flex gdb git htop \
  mit-krb5 mit-krb5-client mit-krb5-devel \
@@ -353,7 +353,7 @@ tail -f /var/log/samba-ad-dc/current
 
 ## 🕒 Servidor NTP / Chrony
 
-## El controlador de dominio deberá ser el servidor de tiempo de la red local, ya que con una discrepancia de 5 minutos, Kerberos ya no autenticará al cliente.
+## El controlador de dominio deberá ser el servidor de tiempo de la red local, porque con una discrepancia de 5 minutos, Kerberos ya no autenticará al cliente.
 
 ## Instale el paquete del servidor Chrony
 
