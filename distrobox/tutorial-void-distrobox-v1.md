@@ -213,8 +213,7 @@ isolamento e sistema bem cuidado.
 
 ## 📜 Créditos
 
-Criado por: Robson Nakane <theblizzard1983@hotmail.com>
-
+Criado por: Robson Nakane <theblizzard1983@hotmail.com>  
 Comunidade: Void Linux Brasil <https://github.com/voidlinuxbr>  
 Distribuição: Chili Linux <https://chililinux.com>  
 Distribuição: VoidBR <https://github.com/voidlinuxbr>  
