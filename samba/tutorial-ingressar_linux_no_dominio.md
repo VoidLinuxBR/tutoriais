@@ -1,4 +1,4 @@
-# Configuração do LightDM para insrção do Linux Mint no domínio
+# Configuração do LightDM para inserção do Linux Mint no domínio
 
 ## 🎯 Objetivo Ingressar Linux no Domínio Samba4 com Winbind por integração NSS/PAM
 
