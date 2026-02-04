@@ -3,7 +3,7 @@
 Container para utilizar todas as distribuições Linux no VoidLinuxBR
 
 ## Objetivo
-Instalar o pacote `voidbr-distrobox`, que não está no repositório oficial do Void Linux, e usar o Distrobox no VoidLinuxBR sem a preocupação de quebrar dependências dos seus pacotes favoritos.
+Instalar o pacote `voidbr-distrobox`, que não está no repositório oficial do Void Linux. A utilização do Distrobox no VoidLinuxBR tira a preocupação de quebrar dependências dos seus pacotes favoritos.
 
 ADAPTE este tutorial ao SEU gosto pessoal!
 
