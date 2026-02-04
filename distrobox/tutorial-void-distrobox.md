@@ -1,95 +1,112 @@
-# Distrobox no VoidLinuxBR
+# Tutorial Distrobox no Void Linux
 
-Container para utilizar todas as distribuições Linux no VoidLinuxBR
-
-## Objetivo
-Instalar o pacote `voidbr-distrobox`, que não está no repositório oficial do Void Linux. A utilização do Distrobox no VoidLinuxBR tira a preocupação de quebrar dependências dos seus pacotes favoritos.
-
-ADAPTE este tutorial ao SEU gosto pessoal!
-
-> Observação: A instalação padrão do Void Linux não será coberta aqui.
+O Distrobox permite usar outras distribuições Linux dentro do teu Void Linux
+sem comprometer o sistema base (host).  
+A lógica é a de sempre: **sistema limpo, testes isolados, zero gambiarra**.
 
 ---
 
-## Importante — repositório chililinux
-Como o pacote `distrobox` não consta no repositório oficial do Void Linux, é necessário adicionar o repositório chililinux. Execute os comandos abaixo no terminal:
+## O que é a proposta aqui
 
+Instalar o distrobox no Void Linux, e usar containers para rodar outras distribuições com segurança.
+
+Isso elimina o risco de:
+- quebrar dependências do sistema
+- poluir o host com pacotes de outras distros
+- transformar o Void em Frankenstein
+
+Obs: este guia parte do pressuposto que o Void Linux já está instalado.
+
+---
+
+## Antes de tudo: repositório chililinux
+
+O pacote `distrobox` não existe nos repositórios oficiais do Void.
+Mas foi empacotado pelo Comunidade VoidLinuxBR, por isso, é necessário adicionar o repositório chililinux (mirror oficial Void no Brasil - <https://xmirror.voidlinux.org/>).
+
+Execute **exatamente** os comandos abaixo:
 ```bash
 sudo sh -c "{
   echo 'repository=https://repo-fastly.voidlinux.org/current'
   echo 'repository=https://void.chililinux.com/voidlinux/current'
 } > /etc/xbps.d/00-repository-main.conf"
-sudo xbps-install -Syu xbps
-sudo xbps-install -Syu libssh2
 ```
 
 ---
 
-## Atualize o sistema após instalar o VoidLinuxBR
-Sempre mantenha o sistema atualizado:
+## Atualizando o sistema base
+
+Antes de instalar qualquer coisa, deixe o sistema em dia:
 
 ```bash
-sudo xbps -Suy
-sudo xbps -Sy xtools
+sudo xbps-install -Syu xbps
+sudo xbps-install -Syu libssh2 xtools
+sudo xbps-install -Suy
 xcheckrestart
 ```
+Se o `xcheckrestart` indicar reinício, reinicie.
 
 ---
 
-## Pacotes necessários para o voidbr-distrobox
-Para que o `voidbr-distrobox` funcione, instale os pacotes abaixo:
+## Instalando o Distrobox e dependências
+
+Agora sim, instale os pacotes necessários:
 
 ```bash
-sudo xbps-install -Sy voidbr-distrobox podman docker crun
+sudo xbps-install -Syf voidbr-distrobox podman docker crun
 ```
 
-> Observação: após instalar `crun`, é necessário reiniciar o sistema:
->
- ```bash
- sudo reboot
- ```
+Importante:
+após instalar o `crun`, é obrigatório reiniciar o sistema:
+
+```bash
+sudo reboot
+```
 
 ---
 
-## Compatibilidade das distribuições
-Todas as distribuições disponíveis estão listadas no site oficial do Distrobox. Verifique se a distro que você deseja usar é compatível:
-- https://distrobox.it/compatibility/#containers-distros
+## Sobre compatibilidade de distribuições
+
+Nem toda distro funciona bem em container.
+Antes de escolher, consulte a lista oficial:
+
+https://distrobox.it/compatibility/#containers-distros
+
+Isso evita perda de tempo e dor de cabeça.
 
 ---
 
-## Criando um container Debian (exemplo)
-Escolhemos Debian como exemplo por ser uma das maiores distribuições ativas.
+## Criando o primeiro container (Debian)
+
+Como exemplo, será usado Debian Testing.
 
 ```bash
 distrobox create -Y --name debian --image docker.io/library/debian:testing
 ```
 
-Legenda:
-- `distrobox create` — comando base para criar o container;
-- `-Y` — executa sem pedir interação ao usuário;
-- `--name` — nome do container (usado em outros comandos, ex.: remoção);
-- `--image` — imagem a ser usada (Docker Hub, Quay, etc).
+O que está acontecendo aqui:
+- `distrobox create` cria o container
+- `-Y` evita perguntas interativas
+- `--name` define o nome do container
+- `--image` define a imagem base
 
-Outras flags estão disponíveis. Consulte `distrobox --help` ou a documentação oficial.
-
----
-
-## Atualizar todos os containers no Distrobox (executar no terminal do VoidLinuxBR)
+Para ver todas as opções disponíveis:
 
 ```bash
-distrobox-upgrade --all -v
+distrobox --help
 ```
 
 ---
 
-## Acessando o container Debian (após o pull)
-Para entrar no container:
+## Entrando no container
+
+Após o pull da imagem, entre no container:
 
 ```bash
 distrobox enter debian
 ```
 
-Dentro do container (exemplo Debian):
+Dentro do Debian, o uso é normal:
 
 ```bash
 sudo apt update
@@ -98,62 +115,66 @@ sudo apt autoremove
 sudo apt install firefox
 ```
 
----
-
-## Lista de containers criados no Distrobox
-
-```bash
-distrobox list
-```
-
-Este comando mostra informações como ID, NAME, STATUS e IMAGE.
+Você está literalmente dentro de outra distro.
 
 ---
 
-## Gerenciamento das distribuições no Distrobox
-Existem duas formas de gerenciar uma distro no Distrobox:
+## Executando comandos sem entrar no container
 
-Opção 1: Entrando no próprio container:
-```bash
-distrobox enter <nome-do-container>
-# e então rodar comandos normalmente dentro do container
-```
+Também é possível executar comandos diretamente a partir do host.
 
-Opção 2: Executando comandos do host que sejam encaminhados ao container:
-Exemplo — instalar o Firefox no container `debian` a partir do VoidLinuxBR:
+Exemplo: instalar Firefox no Debian sem entrar nele:
 
 ```bash
 distrobox enter debian -- sudo apt install -y firefox-esr-l10n-pt-br
 ```
 
+Prático, rápido e tradicional.
+
 ---
 
-## Exportação de aplicações para o menu do VoidLinuxBR
-O Distrobox permite exportar aplicações do container para que sejam executadas como se fossem nativas do sistema.
+## Exportando aplicações para o sistema host
 
-Exemplo — exportar o Firefox instalado no container `debian`:
+O Distrobox permite exportar aplicações do container
+para o menu gráfico do VoidLinuxBR.
+
+Exemplo: exportar o Firefox do container Debian:
 
 ```bash
 distrobox enter debian -- distrobox-export --app firefox
 ```
 
-Após a exportação, você deve encontrar o atalho/aplicação no menu do seu ambiente gráfico (depende do desktop).
+O aplicativo aparecerá no menu do ambiente gráfico
+como se fosse nativo.
 
 ---
 
-## Exclusão do container (Distrobox / Podman)
-O Distrobox usa Podman (ou Docker) como motor de contêineres. Ao criar um container com Distrobox, também é criado um container no Podman. Para excluir totalmente:
+## Atualizando todos os containers
+
+Para atualizar todos os containers de uma vez,
+execute no host:
 
 ```bash
-distrobox rm debian
-# em seguida, remover a imagem no podman (caso queira)
-podman rmi -f [IMAGE ID]
+distrobox-upgrade --all -v
 ```
 
 ---
 
-## Parar um container no Distrobox
-Se precisar parar o container antes de removê-lo:
+## Listando containers existentes
+
+Para ver todos os containers criados:
+
+```bash
+distrobox list
+```
+
+São exibidos nome, status e imagem utilizada.
+
+---
+
+## Parando um container
+
+Se precisar apenas parar o container:
 
 ```bash
 distrobox stop debian
@@ -161,9 +182,56 @@ distrobox stop debian
 
 ---
 
-## Observações finais
-- Adapte este tutorial conforme suas preferências (nomes de containers, imagens, flags).
-- Sempre verifique a documentação oficial do Distrobox: https://distrobox.it
-- Teste em uma máquina ou VM antes de aplicar em sistemas de produção.
+## Removendo um container
 
-Bom uso do Distrobox no VoidLinuxBR!
+Para remover o container do Distrobox:
+
+```bash
+distrobox rm debian
+```
+
+Se quiser remover também a imagem do Podman:
+
+```bash
+podman rmi -f [IMAGE ID]
+```
+
+---
+
+## Observações finais
+
+- Use containers para testes, não para bagunçar o host
+- Ajuste nomes e imagens conforme sua necessidade
+- Consulte sempre a documentação oficial:
+  https://distrobox.it
+- Teste primeiro em VM ou máquina de laboratório
+
+Distrobox é ferramenta de quem gosta de controle,
+isolamento e sistema bem cuidado.
+
+---
+
+## 📜 Créditos
+
+Criado por: Robson Nakane <theblizzard1983@hotmail.com>  
+Comunidade: Void Linux Brasil <https://github.com/voidlinuxbr>  
+Distribuição: Chili Linux <https://chililinux.com>  
+Distribuição: VoidBR <https://github.com/voidlinuxbr>  
+
+---
+
+## ⚖️ Disclaimer (Aviso Legal)
+
+ESTE SOFTWARE/TUTORIAL É FORNECIDO "COMO ESTÁ", SEM ABSOLUTAMENTE NENHUMA GARANTIA
+DE QUALQUER TIPO, EXPRESSA OU IMPLÍCITA, INCLUINDO, MAS NÃO SE LIMITANDO A,
+GARANTIAS DE COMERCIALIZAÇÃO OU ADEQUAÇÃO A UM PROPÓSITO ESPECÍFICO.
+
+O USO DESTE SOFTWARE É DE TOTAL RESPONSABILIDADE DO USUÁRIO.
+
+EM NENHUM MOMENTO O AUTOR OU OS CONTRIBUIDORES SERÃO RESPONSÁVEIS POR
+QUALQUER DANO, PERDA DE DADOS OU FALHAS NO SISTEMA DECORRENTES DO USO
+DESTE PROGRAMA.
+
+---
+
+Copyright (C) 2026 Robson Nakane
