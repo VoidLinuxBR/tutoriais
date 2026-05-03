@@ -85,6 +85,7 @@ shadow:         compat
 ## 5. Ingressar no domínio
 
 ```bash
+kinit administrator
 sudo net ads join -U Administrator
 ```
 
