@@ -154,7 +154,7 @@ Isso cria:
 ## 6. Criar DNS do subdomínio
 
 ```sh
-cloudflared tunnel route dns chililinux voidrepo.chililinux.com
+cloudflared tunnel route dns chililinux-tunnel voidrepo.chililinux.com
 ```
 
 No Cloudflare será criado automaticamente:
