@@ -1,10 +1,17 @@
-# Tutorial completo: GPU Intel en Linux (Void Linux, XFCE y hardware antiguo)
+# Tutorial completo: GPUs Intel en Linux (Void Linux, XFCE y hardware antiguo)
 
-Esta guía explica cómo identificar, configurar y estabilizar GPU Intel en Linux, especialmente hardware antiguo como GMA 3100, GMA X3100, HD 2000/3000, etc.
+Esta guía explica cómo identificar, configurar y estabilizar GPUs Intel en Linux, especialmente hardware antiguo como GMA 3100, GMA X3100, HD 2000/3000, etc.
+
+> **Atención:** las GPUs Intel antiguas se dividen en dos grupos, y la configuración cambia:
+>
+> - **Grupo A – GMA (950, 3000, 3100, X3100, X4500):** siguen los pasos de estabilidad (DRI2, compositor y aceleración de Firefox desactivados). No tienen decodificación de vídeo útil por hardware.
+> - **Grupo B – Intel HD (1.ª generación Core/Ironlake, HD 2000/3000/Sandy Bridge, HD 2500/4000/Ivy Bridge, Haswell):** en general no necesitan ajustes de estabilidad y **pueden y deben usar aceleración de vídeo (VA-API)** con el controlador `i965` (ver sección 7).
+>
+> Usa la sección 1 para descubrir en qué grupo está tu GPU.
 
 ---
 
-# 1. Identifique su GPU Intel
+# 1. Identificar su GPU Intel
 
 Ejecutar:
 
@@ -12,13 +19,13 @@ Ejecutar:
 lspci -k | grep -A3 VGA
 ```
 
-o:
+ou:
 
 ```bash
 inxi -G
 ```
 
-Salida de ejemplo:
+Ejemplo de salida:
 
 ```
 Device: Intel 82G33/G31 Express Integrated Graphics
@@ -29,51 +36,66 @@ OpenGL: 2.1 Mesa i915
 
 ---
 
-# 2. Controladores Intel sin Linux
+# 2. Controladores Intel en Linux
 
-Todas las GPU Intel utilizan:
+Todas las GPUs Intel usan:
 
 ```
 kernel driver: i915
 ```
 
-NO es necesario instalar un controlador propietario.
+Usted NO necesita instalar un controlador propietario. En Intel, **todos los controladores son libres**.
 
-Hay dos posibles controladores Xorg:
+## 2.1 i915, i965 e iHD: no confundas
 
-- configuración de modo → recomendado
+Son capas diferentes, y es común pensar que son alternativas entre sí:
+
+| Nombre | Qué es | De dónde viene |
+|------|---------|----------|
+| `i915` | Controlador del **kernel** (vídeo/modesetting) | Ya viene en el kernel, no instala nada |
+| `i965` | Controlador **VA-API** (decodificación de video) para GPUs hasta ~Coffee Lake | Paquete `libva-intel-driver` |
+| `iHD` | Controlador **VA-API** para Broadwell (5.ª generación) y más recientes | Paquete `intel-media-driver` |
+| `crocus` / `iris` | Controlador **OpenGL** de Mesa (crocus: Gen4 a Haswell; iris: Broadwell+) | Paquete `mesa-dri` |
+
+Es decir: quien tiene HD 2000/3000 usa el `i915` (kernel) **y** el `i965` (VA-API) al mismo tiempo.
+
+## 2.2 Controladores Xorg
+
+Existen dos controladores Xorg posibles:
+
+- modesetting → recomendado
 - xf86-video-intel → obsoleto en la mayoría de los casos
 
-Compruebe cuál está en uso:
+Verifique cuál está en uso:
 
 ```bash
 inxi -G
 ```
 
-Si muestra:
+Se mostrará:
 
 ```
 driver: modesetting
 ```
 
-Es correcto.
+Está correcto.
 
 ---
 
-# 3. Para GPU Intel más antiguas (GMA 950, 3000, 3100, X3100, X4500)
+# 3. Para GPUs Intel antiguas (GMA 950, 3000, 3100, X3100, X4500)
 
-Estas GPU tienen limitaciones:
+Esas GPUs tienen limitaciones:
 
 - OpenGL 2.1 máximo
 - DRI3 inestable
-- el compositor provoca un accidente
+- compositor causa bloqueo
 - la aceleración moderna no funciona correctamente
 
 ---
 
 # 4. Configuración estable recomendada
 
-Crear:
+Cree:
 
 ```bash
 sudo mkdir -p /etc/X11/xorg.conf.d
@@ -92,7 +114,7 @@ EndSection
 
 ---
 
-# 5. Deshabilite el compositor XFCE (REQUERIDO en GPU antiguas)
+# 5. Desactivar el compositor XFCE (OBLIGATORIO en GPU antiguas)
 
 Ejecutar:
 
@@ -100,7 +122,7 @@ Ejecutar:
 xfconf-query -c xfwm4 -p /general/use_compositing -s false
 ```
 
-Controlar:
+Verifique:
 
 ```bash
 xfconf-query -c xfwm4 -p /general/use_compositing
@@ -114,9 +136,11 @@ false
 
 ---
 
-# 6. Configurar Firefox para GPU Intel más antiguas
+# 6. Configuración de Firefox para GPUs Intel antiguas (solo Grupo A – GMA)
 
-Crear:
+> **Solo para GMA 950/3000/3100/X3100/X4500.** Si tu GPU es Intel HD (HD 2000/3000 o más reciente), **no apliques este paso**: desactiva la aceleración de video. Ve directamente a la sección 7.
+
+Cree:
 
 ```bash
 nano ~/.mozilla/firefox/*.default-release/user.js
@@ -131,11 +155,93 @@ user_pref("gfx.xrender.enabled", true);
 user_pref("media.ffmpeg.vaapi.enabled", false);
 ```
 
-Esto evita accidentes.
+Eso evita bloqueos.
 
 ---
 
-# 7. Verifique la compatibilidad con OpenGL
+# 7. Aceleración de video (VA-API) para Intel HD (Grupo B)
+
+Con VA-API, la GPU decodifica el video y la CPU queda libre. Esto hace mucha diferencia en los portátiles con Core i3/i5 de 2.ª/3.ª generación al ver YouTube.
+
+## 7.1 Qué decodifica cada GPU en hardware
+
+| GPU | Códecs con aceleración | Controlador VA-API |
+|-----|----------------------|---------------|
+| GMA 950/3000/3100/X3100 | ninguno | — |
+| GMA X4500 | MPEG-2 | `i965` |
+| HD Graphics (Ironlake, 1ª generación Core) | MPEG-2, H.264, VC-1 | `i965` |
+| HD 2000/3000 (Sandy Bridge) | MPEG-2, H.264, VC-1 | `i965` |
+| HD 2500/4000 (Ivy Bridge) | MPEG-2, H.264, VC-1, JPEG | `i965` |
+| HD 4200–5200 (Haswell) | MPEG-2, H.264, VC-1, JPEG | `i965` |
+| Broadwell y más recientes | + VP8/HEVC/VP9/AV1 según la generación | `iHD` |
+
+**Ninguna GPU hasta Haswell decodifica VP9 o AV1.** YouTube usa VP9/AV1 por defecto, así que en esos casos instala en el navegador una extensión que fuerce H.264 (ej.: *h264ify* o *enhanced-h264ify*). Sin ella el vídeo vuelve a ser decodificado por la CPU.
+
+## 7.2 Instalar los paquetes
+
+```bash
+sudo xbps-install -S mesa-dri libva-intel-driver libva-utils intel-gpu-tools
+```
+
+Asegúrese de que el usuario esté en el grupo `video` (salga y vuelva a entrar en la sesión después):
+
+```bash
+sudo usermod -aG video $USER
+```
+
+## 7.3 Forzar el controlador VA-API correcto
+
+Agregue en `~/.profile` (o en `/etc/environment`, sin el `export`):
+
+```bash
+export LIBVA_DRIVER_NAME=i965
+```
+
+## 7.4 Probar
+
+```bash
+vainfo
+```
+
+Resultado esperado (resumido):
+
+```
+vainfo: Driver version: Intel i965 driver for Intel(R) Sandybridge Mobile
+      VAProfileH264Main               : VAEntrypointVLD
+      VAProfileH264High               : VAEntrypointVLD
+```
+
+`VAEntrypointVLD` = decodificación por hardware disponible.
+
+## 7.5 Firefox
+
+En `about:config`:
+
+```
+media.ffmpeg.vaapi.enabled = true
+```
+
+En las versiones más recientes de Firefox, si la decodificación no se activa sola, también:
+
+```
+media.hardware-video-decoding.force-enabled = true
+```
+
+Si aplicaste el `user.js` de la sección 6, elimínalo. Reinicia Firefox y verifica en `about:support`, sección **Medios**, si H264 aparece con decodificación por hardware.
+
+## 7.6 Confirmar que la GPU está trabajando
+
+Abra un video en YouTube (con la extensión H.264 activada) y ejecute:
+
+```bash
+sudo intel_gpu_top
+```
+
+Si la línea **Video** se mantiene ocupada mientras el video se reproduce, la decodificación está en la GPU. El uso de CPU disminuye bastante.
+
+---
+
+# 8. Verificar soporte OpenGL
 
 Ejecutar:
 
@@ -149,11 +255,11 @@ Ejemplo:
 OpenGL version string: 2.1 Mesa 25.3.3
 ```
 
-Este es el máximo admitido por el GMA 3100.
+Esto es lo máximo soportado por la GMA 3100.
 
 ---
 
-# 8. Verifique la aceleración activa
+# 9. Verificar aceleración activa
 
 Ejecutar:
 
@@ -169,7 +275,7 @@ direct rendering: Yes
 
 ---
 
-# 9. Verifique el controlador cargado
+# 10. Verificar controlador cargado
 
 Ejecutar:
 
@@ -185,7 +291,7 @@ i915
 
 ---
 
-# 10. Verifique el estado de Xorg
+# 11. Verificar el estado del Xorg
 
 Ejecutar:
 
@@ -201,19 +307,19 @@ modesetting
 
 ---
 
-# 11. No utilice xf86-video-intel en hardware muy antiguo
+# 12. No utilice xf86-video-intel en hardware muy antiguo
 
-Quitar si está instalado:
+Retire si está instalado:
 
 ```bash
 sudo xbps-remove xf86-video-intel
 ```
 
-El controlador de configuración de modo es más estable.
+El controlador modesetting es más estable.
 
 ---
 
-# 12. Verifique el DRI
+# 13. Verificar DRI
 
 Ejecutar:
 
@@ -221,7 +327,7 @@ Ejecutar:
 glxinfo | grep DRI
 ```
 
-Para GPU más antiguas, utilice:
+Para GPUs antiguas, use:
 
 ```
 DRI2
@@ -229,7 +335,7 @@ DRI2
 
 ---
 
-# 13. Verificar resolución
+# 14. Verificar resolución
 
 Ejecutar:
 
@@ -239,11 +345,11 @@ xrandr
 
 ---
 
-# 14. Problemas comunes y solución
+# 15. Problemas comunes y solución
 
-## reiniciar al entrar a XFCE
+## reiniciar al entrar en XFCE
 
-Deshabilitar compositor:
+Desactivar compositor:
 
 ```bash
 xfconf-query -c xfwm4 -p /general/use_compositing -s false
@@ -251,15 +357,24 @@ xfconf-query -c xfwm4 -p /general/use_compositing -s false
 
 ---
 
-## Firefox falla
+## Firefox se bloquea
 
-Deshabilite la aceleración a través de user.js (paso 6)
+Desactive la aceleración vía user.js (paso 6). **Solo GMA** — en Intel HD, prefiera mantener la aceleración.
+
+---
+
+## video de YouTube usando mucha CPU (Intel HD)
+
+- Verifique si la extensión que fuerza H.264 está activa (la GPU no decodifica VP9/AV1).
+- Ejecute `vainfo` y vea si aparece `VAProfileH264...: VAEntrypointVLD`.
+- Confirme `LIBVA_DRIVER_NAME=i965` con `echo $LIBVA_DRIVER_NAME`.
+- Confirme que el `user.js` de la sección 6 no está aplicado (él desactiva el VA-API).
 
 ---
 
 ## pantalla negra
 
-Eliminar xf86-video-intel:
+Remueva xf86-video-intel:
 
 ```bash
 sudo xbps-remove xf86-video-intel
@@ -267,7 +382,7 @@ sudo xbps-remove xf86-video-intel
 
 ---
 
-# 15. Verificación completa del sistema de gráficos.
+# 16. Verificación completa del sistema gráfico
 
 Ejecutar:
 
@@ -276,11 +391,12 @@ inxi -G
 glxinfo | grep OpenGL
 lsmod | grep i915
 xfconf-query -c xfwm4 -p /general/use_compositing
+vainfo          # somente Intel HD (Grupo B)
 ```
 
 ---
 
-# 16. GPU Intel y compatibilidad con OpenGL
+# 17. GPUs Intel y soporte OpenGL
 
 | GPU | OpenGL |
 |----|--------|
@@ -295,14 +411,22 @@ xfconf-query -c xfwm4 -p /general/use_compositing
 
 ---
 
-# 17. Conclusión
+# 18. Conclusión
 
-Para GPU Intel más antiguas, utilice:
+**Grupo A – GMA (950, 3000, 3100, X3100, X4500):**
 
-- núcleo del controlador: i915
-- controlador Xorg: configuración de modo
+- controlador del núcleo: i915
+- controlador Xorg: modos de configuración
 - DRI2
-- compositor discapacitado
-- Aceleración de Firefox deshabilitada
+- compositor desactivado
+- aceleración de Firefox desactivada
 
-El sistema será estable y funcional.
+**Grupo B – Intel HD (Ironlake, HD 2000/3000, HD 2500/4000, Haswell):**
+
+- controlador del núcleo: i915
+- controlador Xorg: modos de configuración
+- controlador VA-API: i965 (`libva-intel-driver`) + `LIBVA_DRIVER_NAME=i965`
+- VA-API activado en Firefox
+- extensión que fuerza H.264 en YouTube
+
+El sistema permanecerá estable y funcional.
