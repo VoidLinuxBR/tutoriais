@@ -11,6 +11,43 @@
 
 ---
 
+# 快速方式：`voidbr-gpu-config`
+
+在 VoidBR 中，实用程序 `voidbr-gpu-config`（`voidbr-utils` 套件）会自动执行本教程中所讲的操作。它兼容 **Intel 和 AMD** GPU：
+
+- 检测GPU及其世代（GMA、Intel HD、AMD）；
+- 安装正确的软件包（`libva-intel-driver`、`intel-media-driver` 或 `mesa-vaapi`）；
+- 用 `vainfo` 测试哪个 VA-API 驱动真正可用，并设置 `LIBVA_DRIVER_NAME`；
+- 将用户添加到 `video` 和 `render` 组中；
+- 配置 **Firefox**、**Google Chrome** 和 **Brave**（Intel HD/AMD 启用 VA-API，或在 GMA 上使用稳定性配置文件）；
+- 备份所有内容并允许撤销。
+
+首先，仅诊断（不改变任何情况）：
+
+```bash
+voidbr-gpu-config --check
+```
+
+应用推荐配置：
+
+```bash
+sudo voidbr-gpu-config --apply
+```
+
+撤销：
+
+```bash
+sudo voidbr-gpu-config --revert
+```
+
+它也在应用程序菜单中，以 **VoidBR GPU Config** 的形式出现。应用后，退出并重新登录会话。
+
+如果有问题，请运行 `voidbr-gpu-config --check` 并在 Telegram 群组中发布输出：**https://t.me/voidlinux_br**
+
+如果你更愿意手动操作，请按照下面的各部分进行。
+
+---
+
 # 1. 识别您的英特尔 GPU
 
 执行：

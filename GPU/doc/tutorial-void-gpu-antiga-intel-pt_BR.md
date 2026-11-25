@@ -11,6 +11,43 @@ Este guia explica como identificar, configurar e estabilizar GPUs Intel no Linux
 
 ---
 
+# Jeito rápido: `voidbr-gpu-config`
+
+No VoidBR, o utilitário `voidbr-gpu-config` (pacote `voidbr-utils`) faz automaticamente o que este tutorial explica. Ele funciona com GPUs **Intel e AMD**:
+
+- detecta a GPU e a geração (GMA, Intel HD, AMD);
+- instala os pacotes certos (`libva-intel-driver`, `intel-media-driver` ou `mesa-vaapi`);
+- testa com `vainfo` qual driver VA-API realmente funciona e define o `LIBVA_DRIVER_NAME`;
+- coloca o usuário nos grupos `video` e `render`;
+- configura **Firefox**, **Google Chrome** e **Brave** (VA-API ligado nas Intel HD/AMD, ou perfil de estabilidade nas GMA);
+- faz backup de tudo e permite desfazer.
+
+Primeiro, só o diagnóstico (não altera nada):
+
+```bash
+voidbr-gpu-config --check
+```
+
+Aplicar a configuração recomendada:
+
+```bash
+sudo voidbr-gpu-config --apply
+```
+
+Desfazer:
+
+```bash
+sudo voidbr-gpu-config --revert
+```
+
+Também está no menu de aplicativos como **VoidBR GPU Config**. Depois de aplicar, saia e entre novamente na sessão.
+
+Se algo não funcionar, rode `voidbr-gpu-config --check` e poste a saída no grupo do Telegram: **https://t.me/voidlinux_br**
+
+Se preferir fazer tudo manualmente, siga as seções abaixo.
+
+---
+
 # 1. Identificar sua GPU Intel
 
 Executar:

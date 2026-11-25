@@ -11,6 +11,43 @@ Dieser Leitfaden erklärt, wie man Intel-GPUs unter Linux erkennt, konfiguriert 
 
 ---
 
+# Schneller Weg: `voidbr-gpu-config`
+
+In VoidBR erledigt das Dienstprogramm `voidbr-gpu-config` (Paket `voidbr-utils`) automatisch, was dieses Tutorial erklärt. Es funktioniert mit **Intel- und AMD-GPUs**:
+
+- erkennt die GPU und die Generation (GMA, Intel HD, AMD);
+- installiere die richtigen Pakete (`libva-intel-driver`, `intel-media-driver` oder `mesa-vaapi`);
+- teste mit `vainfo`, welcher VA-API-Treiber wirklich funktioniert, und setze `LIBVA_DRIVER_NAME`;
+- Fügen Sie den Benutzer zu den Gruppen `video` und `render` hinzu;
+- konfiguriere **Firefox**, **Google Chrome** und **Brave** (VA-API aktiviert auf Intel HD/AMD, oder Stabilitätsprofil auf GMA);
+- Sichert alles und ermöglicht das Rückgängigmachen.
+
+Zuerst, nur die Diagnose (ändert nichts):
+
+```bash
+voidbr-gpu-config --check
+```
+
+Die empfohlene Einstellung anwenden:
+
+```bash
+sudo voidbr-gpu-config --apply
+```
+
+Rückgängig machen:
+
+```bash
+sudo voidbr-gpu-config --revert
+```
+
+Es ist auch im Anwendungsmenü als **VoidBR GPU Config** zu finden. Nach dem Anwenden, melden Sie sich ab und wieder an der Sitzung an.
+
+Wenn etwas nicht funktioniert, führen Sie `voidbr-gpu-config --check` aus und posten Sie die Ausgabe in der Telegram-Gruppe: **https://t.me/voidlinux_br**
+
+Wenn Sie alles manuell machen möchten, folgen Sie den untenstehenden Abschnitten.
+
+---
+
 # 1. Ihre Intel-GPU identifizieren
 
 Ausführen:
