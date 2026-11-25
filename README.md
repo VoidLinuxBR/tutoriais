@@ -49,7 +49,7 @@ Pull Requests são bem-vindos — mas com regra clara:
 ---
 
 ## 📡 Comunidade  
-Telegram : **https://t.me/VoidLinuxBrasil** **Void Linux BR** - (Grupo alternativo, funcional e sem frescura.)  
+Telegram : **https://t.me/voidlinux_br** **Void Linux BR** - (Grupo alternativo, funcional e sem frescura.)  
 Youtube  : **https://youtube.com/@voidlinuxbr**  
 Github   : **https://github.com/voidlinuxbr**  
 Discord  : **https://discord.gg/vJz6uvRC**
@@ -139,7 +139,7 @@ Pull Requests are welcome — but with clear rules:
 ---
 
 ## 📡 Community
-Telegram: **https://t.me/VoidLinuxBrasil** **Void Linux BR** - (Alternative, functional and no-frills group.)
+Telegram: **https://t.me/voidlinux_br** **Void Linux BR** - (Alternative, functional and no-frills group.)
 Youtube  : **https://youtube.com/@voidlinuxbr**
 Github : **https://github.com/voidlinuxbr**
 Discord  :
